@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Marañas Mundo — Cartografía viva</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,300..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,300..500;1,300..500&display=swap" rel="stylesheet" />
+<style>
+/* ══════════════════════════════════════════
+   BASE
+══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* ─── PALETA · híbrido nocturno (sistema editorial + selva profunda) ───── */
+  --bg:          #13130f;   /* carbón verdoso muy profundo — sensación nocturna */
+  --bg-2:        #1b1b16;
+  --bg-3:        #26261f;
+  --graphite:    #26261f;
+
+  --musgo:       #e5b53b;   /* amarillo dorado */
+  --emerald:     #e5b53b;
+  --musgo-dim:   #b38822;   /* amarillo oscuro */
+
+  --ocre:        #ed7d3a;   /* pumpkin (del landing) */
+  --pumpkin:     #ed7d3a;
+
+  --vino:        #2fbf71;   /* verde */
+  --watermelon:  #2fbf71;
+
+  --indigo:      #5f5e60;   /* gris cálido ligeramente más oscuro para el fondo nocturno */
+
+  --willow:      #f2cc6b;   /* amarillo claro */
+  --verde-luz:   #f2cc6b;
+
+  --crema:       #e6e0d4;   /* crema apenas más cálida sobre fondo oscuro */
+  --blanco:      #f4f1ec;
+
+  --text-dim:    #5f5c54;   /* tenue con matiz cálido (no gris neutro) */
+  --text-mid:    #9d978a;   /* medio cálido */
+
+  --line:         rgba(240,237,228,0.09);
+  --line-strong:  rgba(240,237,228,0.20);
+
+  /* ─── TIPOGRAFÍA ───── */
+  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-body:    'Bricolage Grotesque', sans-serif;
+  --font-italic:  'Instrument Serif', serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  /* Tracking */
+  --tr-display: -0.025em;
+  --tr-mono:     0.04em;
+  --tr-label:    0.18em;
+  --tr-tiny:     0.32em;
+
+  /* Line height */
+  --lh-tight:    0.86;
+  --lh-display:  0.95;
+  --lh-h:        1.15;
+  --lh-body:     1.55;
+  --lh-long:     1.7;
+
+  /* Layout */
+  --nav-h:       160px;
+  --subnav-h:    46px;
+  --panel-w:     440px;
+  --pad-x:       48px;
+  --pad-x-sm:    24px;
+  --col-gap:     48px;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--blanco);
+  font-family: var(--font-body);
+  font-feature-settings: "ss01", "ss02";
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════ */
+#cursor-ring {
+  position: fixed; z-index: 9999; pointer-events: none;
+  width: 260px; height: 260px; border-radius: 50%;
+  border: 1px solid rgba(236,230,220,0.18);
+  transform: translate(-50%,-50%);
+  transition: border-color 0.2s, width 0.3s, height 0.3s;
+  left: -999px; top: -999px;
+}
+#cursor-ring.hover {
+  width: 282px; height: 282px;
+  border-color: rgba(236,230,220,0.5);
+}
+#cursor-dot {
+  position: fixed; z-index: 9999; pointer-events: none;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--crema);
+  transform: translate(-50%,-50%);
+  opacity: 0.7; left: -999px; top: -999px;
+}
+#cursor-h, #cursor-v {
+  position: fixed; z-index: 9999; pointer-events: none;
+  background: rgba(236,230,220,0.25);
+  transform: translate(-50%,-50%);
+  left: -999px; top: -999px;
+}
+#cursor-h { width: 14px; height: 1px; }
+#cursor-v { width: 1px; height: 14px; }
+
+/* ══════════════════════════════════════════
+   NAV con título completo partido
+══════════════════════════════════════════ */
+nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--nav-h); z-index: 500;
+  display: flex; align-items: center;
+  padding: 0 32px; justify-content: space-between;
+  border-top: 1px solid rgba(236,230,220,0.07);
+  background: rgba(19,19,15,0.92);
+  backdrop-filter: blur(14px);
+}
+.nav-logo {
+  display: flex; flex-direction: column; align-items: center;
+  font-family: var(--font-display);
+  color: var(--crema);
+  user-select: none; cursor: none;
+  line-height: 1;
+  gap: 4px;
+}
+.nav-logo .line1 {
+  font-family: var(--font-mono);
+  font-size: 16.8px; letter-spacing: 0.32em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  font-weight: 400;
+}
+.nav-logo .line2 {
+  font-family: var(--font-display);
+  font-size: 47.5px; letter-spacing: -0.01em;
+  color: var(--crema);
+  margin: 1px 0;
+  font-style: normal;
+  font-weight: 500;
+}
+.nav-logo .line2 em {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.nav-logo .line3 {
+  font-family: var(--font-mono);
+  font-size: 14.2px; letter-spacing: 0.28em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-weight: 300;
+}
+.nav-logo:hover .line2 { color: var(--blanco); }
+
+.nav-right {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+}
+.nav-links { display: flex; gap: 37px; list-style: none; }
+.nav-links a {
+  font-family: var(--font-mono);
+  font-size: 18.2px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-dim);
+  text-decoration: none; transition: color 0.2s;
+  cursor: none;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--crema); }
+.nav-counter {
+  font-family: var(--font-mono);
+  font-size: 16.8px; color: var(--text-dim); letter-spacing: 0.08em;
+}
+.nav-counter span { color: var(--verde-luz); }
+
+/* ══════════════════════════════════════════
+   MAPA
+══════════════════════════════════════════ */
+#vista-mapa {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: calc(100vh - var(--nav-h));
+  z-index: 1;
+}
+#canvas-wrapper {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+
+/* Marca institucional en mapa (esquina) */
+#sello-institucional {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 24px); right: 32px;
+  z-index: 50; pointer-events: none;
+  text-align: right;
+  opacity: 0.6;
+}
+#sello-institucional .sello-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 8px; letter-spacing: 0.18em;
+  color: var(--text-dim); text-transform: uppercase;
+  margin-bottom: 4px;
+}
+#sello-institucional .sello-titulo {
+  font-family: var(--font-italic);
+  font-size: 12px; font-style: italic;
+  color: var(--text-mid); letter-spacing: 0.04em;
+  max-width: 280px;
+}
+
+/* ══════════════════════════════════════════
+   PANEL NODO
+══════════════════════════════════════════ */
+#panel {
+  position: fixed;
+  top: 0; right: calc(-1 * var(--panel-w) - 20px);
+  width: var(--panel-w);
+  height: calc(100vh - var(--nav-h));
+  background: rgba(22,22,17,0.98);
+  border-left: 1px solid rgba(236,230,220,0.09);
+  padding: 48px 36px 36px;
+  z-index: 400;
+  transition: right 0.45s cubic-bezier(0.16,1,0.3,1);
+  display: flex; flex-direction: column; gap: 18px;
+  overflow-y: auto; backdrop-filter: blur(20px);
+}
+#panel.open { right: 0; }
+.panel-close {
+  position: absolute; top: 16px; right: 20px;
+  background: none; border: none; color: var(--text-dim);
+  font-family: var(--font-mono); font-size: 16px;
+  cursor: none; transition: color 0.2s; line-height: 1; padding: 4px;
+}
+.panel-close:hover { color: var(--crema); }
+.panel-tipo {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 2px;
+  display: inline-block; align-self: flex-start;
+}
+.tipo-texto    { background: rgba(107,106,108,0.25); color: #c4c2c4; border: 1px solid rgba(168,163,165,0.4); }
+.tipo-video    { background: rgba(47,191,113,0.18); color: #6fdc9a; border: 1px solid rgba(47,191,113,0.45); }
+.tipo-dibujo   { background: rgba(229,181,59,0.18); color: #f2cc6b; border: 1px solid rgba(229,181,59,0.45); }
+.tipo-bitacora { background: rgba(237,125,58,0.18); color: #f4ad7e; border: 1px solid rgba(237,125,58,0.45); }
+.tipo-foto     { background: rgba(237,125,58,0.18); color: #f4ad7e; border: 1px solid rgba(237,125,58,0.45); }
+.tipo-hoja     { background: rgba(242,204,107,0.18); color: var(--willow); border: 1px solid rgba(242,204,107,0.45); }
+.tipo-plantilla{ background: rgba(120,120,120,0.22); color: #c9c9b8; border: 1px solid rgba(120,120,120,0.45); }
+
+.panel-rama {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-dim);
+}
+.panel-rama span { color: var(--ocre); }
+
+.panel-titulo {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-size: 28px; line-height: 1.15;
+  color: var(--blanco); font-weight: normal;
+  letter-spacing: -0.005em;
+}
+.panel-archivo-nombre {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  word-break: break-all;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.02);
+  border-left: 2px solid rgba(236,230,220,0.15);
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+.panel-meta {
+  display: grid; grid-template-columns: auto 1fr; gap: 6px 12px;
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-dim);
+}
+.panel-meta dt { color: var(--text-dim); letter-spacing: 0.08em; }
+.panel-meta dd { color: var(--text-mid); }
+
+.panel-desc {
+  font-size: 13px; line-height: 1.8;
+  color: var(--text-mid); font-style: italic;
+}
+.panel-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.panel-tag {
+  font-family: var(--font-mono); font-size: 9px;
+  padding: 3px 8px; border: 1px solid rgba(236,230,220,0.12);
+  border-radius: 2px; color: var(--text-dim); letter-spacing: 0.06em;
+}
+.panel-tag.tema {
+  border-color: rgba(237,125,58,0.4);
+  color: var(--ocre);
+}
+.panel-divider {
+  width: 40px; height: 1px;
+  background: rgba(236,230,220,0.12);
+}
+
+.panel-conexiones {
+  border-top: 1px solid rgba(236,230,220,0.07);
+  padding-top: 16px; margin-top: 4px;
+}
+.panel-conexiones-titulo {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.18em;
+  color: var(--musgo); text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.panel-conexion {
+  font-size: 11px; line-height: 1.6;
+  color: var(--text-mid); font-style: italic;
+  margin-bottom: 10px; padding-left: 14px;
+  border-left: 1px solid rgba(47,191,113,0.3);
+  cursor: none; transition: border-color 0.2s, color 0.2s;
+}
+.panel-conexion:hover {
+  color: var(--blanco); border-left-color: var(--verde-luz);
+}
+.panel-conexion strong {
+  color: var(--crema); font-weight: normal;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  font-style: normal;
+}
+.panel-conexion em {
+  color: var(--ocre); font-style: italic;
+}
+
+.panel-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-top: auto; padding: 13px 22px;
+  border: 1px solid var(--musgo); background: transparent;
+  color: var(--verde-luz); font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.1em; cursor: none;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+  align-self: flex-start;
+}
+.panel-btn:hover {
+  background: rgba(47,191,113,0.2);
+  border-color: var(--verde-luz);
+}
+.panel-btn.pendiente {
+  border-color: rgba(237,125,58,0.4);
+  color: var(--ocre);
+  cursor: none;
+}
+.panel-btn.pendiente:hover {
+  background: rgba(237,125,58,0.1);
+}
+
+/* ══════════════════════════════════════════
+   HINT
+══════════════════════════════════════════ */
+#hint {
+  position: fixed; top: 24px; left: 32px;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.13em; color: var(--text-dim);
+  z-index: 100; pointer-events: none;
+  opacity: 1; transition: opacity 1.5s;
+}
+#hint.fade { opacity: 0; }
+
+/* Indicador de profundidad — aparece al usar la rueda */
+#depth-indicator {
+  position: fixed; top: 50%; left: 32px;
+  transform: translateY(-50%);
+  width: 2px; height: 220px;
+  background: rgba(236,230,220,0.1);
+  z-index: 100; pointer-events: none;
+  opacity: 0; transition: opacity 0.4s;
+  --depth-pct: 50%;
+}
+#depth-indicator.visible { opacity: 1; }
+#depth-indicator::before {
+  content: ''; position: absolute;
+  left: -3px; width: 8px; height: 8px;
+  background: var(--crema);
+  border-radius: 50%;
+  top: var(--depth-pct);
+  transform: translateY(-50%);
+  transition: top 0.15s ease-out;
+  box-shadow: 0 0 12px rgba(236,230,220,0.5);
+}
+#depth-indicator-label {
+  position: absolute; left: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono); font-size: 8px;
+  letter-spacing: 0.18em; color: var(--text-dim);
+  text-transform: uppercase; white-space: nowrap;
+}
+#depth-indicator-label .near { color: var(--crema); }
+#depth-indicator-label .far  { color: var(--text-dim); }
+
+/* ══════════════════════════════════════════
+   VISTAS DE PAGINAS
+══════════════════════════════════════════ */
+.vista-pagina {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: calc(100vh - var(--nav-h));
+  background: var(--bg);
+  z-index: 300;
+  overflow-y: auto;
+  opacity: 0; pointer-events: none;
+  transform: translateY(16px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.vista-pagina.visible {
+  opacity: 1; pointer-events: all;
+  transform: translateY(0);
+}
+
+.pag-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 64px 48px 120px;
+}
+.pag-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--text-dim);
+  margin-bottom: 24px;
+  display: flex; align-items: center; gap: 16px;
+}
+.pag-eyebrow::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(236,230,220,0.1);
+}
+.pag-titulo {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-size: clamp(42px, 7vw, 88px);
+  line-height: 0.98; font-weight: normal;
+  color: var(--blanco); margin-bottom: 18px;
+  letter-spacing: -0.02em;
+}
+.pag-subtitulo {
+  font-family: var(--font-body);
+  font-size: 19px; line-height: var(--lh-long);
+  color: var(--text-mid); font-style: normal;
+  max-width: 680px; margin-bottom: 48px;
+  font-weight: 300;
+}
+.pag-linea {
+  width: 60px; height: 1px;
+  background: var(--musgo); margin-bottom: 56px;
+}
+.pag-cuerpo {
+  font-size: 17px; line-height: 1.9;
+  color: var(--text-mid); max-width: 720px;
+}
+.pag-cuerpo p { margin-bottom: 28px; }
+.pag-cuerpo strong { color: var(--crema); font-weight: normal; }
+
+/* Filtros del archivo */
+.filtros-bloque {
+  margin-bottom: 16px;
+}
+.filtros-bloque-label {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--musgo);
+  margin-bottom: 10px;
+}
+.filtros-row {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.filtro-btn {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 12px; border: 1px solid rgba(236,230,220,0.12);
+  background: transparent; color: var(--text-dim);
+  cursor: none; transition: all 0.2s; border-radius: 2px;
+}
+.filtro-btn:hover { border-color: rgba(236,230,220,0.3); color: var(--crema); }
+.filtro-btn.active {
+  border-color: var(--musgo); color: var(--verde-luz);
+  background: rgba(47,191,113,0.12);
+}
+.filtro-btn.tema.active {
+  border-color: var(--ocre); color: var(--ocre);
+  background: rgba(237,125,58,0.12);
+}
+
+/* Archivo por subproyecto */
+.rama-bloque {
+  margin-top: 56px;
+}
+.rama-bloque.hidden { display: none; }
+.rama-header {
+  display: flex; align-items: baseline; gap: 18px;
+  margin-bottom: 6px; flex-wrap: wrap;
+}
+.rama-id {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.16em;
+  color: var(--text-dim);
+}
+.rama-tipo-tag {
+  font-family: var(--font-mono);
+  font-size: 8px; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 3px 8px; border-radius: 2px;
+}
+.tipo-tronco { background: rgba(47,191,113,0.18); color: var(--willow); border: 1px solid rgba(47,191,113,0.45); }
+.tipo-rama   { background: rgba(237,125,58,0.18); color: #f4ad7e; border: 1px solid rgba(237,125,58,0.45); }
+.tipo-gestion{ background: rgba(120,120,120,0.22); color: #c9c9b8; border: 1px solid rgba(120,120,120,0.45); }
+.rama-titulo {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-size: 38px; line-height: 1.05;
+  color: var(--blanco); font-weight: normal;
+  flex-basis: 100%;
+  margin-top: 10px;
+  letter-spacing: -0.01em;
+}
+.rama-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  display: flex; gap: 24px; flex-wrap: wrap;
+}
+.rama-meta span strong {
+  color: var(--text-mid); font-weight: normal;
+}
+.rama-desc {
+  font-size: 13px; line-height: 1.85;
+  color: var(--text-mid); font-style: italic;
+  max-width: 780px;
+  margin-top: 18px; margin-bottom: 32px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(47,191,113,0.3);
+}
+
+.archivos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1px;
+  background: rgba(236,230,220,0.05);
+  border: 1px solid rgba(236,230,220,0.05);
+}
+.archivo-card {
+  background: var(--bg);
+  padding: 22px 22px 20px;
+  transition: background 0.2s;
+  cursor: none;
+  position: relative;
+  min-height: 180px;
+  display: flex; flex-direction: column;
+}
+.archivo-card:hover {
+  background: rgba(255,255,255,0.025);
+}
+.archivo-card.hidden { display: none; }
+.archivo-card.is-serie::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-left: 2px solid rgba(237,125,58,0.35);
+  pointer-events: none;
+}
+.card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.card-id {
+  font-family: var(--font-mono);
+  font-size: 8px; letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+.card-tipo {
+  font-family: var(--font-mono);
+  font-size: 8px; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 1px;
+}
+.card-archivo {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mid);
+  word-break: break-word;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.card-desc {
+  font-size: 11.5px; line-height: 1.7;
+  color: var(--text-dim); font-style: italic;
+  margin-bottom: 12px;
+  flex: 1;
+}
+.card-tags {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  margin-top: auto;
+}
+.card-tag {
+  font-family: var(--font-mono); font-size: 8px;
+  padding: 2px 5px; color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+.card-tag.tema {
+  color: var(--ocre);
+}
+.card-serie-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--ocre);
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+/* Vista Sobre/Método/Contacto styling */
+.pag-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px; margin-top: 48px;
+}
+@media (max-width: 760px) { .pag-cols { grid-template-columns: 1fr; } }
+.pag-col-titulo {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--musgo);
+  margin-bottom: 20px;
+}
+.pag-col-cuerpo {
+  font-size: 16px; line-height: 1.85;
+  color: var(--text-dim);
+}
+
+/* Grupos investigación grid */
+.grupos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1px;
+  background: rgba(236,230,220,0.05);
+  margin-top: 32px;
+}
+.grupo-item {
+  background: var(--bg);
+  padding: 24px;
+}
+.grupo-label {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--text-dim);
+  margin-bottom: 10px;
+}
+.grupo-nombre {
+  font-family: var(--font-italic);
+  font-size: 20px; color: var(--crema);
+  font-style: italic; line-height: 1.35;
+  margin-bottom: 10px;
+}
+.grupo-rama {
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--ocre);
+  letter-spacing: 0.04em; line-height: 1.7;
+}
+
+/* Back button */
+.btn-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-dim); background: none; border: none;
+  cursor: none; transition: color 0.2s;
+  margin-bottom: 48px; padding: 0;
+}
+.btn-back:hover { color: var(--crema); }
+
+/* Scroll custom */
+.vista-pagina::-webkit-scrollbar { width: 3px; }
+.vista-pagina::-webkit-scrollbar-track { background: transparent; }
+.vista-pagina::-webkit-scrollbar-thumb { background: var(--musgo-dim); }
+
+/* Estado de archivo (pendiente / apto) */
+.estado-badge {
+  font-family: var(--font-mono);
+  font-size: 8px; letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 6px; border-radius: 1px;
+  display: inline-block;
+}
+.estado-apto       { color: var(--verde-luz); border: 1px solid rgba(47,191,113,0.5); }
+.estado-sinrevisar { color: var(--text-dim);  border: 1px solid rgba(236,230,220,0.15); }
+.estado-huerfano   { color: var(--vino);      border: 1px solid rgba(229,181,59,0.5); }
+
+/* Conteo resultados */
+.conteo-resultados {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  margin-top: 16px;
+}
+.conteo-resultados span { color: var(--verde-luz); }
+
+/* ══════════════════════════════════════════
+   LANDING (pantalla de entrada)
+══════════════════════════════════════════ */
+#landing {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: var(--bg);
+  overflow-y: auto;
+  overflow-x: hidden;
+  opacity: 1;
+  transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1);
+}
+#landing.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+/* canvas atmosférico de fondo del landing */
+#landing-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+/* grano sutil sobre todo el landing */
+#landing::after {
+  content: '';
+  position: fixed; inset: 0;
+  z-index: 1; pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.landing-inner {
+  position: relative;
+  z-index: 2;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 48px var(--pad-x) 56px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+@media (max-width: 720px) {
+  .landing-inner { padding: 32px 24px 40px; }
+}
+
+/* ── Top bar del landing ── */
+.landing-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: auto;
+}
+.landing-marca .l-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: var(--tr-label);
+  text-transform: uppercase; color: var(--text-mid);
+  margin-bottom: 8px;
+}
+.landing-marca .l-inst {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text-dim);
+  max-width: 260px; line-height: 1.6;
+}
+.landing-meta {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-dim);
+  line-height: 1.9;
+}
+.landing-meta span { color: var(--verde-luz); }
+
+/* ── Hero ── */
+.landing-hero {
+  padding: 80px 0 64px;
+  display: flex;
+  align-items: flex-start;
+  gap: 48px;
+}
+.landing-hero-left {
+  flex: 1;
+  min-width: 0;
+}
+.landing-hero-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding-top: 80px;
+  opacity: 0;
+  animation: landRise 1s ease 1.0s forwards;
+}
+.hero-kicker {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--ocre);
+  margin-bottom: 28px;
+  display: flex; align-items: center; gap: 16px;
+  opacity: 0;
+  animation: landRise 0.9s cubic-bezier(0.2,0.8,0.2,1) 0.2s forwards;
+}
+.hero-kicker::before {
+  content: ''; width: 40px; height: 1px; background: var(--ocre); opacity: 0.6;
+}
+.hero-titulo {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(58px, 12vw, 184px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  color: var(--blanco);
+  margin-bottom: 32px;
+}
+.hero-titulo .l1, .hero-titulo .l2 {
+  display: block;
+  opacity: 0;
+  animation: landRise 1s cubic-bezier(0.2,0.8,0.2,1) forwards;
+}
+.hero-titulo .l1 { animation-delay: 0.3s; }
+.hero-titulo .l2 {
+  animation-delay: 0.45s;
+  color: var(--verde-luz);
+  padding-left: 0.8em;
+}
+.hero-sub {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: clamp(16px, 2vw, 21px);
+  line-height: var(--lh-long);
+  color: var(--text-mid);
+  max-width: 620px;
+  opacity: 0;
+  animation: landRise 1s cubic-bezier(0.2,0.8,0.2,1) 0.6s forwards;
+}
+.hero-sub em {
+  font-family: var(--font-italic);
+  color: var(--crema);
+  font-size: 1.08em;
+}
+
+@keyframes landRise {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Portales ── */
+.portales-label {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text-dim);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 16px;
+  opacity: 0;
+  animation: landRise 0.9s ease 0.8s forwards;
+}
+.portales-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--line);
+}
+.portales {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  opacity: 0;
+  animation: landRise 1s ease 0.9s forwards;
+}
+@media (max-width: 880px) { .portales { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .portales { grid-template-columns: 1fr; } }
+
+.portal {
+  position: relative;
+  background: var(--bg);
+  padding: 30px 26px 26px;
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  cursor: none;
+  overflow: hidden;
+  transition: background 0.4s ease;
+}
+.portal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--portal-color, var(--musgo));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.2,0.8,0.2,1);
+}
+.portal:hover { background: var(--bg-2); }
+.portal:hover::before { transform: scaleX(1); }
+
+.portal-num {
+  font-family: var(--font-mono);
+  font-size: 10.75px; letter-spacing: 0.14em;
+  color: var(--portal-color, var(--musgo));
+  margin-bottom: auto;
+}
+.portal-nombre {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-size: 30.75px; line-height: 1.05;
+  color: var(--blanco);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+  transition: color 0.3s;
+}
+.portal:hover .portal-nombre { color: var(--portal-color, var(--verde-luz)); }
+.portal-desc {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 13.25px; line-height: 1.65;
+  color: var(--text-mid);
+  margin-bottom: 16px;
+}
+.portal-cta {
+  font-family: var(--font-mono);
+  font-size: 9.75px; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: flex; align-items: center; gap: 8px;
+  transition: color 0.3s, gap 0.3s;
+}
+.portal:hover .portal-cta { color: var(--portal-color, var(--verde-luz)); gap: 14px; }
+.portal-cta .arrow { transition: transform 0.3s; }
+.portal:hover .portal-cta .arrow { transform: translateX(4px); }
+
+/* ── Entrada directa + footer ── */
+.landing-foot {
+  margin-top: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: landRise 1s ease 1.1s forwards;
+}
+.entrar-directo {
+  display: inline-flex; align-items: center; gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 12px; letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--crema);
+  background: transparent;
+  border: 1px solid var(--musgo);
+  padding: 16px 28px;
+  cursor: none;
+  transition: background 0.3s, border-color 0.3s, gap 0.3s;
+}
+.entrar-directo:hover {
+  background: rgba(47,191,113,0.12);
+  border-color: var(--verde-luz);
+  gap: 20px;
+}
+.entrar-directo .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--verde-luz);
+  box-shadow: 0 0 12px var(--verde-luz);
+  animation: pulseDot 2.4s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  0%,100% { opacity: 0.5; transform: scale(0.85); }
+  50%     { opacity: 1;   transform: scale(1.15); }
+}
+.landing-credito {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.12em;
+  color: var(--text-dim); line-height: 1.8;
+  text-align: right;
+}
+
+/* ══════════════════════════════════════════
+   NAV TOGGLE — ocultar/mostrar barra inferior
+══════════════════════════════════════════ */
+#nav-toggle {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 12px);
+  right: 32px;
+  z-index: 600;
+  background: rgba(19,19,15,0.88);
+  border: 1px solid rgba(236,230,220,0.12);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  cursor: none;
+  transition: bottom 0.45s cubic-bezier(0.16,1,0.3,1), color 0.2s, border-color 0.2s;
+  backdrop-filter: blur(10px);
+  display: flex; align-items: center; gap: 7px;
+  pointer-events: all;
+}
+#nav-toggle:hover {
+  color: var(--crema);
+  border-color: rgba(236,230,220,0.3);
+}
+#nav-toggle .toggle-icon {
+  font-size: 10px; line-height: 1;
+  transition: transform 0.3s;
+}
+
+/* Estado con nav oculto */
+body.nav-hidden nav {
+  transform: translateY(100%);
+}
+body.nav-hidden #vista-mapa {
+  height: 100vh;
+}
+body.nav-hidden #nav-toggle {
+  bottom: 12px;
+}
+body.nav-hidden #nav-toggle .toggle-icon {
+  transform: rotate(180deg);
+}
+nav {
+  transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+}
+#vista-mapa {
+  transition: height 0.45s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* botón volver al inicio desde la maraña */
+.btn-inicio {
+  font-family: var(--font-mono);
+  font-size: 16.8px; letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: none; border: none;
+  cursor: none; transition: color 0.2s;
+  display: flex; align-items: center; gap: 7px;
+  margin-bottom: 6px;
+}
+.btn-inicio:hover { color: var(--crema); }
+
+</style>
+</head>
+<body>
+
+<div id="cursor-ring"></div>
+<div id="cursor-dot"></div>
+<div id="cursor-h"></div>
+<div id="cursor-v"></div>
+
+<div id="landing">
+  <canvas id="landing-canvas"></canvas>
+  <div class="landing-inner">
+
+    <div class="landing-top">
+      <div class="landing-marca">
+        <div class="l-eyebrow">prácticas artísticas · investigación-creación</div>
+        <div class="l-inst">Universidad Distrital Francisco José de Caldas · Facultad de Artes ASAB · 2023—2026</div>
+      </div>
+      <div class="landing-meta">
+        cartografía viva<br>
+        <span>4</span> grupos · <span>8</span> nichos · <span>4</span> obras
+      </div>
+    </div>
+
+    <div class="landing-hero">
+      <div class="landing-hero-left">
+        <div class="hero-kicker">De los mundos de plantación a las marañas mundo</div>
+        <h1 class="hero-titulo">
+          <span class="l1">Marañas</span>
+          <span class="l2">Mundo</span>
+        </h1>
+        <p class="hero-sub">
+          Un proyecto de investigación-creación de 30 creadores-investigadores de la Facultad de Artes ASAB.
+          Cuatro grupos, cuatro obras, ocho nichos somato-poéticos. No es un repositorio:
+          es un <em>enmarañamiento</em> —respirando, tocando, encauchando, aguando— donde
+          cada práctica artística abre zonas de contacto con mundos más que humanos.
+        </p>
+      </div>
+      <div class="landing-hero-right">
+        <button class="entrar-directo" id="entrar-directo">
+          <span class="dot"></span> Entrar al rizoma
+        </button>
+      </div>
+    </div>
+
+    <div class="portales-label">Cuatro grupos de investigación</div>
+    <div class="portales">
+      <div class="portal" data-portal="tronco" style="--portal-color: var(--willow);">
+        <div class="portal-num">I · Dramaturgias</div>
+        <div class="portal-nombre">De los mundos<br>de plantación</div>
+        <div class="portal-desc">Performance en vivo con 8 nichos somato-poéticos y 15 performers entre músicos, actores, bailarines y artistas plásticos.</div>
+        <div class="portal-cta"><span class="arrow">→</span> explorar la obra</div>
+      </div>
+      <div class="portal" data-portal="temas" style="--portal-color: var(--ocre);">
+        <div class="portal-num">II · Arte Danzario</div>
+        <div class="portal-nombre">Enmarañar-Ser</div>
+        <div class="portal-desc">Videodanza que atraviesa el caos y el dolor para volver a tejer la maraña entre cuerpos y tierra. Cuerpos que devienen más que humanos.</div>
+        <div class="portal-cta"><span class="arrow">→</span> explorar la obra</div>
+      </div>
+      <div class="portal" data-portal="archivo" style="--portal-color: var(--vino);">
+        <div class="portal-num">III · Aulide</div>
+        <div class="portal-nombre">Per(r)o mundo</div>
+        <div class="portal-desc">Escritura coral de siete autores que indaga las fronteras de lo humano y lo no-humano a través del cuerpo, el lenguaje y la escena.</div>
+        <div class="portal-cta"><span class="arrow">→</span> explorar la obra</div>
+      </div>
+      <div class="portal" data-portal="libre" style="--portal-color: var(--musgo);">
+        <div class="portal-num">IV · Creación Artística</div>
+        <div class="portal-nombre">Carne de mis<br>bosques corporados</div>
+        <div class="portal-desc">Videoperformance que registra el encuentro entre cuerpos, bosques y entidades no humanas en una experiencia de inmersión y enmarañamiento.</div>
+        <div class="portal-cta"><span class="arrow">→</span> explorar la obra</div>
+      </div>
+    </div>
+
+    <div class="landing-foot">
+      <div class="landing-credito">
+        investigación-creación · Álvaro Iván Hernández Rodríguez (IP)<br>
+        cartografía digital · Nathalie Hernández · proyecto Marañas Mundo
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+
+<nav>
+  <div class="nav-logo" id="nav-home">
+    <span class="line1">prácticas artísticas</span>
+    <span class="line2">Marañas <em>Mundo</em></span>
+    <span class="line3">universidad distrital · investigación-creación</span>
+  </div>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#" data-vista="sobre"    class="nav-link">Proyecto</a></li>
+      <li><a href="#" data-vista="metodo"   class="nav-link">Método</a></li>
+      <li><a href="#" data-vista="archivo"  class="nav-link">Archivo</a></li>
+      <li><a href="#" data-vista="grupos"   class="nav-link">Grupos</a></li>
+      <li><a href="#" data-vista="contacto" class="nav-link">Contacto</a></li>
+    </ul>
+    <div class="nav-counter">
+      <button class="btn-inicio" id="btn-inicio">← inicio</button>
+      nodos en el rizoma: <span id="node-count">0</span>
+    </div>
+  </div>
+</nav>
+
+<button id="nav-toggle" title="Ocultar/mostrar menú">
+  <span class="toggle-icon">▼</span> <span id="nav-toggle-label">ocultar menú</span>
+</button>
+
+<div id="vista-mapa">
+  <div id="canvas-wrapper"></div>
+</div>
+
+<div id="sello-institucional">
+  <div class="sello-eyebrow">Universidad Distrital Francisco José de Caldas</div>
+  <div class="sello-titulo">Proyecto de investigación-creación · 2024-2026</div>
+</div>
+
+<div id="panel">
+  <button class="panel-close" id="panel-close">x</button>
+  <span class="panel-tipo" id="panel-tipo"></span>
+  <div class="panel-rama" id="panel-rama"></div>
+  <h2 class="panel-titulo" id="panel-titulo"></h2>
+  <div class="panel-archivo-nombre" id="panel-archivo-nombre"></div>
+  <dl class="panel-meta" id="panel-meta"></dl>
+  <div class="panel-divider"></div>
+  <p class="panel-desc" id="panel-desc"></p>
+  <div class="panel-tags" id="panel-tags"></div>
+  <div class="panel-conexiones" id="panel-conexiones" style="display:none;">
+    <div class="panel-conexiones-titulo">Conexiones en el rizoma</div>
+    <div id="panel-conexiones-lista"></div>
+  </div>
+  <a href="#" class="panel-btn pendiente" id="panel-link">Ver archivo · pendiente de publicación</a>
+</div>
+
+<div id="hint">mueve el cursor · revela la maraña · click en un nodo para explorar · rueda del mouse para navegar la profundidad</div>
+
+<div id="depth-indicator">
+  <div id="depth-indicator-label"><span class="near">cerca</span> ─ <span class="far">lejos</span></div>
+</div>
+
+<div class="vista-pagina" id="vista-sobre">
+  <div class="pag-inner">
+    <button class="btn-back" data-back>&#8592; Volver al mapa</button>
+    <div class="pag-eyebrow">Sobre el proyecto</div>
+    <h1 class="pag-titulo">Prácticas artísticas para una<br><em>Colombia más que humana</em></h1>
+    <p class="pag-subtitulo"><strong>De los Mundos de Plantación a las Marañas Mundo.</strong> Proyecto ganador de la Convocatoria Banco de Proyectos 2023 de la Universidad Distrital Francisco José de Caldas, financiado por la Oficina de Investigaciones. Investigación-creación con 30 creadores-investigadores de la Facultad de Artes ASAB.</p>
+    <div class="pag-linea"></div>
+    <div class="pag-cuerpo">
+      <p>El proyecto toma la obra de dramaturgia <em>«El silencio del salvaje: viaje interior por los laticíferos de la Siringa»</em> —escrita en 2014 por Álvaro Iván Hernández— como eje metodológico y movilizador de prácticas performativas orientadas a un agenciamiento reparador y restitutivo del continuo naturaleza-cultura. Desde ese eje, el hacer performativo se propone como lugar de emergencia de múltiples mundos imaginados y modos de existencia que favorecen el cultivo de capacidades afectivas propicias para activar formas de relacionamiento con humanos y entidades más que humanas.</p>
+      <p>El proyecto se pregunta por los modos de hacer-sentir-pensar que pueden movilizarse desde las prácticas artísticas como respuesta a los tiempos de una crisis ecológica nunca antes enfrentada por la humanidad. Dicha labor requiere de una imaginación activa que permita despertar posibilidades para la construcción de nuevos proyectos de mundo, nuevas colaboraciones, y experiencias de compartir —siempre más allá de lo humano— que no son el resultado de un sujeto individual sino de modos de existencia que sostienen las redes de vulnerabilidad compartidas que llamamos ecología.</p>
+      <p>El movimiento que da título al proyecto —de los <em>Mundos de Plantación</em> (monocultivo, extracción, colonialidad) a las <em>Marañas Mundo</em> (multiplicidad, coexistencia más-que-humana)— no es solo un argumento teórico: es la forma misma de organizar tres años de trabajo colectivo de cuatro grupos de investigación. La producción investigativa pasa por artículos académicos, escrituras creativas, escrituras performativas, prácticas a campo abierto, conferencias performativas, partituras, proposiciones y registros múltiples de la experiencia.</p>
+    </div>
+    <div style="margin-top:64px;">
+      <div class="pag-eyebrow">Cuatro grupos de investigación</div>
+      <div class="grupos-grid">
+        <div class="grupo-item">
+          <div class="grupo-label">Grupo I</div>
+          <div class="grupo-nombre">Dramaturgias del Cuerpo<br>y Escrituras del Espacio</div>
+        </div>
+        <div class="grupo-item">
+          <div class="grupo-label">Grupo II</div>
+          <div class="grupo-nombre">Arte Danzario<br>(PCAD)</div>
+        </div>
+        <div class="grupo-item">
+          <div class="grupo-label">Grupo III</div>
+          <div class="grupo-nombre">Aulide</div>
+        </div>
+        <div class="grupo-item">
+          <div class="grupo-label">Grupo IV</div>
+          <div class="grupo-nombre">Grupo para la<br>Creación Artística</div>
+        </div>
+        <div class="grupo-item">
+          <div class="grupo-label">Investigador principal</div>
+          <div class="grupo-nombre">Álvaro Iván Hernández Rodríguez</div>
+        </div>
+        <div class="grupo-item">
+          <div class="grupo-label">Co-dirección</div>
+          <div class="grupo-nombre">Regina María Gutiérrez Bermúdez</div>
+        </div>
+        <div class="grupo-item">
+          <div class="grupo-label">Institución</div>
+          <div class="grupo-nombre">Universidad Distrital<br>Francisco José de Caldas · ASAB</div>
+        </div>
+        <div class="grupo-item">
+          <div class="grupo-label">Periodo</div>
+          <div class="grupo-nombre">2023 — 2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="vista-pagina" id="vista-metodo">
+  <div class="pag-inner">
+    <button class="btn-back" data-back>&#8592; Volver al mapa</button>
+    <div class="pag-eyebrow">Método · forma de la investigación</div>
+    <h1 class="pag-titulo">Nichos somato-poéticos<br><em>y acusmáticos</em></h1>
+    <p class="pag-subtitulo">El performance <em>De los Mundos de Plantación a las Marañas Mundo</em> surge de un ejercicio de re-escritura donde re-escribir se plantea como replantar: volver a plantar, cultivar, re-mover, re-tornar, desubicar, hacer espacio para poder decir-hacer-pensar de otra manera. Cada nicho es un espacio del hacer que se traduce en un verbo.</p>
+    <div class="pag-linea"></div>
+    <div class="pag-cuerpo" style="margin-bottom:48px;">
+      <p>El performance es una exploración que reescribe a través de la creación de nichos somato-poéticos y acusmáticos que constituyen flujos otros distintos a los del capital. Forman así un pequeño <strong>glosario especulativo y ecosomático</strong> para abrir campos de relacionalidad más que humana: colectas de formas de pensar visual, sonoro y háptico, entretejidas en un mover-pensar colectivo que nos enmaraña a todxs.</p>
+    </div>
+    <div class="pag-cols">
+      <div>
+        <div class="pag-col-titulo">· Respiración</div>
+        <div class="pag-col-cuerpo">Primer nicho. La respiración como eje metodológico transversal: alta clavicular, media torácica, media baja abdominal, baja pélvica. La <em>marresción</em> —acción de enmarañar la respiración— como punto de entrada al cuerpo colectivo.</div>
+      </div>
+      <div>
+        <div class="pag-col-titulo">· Toque</div>
+        <div class="pag-col-cuerpo">El contacto como política. Tocar como forma de reconocimiento, de intra-acción entre cuerpos humanos y más que humanos. La piel como membrana porosa entre el adentro y el afuera.</div>
+      </div>
+      <div>
+        <div class="pag-col-titulo">· Encauchamientos</div>
+        <div class="pag-col-cuerpo">Resonancia con la debacle extractivista del caucho en el Putumayo: el látex, la siringa, los laticíferos. Encauchar como acto de resistencia y reescritura de la memoria terricida.</div>
+      </div>
+      <div>
+        <div class="pag-col-titulo">· Plantaciones</div>
+        <div class="pag-col-cuerpo">Del monocultivo a la diversidad. Las plantaciones como modelo de extracción y colonialidad que el proyecto busca desmontar a través de la práctica artística colectiva y la imaginación ecosomática.</div>
+      </div>
+      <div>
+        <div class="pag-col-titulo">· Abejas</div>
+        <div class="pag-col-cuerpo">Entidades no humanas como interlocutoras. Las abejas como figura de la comunidad, la polinización cruzada, la inteligencia distribuida y la vulnerabilidad compartida del sistema vivo.</div>
+      </div>
+      <div>
+        <div class="pag-col-titulo">· Pájaros</div>
+        <div class="pag-col-cuerpo">Lo acusmático: el sonido sin fuente visible, el canto que llega antes que el pájaro. La escucha como práctica de apertura a lo más que humano, a presencias que no se ven pero se sienten.</div>
+      </div>
+      <div>
+        <div class="pag-col-titulo">· Agua</div>
+        <div class="pag-col-cuerpo">Aguando-tanguando: el agua como flujo, como memoria, como purificación y como zona de contacto. El cuerpo que se vuelve permeable, que aprende a moverse como el agua se mueve.</div>
+      </div>
+      <div>
+        <div class="pag-col-titulo">· Enmarañamientos</div>
+        <div class="pag-col-cuerpo">Nicho síntesis. El enmarañamiento como forma de ser en el mundo: cuerpos, sonidos e imágenes entretejidos en una experiencia de 1 hora y 30 minutos que abre zonas de contacto y reflexión sobre el todo interconectado.</div>
+      </div>
+    </div>
+    <div style="margin-top:72px;">
+      <div class="pag-eyebrow">Texto fuente · eje metodológico</div>
+      <div class="pag-cuerpo" style="margin-top:32px;">
+        <p><em>«El silencio del salvaje: viaje interior por los laticíferos de la Siringa»</em> de Álvaro Iván Hernández (2014) se basa en la debacle extractivista, genocida y terricida de las plantaciones de caucho del Putumayo, y la aniquilación sistemática de la diversidad, la diferencia y las vidas y existencias humanas y más que humanas del lugar. Esta obra es el eje movilizador del que emergen las cuatro obras de los grupos de investigación, cada una respondiendo desde su propio lenguaje artístico: performance, videodanza, escritura coral y videoperformance.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="vista-pagina" id="vista-archivo">
+  <div class="pag-inner">
+    <button class="btn-back" data-back>&#8592; Volver al mapa</button>
+    <div class="pag-eyebrow">Archivo completo · catalogado</div>
+    <h1 class="pag-titulo">El tejido<br><em>visto en columnas</em></h1>
+    <p class="pag-subtitulo">Lo que en el mapa se mueve como rizoma, aquí se ordena por grupos. Cada bloque es una obra de investigación-creación; cada tarjeta, un archivo real del proceso.</p>
+    <div class="pag-linea"></div>
+
+    <div class="filtros-bloque">
+      <div class="filtros-bloque-label">Filtrar por rama</div>
+      <div class="filtros-row" id="filtros-rama">
+        <button class="filtro-btn active" data-filtro-rama="todos">Todas las obras</button>
+        <button class="filtro-btn" data-filtro-rama="SUB-02">Dramaturgias · De los mundos</button>
+        <button class="filtro-btn" data-filtro-rama="SUB-03">Arte Danzario · Enmarañar-Ser</button>
+        <button class="filtro-btn" data-filtro-rama="SUB-04">Aulide · Per(r)o mundo</button>
+        <button class="filtro-btn" data-filtro-rama="SUB-05">Creación Artística · Carne de mis bosques</button>
+        <button class="filtro-btn" data-filtro-rama="SUB-06">Salidas de campo</button>
+        <button class="filtro-btn" data-filtro-rama="SUB-06">FOTO LEMA</button>
+      </div>
+    </div>
+
+    <div class="filtros-bloque">
+      <div class="filtros-bloque-label">Cruzar por temática rizoma</div>
+      <div class="filtros-row" id="filtros-tema">
+        <button class="filtro-btn tema active" data-filtro-tema="todos">Todas</button>
+        <button class="filtro-btn tema" data-filtro-tema="naturaleza">Naturaleza</button>
+        <button class="filtro-btn tema" data-filtro-tema="sufrimiento">Sufrimiento</button>
+        <button class="filtro-btn tema" data-filtro-tema="soledad">Soledad</button>
+        <button class="filtro-btn tema" data-filtro-tema="silencio">Silencio</button>
+        <button class="filtro-btn tema" data-filtro-tema="transformacion">Transformación</button>
+        <button class="filtro-btn tema" data-filtro-tema="dualidad">Dualidad</button>
+      </div>
+    </div>
+
+    <div class="conteo-resultados">mostrando <span id="conteo-num">0</span> archivos del catálogo</div>
+
+    <div id="archivo-por-rama"></div>
+  </div>
+</div>
+
+<div class="vista-pagina" id="vista-grupos">
+  <div class="pag-inner">
+    <button class="btn-back" data-back>&#8592; Volver al mapa</button>
+    <div class="pag-eyebrow">Grupos de investigación</div>
+    <h1 class="pag-titulo">Cuatro grupos<br><em>una sola maraña</em></h1>
+    <p class="pag-subtitulo">Cuatro grupos de investigación de la Universidad Distrital Francisco José de Caldas convergen en este proyecto. Cada uno aporta una obra, una práctica metodológica, una huella en el archivo.</p>
+    <div class="pag-linea"></div>
+
+    <div class="grupos-grid">
+      <div class="grupo-item">
+        <div class="grupo-label">I · Obra</div>
+        <div class="grupo-nombre">De los mundos de plantación<br>a las marañas mundo</div>
+        <div class="grupo-rama">Grupo Dramaturgias del Cuerpo y Escrituras del Espacio<br>Dirección: Álvaro Iván Hernández Rodríguez · Co-dirección: Regina María Gutiérrez Bermúdez</div>
+      </div>
+      <div class="grupo-item">
+        <div class="grupo-label">II · Obra</div>
+        <div class="grupo-nombre">Enmarañar-Ser</div>
+        <div class="grupo-rama">Grupo Arte Danzario (PCAD)<br>Ana Cecilia Vargas Núñez · Diana Lucía León Bohórquez · Yina Erazo Coral · Jhonnatan Luna "Tatán"</div>
+      </div>
+      <div class="grupo-item">
+        <div class="grupo-label">III · Obra</div>
+        <div class="grupo-nombre">Per(r)o mundo</div>
+        <div class="grupo-rama">Grupo Aulide<br>Alexánder Llerena · Daniela Botero · Dubián Gallego · Javier Mican · Isabel García · Marcela Ayala · Vicente Bernal</div>
+      </div>
+      <div class="grupo-item">
+        <div class="grupo-label">IV · Obra</div>
+        <div class="grupo-nombre">Carne de mis bosques<br>corporados</div>
+        <div class="grupo-rama">Grupo para la Creación Artística<br>Créditos completos al final del videoperformance</div>
+      </div>
+    </div>
+
+    <div class="pag-cuerpo" style="margin-top:56px;">
+      <p>El proyecto reúne a <strong>30 creadores-investigadores</strong> —profesores, estudiantes y egresados de todos los proyectos curriculares de la Facultad de Artes ASAB— más un grupo de investigadores externos y colaboradores. Cada grupo comprometió sus esfuerzos a desarrollar procesos de creación de carácter muy distinto como caminos de indagación con y a través de los problemas planteados por el proyecto.</p>
+      <p>Las cuatro obras convergen en un mismo eje: la obra de dramaturgia <em>«El silencio del salvaje: viaje interior por los laticíferos de la Siringa»</em> de Álvaro Iván Hernández (2014), que funciona como movilizador metodológico y fuente literaria compartida. El resultado es un enmarañamiento de lenguajes artísticos —performance, videodanza, escritura coral y videoperformance— que se preguntan colectivamente: <strong>¿Qué estamos haciendo? ¿Para dónde vamos?</strong></p>
+    </div>
+  </div>
+</div>
+
+<div class="vista-pagina" id="vista-contacto">
+  <div class="pag-inner">
+    <button class="btn-back" data-back>&#8592; Volver al mapa</button>
+    <div class="pag-eyebrow">Contacto</div>
+    <h1 class="pag-titulo">Esta maraña<br><em>tiene autoras y autores</em></h1>
+    <p class="pag-subtitulo">El proyecto está abierto al diálogo, la colaboración y el intercambio con otras prácticas de investigación-creación en Colombia y América Latina.</p>
+    <div class="pag-linea"></div>
+    <div class="grupos-grid">
+      <div class="grupo-item">
+        <div class="grupo-label">Líder del proyecto</div>
+        <div class="grupo-nombre">Álvaro Iván<br>Hernández Rodríguez</div>
+      </div>
+      <div class="grupo-item">
+        <div class="grupo-label">Correo institucional</div>
+        <div class="grupo-nombre" style="font-family:var(--font-mono);font-size:13px;font-style:normal;letter-spacing:0.02em;">dcee@udistrital.edu.co</div>
+      </div>
+      <div class="grupo-item">
+        <div class="grupo-label">Institución</div>
+        <div class="grupo-nombre">Universidad Distrital<br>Francisco José de Caldas</div>
+      </div>
+      <div class="grupo-item">
+        <div class="grupo-label">Ciudad</div>
+        <div class="grupo-nombre">Bogotá, D. C., Colombia</div>
+      </div>
+    </div>
+    <div style="margin-top:64px;">
+      <div class="pag-eyebrow">Colofón técnico</div>
+      <div class="pag-cuerpo" style="margin-top:32px;">
+        <p>Este sitio usa <strong>p5.js</strong> para el rizoma vivo y está desplegado en GitHub Pages. Las imágenes (~650 fotos WebP) están alojadas en <strong>Cloudinary</strong> (cloud: dt6cvonyy). Los videos principales están en <strong>YouTube</strong> y se embeben directamente. El código vive en <code>proyectomaranas-cloud/maranas-mundo</code>.</p>
+        <p>Tipografías: Bricolage Grotesque (display y cuerpo), Instrument Serif (cursivas editoriales), JetBrains Mono (sistema). Paleta: emerald, pumpkin, watermelon y willow sobre carbón cálido. Segunda fase: deploy en VM de la Universidad Distrital.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="vista-pagina" id="vista-nodo">
+  <div class="pag-inner" style="max-width:860px;">
+    <button class="btn-back" data-back>&#8592; Volver al mapa</button>
+    <div style="margin-bottom:32px;">
+      <span class="panel-tipo" id="nodo-tipo" style="margin-bottom:18px;display:inline-block;"></span>
+      <div class="panel-rama" id="nodo-rama" style="margin-bottom:18px;"></div>
+      <h1 class="pag-titulo" id="nodo-titulo"></h1>
+      <p class="pag-subtitulo" id="nodo-desc"></p>
+      <div class="panel-archivo-nombre" id="nodo-archivo-nombre" style="margin-bottom:18px;"></div>
+      <div class="panel-tags" id="nodo-tags"></div>
+    </div>
+    <div id="nodo-media-wrapper" style="margin-bottom:48px;"></div>
+    <div class="pag-cuerpo" id="nodo-cuerpo-extra"></div>
+  </div>
+</div>
+
+</div><script>
+/* ══════════════════════════════════════════
+   LANDING + TRANSICIÓN  (script independiente, previo a p5)
+   No depende del sketch p5: si p5 fallara, el landing y la
+   navegación siguen funcionando.
+══════════════════════════════════════════ */
+(function() {
+  var landingEl = document.getElementById('landing');
+  var appEl     = document.getElementById('app');
+
+  function revelarApp() {
+    appEl.style.display = 'block';
+    // Avisar a quien escuche (el sketch p5) que la app ya es visible,
+    // para que recalcule el tamaño del canvas.
+    window.dispatchEvent(new Event('app-revealed'));
+  }
+
+  window.entrarAlRizoma = function(destino) {
+    if (!landingEl) return;
+    landingEl.classList.add('fade-out');
+    revelarApp();  // mostrar la app bajo el landing durante el fundido
+
+    setTimeout(function() {
+      landingEl.style.display = 'none';
+      if (window._landingRAF) cancelAnimationFrame(window._landingRAF);
+
+      // Navegar al destino. mostrarVista puede no existir aún si p5 falló;
+      // se protege con typeof.
+      if (typeof mostrarVista === 'function') {
+        if (destino === 'temas' || destino === 'archivo' || destino === 'tronco') {
+        mostrarVista('archivo');
+      } else {
+        mostrarVista('mapa');
+      }
+      }
+    }, 900);  // coincide con el fundido CSS
+  };
+
+  window.volverAlInicio = function() {
+    if (!landingEl) return;
+    landingEl.style.display = 'block';
+    void landingEl.offsetWidth;  // reflow para reactivar la transición
+    landingEl.classList.remove('fade-out');
+    appEl.style.display = 'none';
+    iniciarLandingCanvas();
+  };
+
+  // ── Listeners de portales y botones ──
+  document.querySelectorAll('.portal').forEach(function(portal) {
+    portal.addEventListener('click', function() {
+      window.entrarAlRizoma(this.dataset.portal);
+    });
+  });
+  var btnDirecto = document.getElementById('entrar-directo');
+  if (btnDirecto) btnDirecto.addEventListener('click', function() { window.entrarAlRizoma('libre'); });
+  var btnInicio = document.getElementById('btn-inicio');
+  if (btnInicio) btnInicio.addEventListener('click', function() { window.volverAlInicio(); });
+
+  /* ── Canvas atmosférico del landing (vanilla, sin p5) ── */
+  window.iniciarLandingCanvas = function() {
+    var cv = document.getElementById('landing-canvas');
+    if (!cv) return;
+    var ctx = cv.getContext('2d');
+    var W, H, parts;
+    var PAL = [[47,191,113],[237,125,58],[229,181,59],[140,216,103],[157,151,138]];
+
+    function resize() { W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    parts = [];
+    var n = Math.min(70, Math.floor(W * H / 26000));
+    for (var i = 0; i < n; i++) {
+      var col = PAL[Math.floor(Math.random() * PAL.length)];
+      var r = Math.random();
+      var px = Math.random() * W, py = Math.random() * H;
+      parts.push({
+        ax: px, ay: py, x: px, y: py,
+        size: 0.6 + r * r * r * 3.4,
+        col: col,
+        ph: Math.random() * Math.PI * 2,
+        spd: 0.15 + Math.random() * 0.4,
+        amp: 8 + Math.random() * 22,
+        baseAlpha: 0.12 + Math.random() * 0.35
+      });
+    }
+
+    var t = 0;
+    function frame() {
+      t += 0.004;
+      ctx.clearRect(0, 0, W, H);
+      // líneas tenues entre partículas cercanas
+      for (var i = 0; i < parts.length; i++) {
+        var a = parts[i];
+        for (var j = i + 1; j < parts.length; j++) {
+          var b = parts[j];
+          var dx = a.x - b.x, dy = a.y - b.y;
+          var dd = Math.sqrt(dx*dx + dy*dy);
+          if (dd < 150) {
+            ctx.strokeStyle = 'rgba(' + a.col[0] + ',' + a.col[1] + ',' + a.col[2] + ',' + ((1 - dd/150) * 0.10) + ')';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+      // partículas
+      for (var k = 0; k < parts.length; k++) {
+        var pt = parts[k];
+        pt.x = pt.ax + Math.cos(t * pt.spd + pt.ph) * pt.amp;
+        pt.y = pt.ay + Math.sin(t * pt.spd * 0.8 + pt.ph * 1.4) * pt.amp;
+        var alpha = pt.baseAlpha * (0.7 + Math.sin(t * 2 + pt.ph) * 0.3);
+        ctx.fillStyle = 'rgba(' + pt.col[0] + ',' + pt.col[1] + ',' + pt.col[2] + ',' + (alpha * 0.25) + ')';
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size * 3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(' + pt.col[0] + ',' + pt.col[1] + ',' + pt.col[2] + ',' + alpha + ')';
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2); ctx.fill();
+      }
+      window._landingRAF = requestAnimationFrame(frame);
+    }
+    if (window._landingRAF) cancelAnimationFrame(window._landingRAF);
+    frame();
+  };
+  window.iniciarLandingCanvas();
+})();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+<script>
+/* ══════════════════════════════════════════
+   DATOS REALES DEL CATÁLOGO
+   Estructura: 4 grupos · 4 obras · 8 nichos · 3 videos YouTube
+   Actualizado con textos de Álvaro Iván Hernández Rodríguez
+══════════════════════════════════════════ */
+
+var SUBPROYECTOS = {
+  'SUB-01': { titulo:'Gestión · archivo general', tipo:'gestion', rotulo:'Gestión · transversal', grupo:'Coordinación (Nathalie Hernández)',
+              desc:'Documentos rectores del proyecto: Plan de Trabajo Inicial, Requerimientos Técnicos y matriz de catalogación. Definen la arquitectura conceptual y técnica del archivo digital.' },
+  'SUB-02': { titulo:'De los mundos de plantación a las marañas mundo', tipo:'tronco', rotulo:'OBRA · Dramaturgias del Cuerpo', grupo:'Grupo Dramaturgias del Cuerpo y Escrituras del Espacio · Dir. Álvaro Iván Hernández Rodríguez',
+              desc:'Performance en vivo de gran formato. 15 performers entre músicos, actores, bailarines y artistas plásticos. 1h 30 min. 8 nichos somato-poéticos: Respiración, Toque, Encauchamientos, Plantaciones, Abejas, Pájaros, Agua, Enmarañamientos. Registro de video completo y fotos disponibles.' },
+  'SUB-03': { titulo:'Enmarañar-Ser', tipo:'rama', rotulo:'OBRA · Arte Danzario', grupo:'Grupo Arte Danzario (PCAD) · Dir. colectiva: Ana Vargas, Diana León, Yina Erazo, Tatán Luna',
+              desc:'Videodanza. El ruido, el caos, la ciudad, las ruinas. La búsqueda por conectar de nuevo, consigo misma, con el entorno, con la naturaleza, con las otras. El agua que purifica y limpia. Atravesar el caos y el dolor para elevarse con fuerza y belleza. Volver a tejer la maraña entre nuestros cuerpos y la tierra. Convertirnos en más que humanas. Fotos, videos, making-of y diagramas del proceso de creación.' },
+  'SUB-04': { titulo:'Per(r)o mundo', tipo:'rama', rotulo:'OBRA · Aulide', grupo:'Grupo Aulide · Alexánder Llerena · Daniela Botero · Dubián Gallego · Javier Mican · Isabel García · Marcela Ayala · Vicente Bernal',
+              desc:'Escritura coral de siete autores que indaga las fronteras de lo humano y lo no-humano. Fotos y videos del proceso de creación, textos y fotos de manuscritos.' },
+  'SUB-05': { titulo:'Carne de mis bosques corporados', tipo:'rama', rotulo:'OBRA · Creación Artística', grupo:'Grupo para la Creación Artística · créditos al final del videoperformance',
+              desc:'Videoperformance. Registro completo de la obra, fotos detrás de escena y videos. Una experiencia de inmersión y enmarañamiento entre cuerpos, bosques y entidades no humanas.' },
+  'SUB-06': { titulo:'Salidas de campo · GRINPLART', tipo:'rama', rotulo:'RAMA · proceso colectivo', grupo:'Transversal a los grupos',
+              desc:'Documenta salidas de campo: San Francisco de Sales (27 investigadores · nov 2023), Los Copetones, Villa Rosil. Metodología Integrada centrada en Respiración. Galerías extensas de fotos y videos.' }
+};
+
+/* ARCHIVOS: catálogo principal */
+var ARCHIVOS = [
+  // SUB-01 · Gestión
+  { id:'ARC-001', sub:'SUB-01', tipo:'texto', archivo:'Plan de Trabajo Inicial - Matriz de organización del material recopilado.pdf',
+    titulo:'Plan de Trabajo Inicial', tam:'0.13 MB', fecha:'2025-11-27',
+    desc:'Documento fundacional del catálogo. Define la arquitectura conceptual del archivo y la tipología de contenido. Punto de partida para la cartografía digital del proyecto.',
+    tags:['cartografía viva','archivo digital','tipología'], temas:[], estado:'apto', peso:3 },
+  { id:'ARC-002', sub:'SUB-01', tipo:'texto', archivo:'Requerimientos_Tecnicos_Maranas.docx',
+    titulo:'Requerimientos Técnicos', tam:'0.03 MB', fecha:'2025-11-25',
+    desc:'Especificaciones técnicas de la plataforma digital. Identifica los 4 grupos de investigación participantes y las condiciones de producción del archivo web.',
+    tags:['stack tecnológico','infraestructura','4 grupos'], temas:[], estado:'apto', peso:2 },
+  // SUB-02 · Dramaturgias — obra principal
+  { id:'ARC-003', sub:'SUB-02', tipo:'video', archivo:'Obra_Completa_Dramaturgias.mp4',
+    titulo:'De los mundos de plantación a las marañas mundo · obra completa', tam:'—', fecha:'2025',
+    desc:'Registro completo del performance en vivo. 15 performers. 1h 30 min. 8 nichos somato-poéticos. Dirección: Álvaro Iván Hernández Rodríguez. Co-dirección: Regina María Gutiérrez Bermúdez.',
+    tags:['performance','obra completa','8 nichos','15 performers'], temas:['naturaleza','transformacion','dualidad'], estado:'apto', peso:4 },
+  { id:'ARC-004', sub:'SUB-02', tipo:'foto', archivo:'Fotos_obra_Dramaturgias/',
+    titulo:'Registro fotográfico · Dramaturgias', tam:'—', fecha:'2025',
+    desc:'Galería fotográfica del performance. Fotos de función y detrás de cámara. Afectografías: María Camila Largo Casallas.',
+    tags:['fotos','performance','registro','afectografías'], temas:['naturaleza','transformacion'], estado:'sinrevisar', peso:3 },
+  // SUB-02 · Videos YouTube (obra colectiva — Obra Completa Hernán, Cartografías)
+  { id:'ARC-YT-01', sub:'SUB-02', tipo:'video', archivo:'youtube:Tcyzxk4IEl4',
+    titulo:'Obra Completa · Hernán Darío Guzmán', tam:'YouTube', fecha:'2025',
+    desc:'Video de la obra completa publicado en YouTube. Registro del performance de gran formato del Grupo Dramaturgias del Cuerpo. Música y creación sonora: Hernán Darío Guzmán.',
+    tags:['youtube','obra completa','música','Hernán Guzmán'], temas:['naturaleza','transformacion'], estado:'apto', peso:4,
+    youtubeId:'Tcyzxk4IEl4' },
+  { id:'ARC-YT-03', sub:'SUB-06', tipo:'video', archivo:'youtube:IDmTLHw_Brc',
+    titulo:'Cartografías Sur · salidas de campo', tam:'YouTube', fecha:'2025',
+    desc:'Video que documenta las salidas de campo al sur: San Francisco de Sales, Los Copetones, Villa Rosil. Registro del proceso colectivo de investigación-creación en territorio.',
+    tags:['youtube','salidas de campo','territorio','cartografías'], temas:['naturaleza','silencio'], estado:'apto', peso:3,
+    youtubeId:'IDmTLHw_Brc' },
+  // SUB-03 · Arte Danzario — Enmarañar-Ser
+  { id:'ARC-YT-02', sub:'SUB-03', tipo:'video', archivo:'youtube:2dhOlxuE2nA',
+    titulo:'Enmarañar-Ser · videodanza completa', tam:'YouTube', fecha:'2025',
+    desc:'Videodanza completa publicada en YouTube. Dirección y creación colectiva: Ana Cecilia Vargas Núñez, Diana Lucía León Bohórquez, Yina Erazo Coral. Música original: Villy Glez. Cámara: Soraya Vargas.',
+    tags:['youtube','videodanza','enmarañar-ser'], temas:['naturaleza','transformacion','dualidad'], estado:'apto', peso:4,
+    youtubeId:'2dhOlxuE2nA' },
+  { id:'ARC-010', sub:'SUB-03', tipo:'texto', archivo:'Marañas guión avances (1).docx',
+    titulo:'Guion · Enmarañar-Ser', tam:'—', fecha:'—',
+    desc:'Guion de la videodanza estructurado en 16 escenas en 5 bloques temáticos. Locaciones: Hospital San Juan de Dios y San Lucas. Intérpretes: Ana Vargas, Diana León, Yina Erazo, Tatán Luna.',
+    tags:['guion','16 escenas','5 bloques','videodanza'], temas:['naturaleza','sufrimiento','silencio','transformacion'], estado:'apto', peso:3 },
+  { id:'ARC-011', sub:'SUB-03', tipo:'hoja', archivo:'Tabla de lectura - texto base.xlsx',
+    titulo:'Texto base · 18 Árboles · El silencio del salvaje', tam:'—', fecha:'—',
+    desc:'«El silencio del salvaje: viaje interior por los laticíferos de la siringa» de Álvaro Hernández, estructurado en 18 Árboles. Lectura coral. Eje metodológico del proyecto y fuente literaria de la videodanza.',
+    tags:['texto base','18 árboles','siringa','Álvaro Hernández'], temas:['naturaleza','silencio'], estado:'apto', peso:3 },
+  { id:'ARC-012', sub:'SUB-03', tipo:'foto', archivo:'PÓSTER ENMARAÑAR - SER AGOSTO 2025.jpg',
+    titulo:'Póster oficial · Enmarañar-Ser', tam:'—', fecha:'2025-08',
+    desc:'Póster oficial de la videodanza Enmarañar-Ser. Identidad gráfica del estreno en Teatro Taller de Colombia.',
+    tags:['póster','identidad gráfica','estreno','Teatro Taller'], temas:[], estado:'apto', peso:2 },
+  { id:'ARC-013', sub:'SUB-03', tipo:'video', archivo:'Enmarañar-Ser_TRAILER FINAL.mp4',
+    titulo:'Trailer final · Enmarañar-Ser', tam:'—', fecha:'—',
+    desc:'Pieza promocional definitiva de la videodanza. Junto al póster, es la comunicación principal de la obra.',
+    tags:['trailer','pieza promocional','videodanza'], temas:['naturaleza','dualidad'], estado:'apto', peso:3 },
+  { id:'SER-ES-01', sub:'SUB-03', tipo:'foto', titulo:'Fotos obra · Enmarañar-Ser', conteo:'70+ fotos', tam:'~70 MB', fecha:'2025-10-13',
+    desc:'Galería profesional retocada de la videodanza. Serie homogénea DSCF3xxx-Mejorado-NR. Material principal de imagen fija curada.', temas:['naturaleza','transformacion'], estado:'sinrevisar', peso:3,
+    esSerie:true, archivo:'[ serie · 70+ fotos ]' },
+  { id:'SER-ES-02', sub:'SUB-03', tipo:'video', titulo:'Making-of · Enmarañar-Ser', conteo:'11 videos', tam:'~4 GB', fecha:'2024-10 a 2025-10',
+    desc:'Videos del making-of y proceso de creación de la videodanza. Sesiones de ensayo y registro de proceso.', temas:['transformacion'], estado:'sinrevisar', peso:2,
+    esSerie:true, archivo:'[ serie · 11 videos ]' },
+  // SUB-04 · Aulide — Per(r)o mundo
+  { id:'ARC-020', sub:'SUB-04', tipo:'texto', archivo:'Cadena JVACD.pdf',
+    titulo:'Per(r)o mundo · escritura coral (v.1)', tam:'—', fecha:'—',
+    desc:'Escritura coral de siete autores (Alexánder Llerena, Daniela Botero, Dubián Gallego, Javier Mican, Isabel García, Marcela Ayala, Vicente Bernal). Indagación sobre las fronteras de lo humano y lo no-humano.',
+    tags:['escritura coral','7 autores','Aulide'], temas:['sufrimiento','dualidad'], estado:'apto', peso:3 },
+  { id:'ARC-021', sub:'SUB-04', tipo:'foto', archivo:'Flyer Per(r)o mundo.jpg',
+    titulo:'Flyer · Per(r)o mundo', tam:'—', fecha:'—',
+    desc:'Pieza gráfica de difusión de la obra Per(r)o mundo.',
+    tags:['flyer','difusión','Aulide'], temas:[], estado:'apto', peso:1 },
+  { id:'SER-PM-01', sub:'SUB-04', tipo:'foto', titulo:'Fotos proceso · Per(r)o mundo', conteo:'por inventariar', tam:'—', fecha:'—',
+    desc:'Fotos y videos detrás de cámara del proceso de creación. Textos y fotos de manuscritos.', temas:[], estado:'sinrevisar', peso:2,
+    esSerie:true, archivo:'[ serie · proceso ]' },
+  // SUB-05 · Creación Artística — Carne de mis bosques corporados
+  { id:'ARC-030', sub:'SUB-05', tipo:'video', archivo:'Carne_de_mis_bosques_corporados.mp4',
+    titulo:'Carne de mis bosques corporados · videoperformance', tam:'—', fecha:'2025',
+    desc:'Videoperformance del Grupo para la Creación Artística. Registro completo de la obra. Los créditos están al final del videoperformance. Una experiencia de inmersión entre cuerpos, bosques y entidades no humanas.',
+    tags:['videoperformance','bosques','creación artística'], temas:['naturaleza','transformacion'], estado:'apto', peso:4 },
+  { id:'SER-CB-01', sub:'SUB-05', tipo:'foto', titulo:'Registro · Carne de mis bosques', conteo:'por inventariar', tam:'—', fecha:'—',
+    desc:'Fotos detrás de escena y videos del proceso de creación del videoperformance.', temas:['naturaleza'], estado:'sinrevisar', peso:2,
+    esSerie:true, archivo:'[ serie · detrás de escena ]' },
+  // SUB-06 · Salidas de campo
+  { id:'SER-10', sub:'SUB-06', tipo:'foto', titulo:'GRINPLART · San Francisco de Sales · FOTOS', conteo:'100+ fotos', tam:'—', fecha:'2024-11-23 a 2024-11-24',
+    desc:'Galería extensa de la salida de campo a San Francisco de Sales. 27 investigadores. Metodología Integrada centrada en Respiración.', temas:['naturaleza','silencio'], estado:'sinrevisar', peso:3,
+    esSerie:true, archivo:'[ serie · 100+ fotos ]' },
+  { id:'SER-11', sub:'SUB-06', tipo:'video', titulo:'GRINPLART · San Francisco de Sales · VIDEOS', conteo:'múltiples', tam:'—', fecha:'2024-11-23 a 2024-11-24',
+    desc:'Videos de la salida de San Francisco de Sales. 27 investigadores en campo.', temas:['naturaleza'], estado:'sinrevisar', peso:2,
+    esSerie:true, archivo:'[ serie · videos campo ]' },
+  { id:'SER-13', sub:'SUB-06', tipo:'video', titulo:'Los Copetones · videos', conteo:'por inventariar', tam:'—', fecha:'—',
+    desc:'Salida de campo a Los Copetones. Material en proceso de inventario.', temas:['naturaleza'], estado:'sinrevisar', peso:1,
+    esSerie:true, archivo:'[ serie · Los Copetones ]' },
+  { id:'SER-14', sub:'SUB-06', tipo:'foto', titulo:'Villa Rosil · FOTOS', conteo:'por inventariar', tam:'—', fecha:'—',
+    desc:'Salida de campo a Villa Rosil. Fotografías en proceso de inventario.', temas:['naturaleza'], estado:'sinrevisar', peso:1,
+    esSerie:true, archivo:'[ serie · Villa Rosil fotos ]' },
+  { id:'SER-16', sub:'SUB-06', tipo:'foto', titulo:'FOTO LEMA · «De los mundos de»', conteo:'16 fotos', tam:'~14 MB', fecha:'2025-09-24',
+    desc:'Sesión fotográfica profesional. 16 fotos 2K6A7xxx. Documenta el movimiento de los mundos de plantación a las marañas mundo.', temas:['naturaleza','transformacion'], estado:'sinrevisar', peso:2,
+    esSerie:true, archivo:'[ serie · 16 fotos ]' }
+];
+
+/* SERIES: vacío — series integradas en ARCHIVOS con esSerie:true */
+var SERIES = [];
+
+/* CONEXIONES seleccionadas (visualizadas como puentes preferentes) */
+var CONEXIONES_VISUALES = [
+  ['ARC-YT-02','ARC-010'],   // videodanza ↔ guion
+  ['ARC-YT-02','ARC-011'],   // videodanza ↔ texto base
+  ['ARC-YT-02','ARC-012'],   // videodanza ↔ póster
+  ['ARC-YT-01','ARC-003'],   // Hernán ↔ obra completa Dramaturgias
+  ['ARC-YT-03','SER-10'],    // cartografías ↔ San Francisco fotos
+  ['ARC-YT-03','SER-11'],    // cartografías ↔ San Francisco videos
+  ['ARC-003','ARC-004'],     // obra ↔ fotos Dramaturgias
+  ['ARC-030','SER-CB-01'],   // videoperformance ↔ registro
+  ['ARC-020','ARC-021'],     // escritura coral ↔ flyer Per(r)o
+  ['ARC-011','ARC-010'],     // texto base ↔ guion
+  ['SER-10','SER-11'],       // San Francisco fotos ↔ videos
+  ['SER-ES-01','ARC-YT-02'], // fotos Enmarañar ↔ videodanza
+  ['ARC-YT-02','ARC-013'],   // videodanza ↔ trailer
+];
+
+/* CONEXIONES DETALLADAS para mostrar en el panel */
+var CONEXIONES_TEXTO = {
+  'ARC-001': [
+    { tipo:'rige a', destino:'TODO el catálogo', texto:'Define la metáfora Tronco-Ramas que estructura el catálogo entero.' }
+  ],
+  'ARC-002': [
+    { tipo:'contradice', destino:'prototipo p5.js actual', texto:'Plantea Unity 2022 LTS pero el mapa migró a p5.js / HTML.' }
+  ],
+  'ARC-012': [
+    { tipo:'es fuente de', destino:'ARC-011', texto:'El texto base de Álvaro Hernández (18 Árboles) es la fuente literaria del guion.' }
+  ],
+  'ARC-013': [
+    { tipo:'expande a', destino:'ARC-011', texto:'El Guion físico es la versión técnica detallada: vestuario, sonoridad, planos, órdenes de montaje.' },
+    { tipo:'ubica acción en', destino:'HSJ + San Lucas', texto:'Las dos locaciones físicas estructuran el guion de la videodanza.' }
+  ],
+  'ARC-014': [
+    { tipo:'destila tags de', destino:'ARC-013', texto:'Los 6 temas comunes son la síntesis temática del guion.' }
+  ],
+  'ARC-016': [
+    { tipo:'deriva poéticamente', destino:'concepto Maraña', texto:'Maraña → Mar-Araña-Arañar-Maña-Amar. Marresción. Dansiesta.' },
+    { tipo:'aporta neologismo', destino:'ARC-017', texto:'Marresción («acción de enmarañar la respiración») conecta directo con la Metodología Integrada centrada en Respiración.' }
+  ],
+  'ARC-017': [
+    { tipo:'documenta', destino:'SER-10 / SER-11', texto:'Reporta la salida de San Francisco 24-26 nov 2023 con 27 investigadores.' },
+    { tipo:'propone', destino:'Metodología 4 respiraciones', texto:'Alta clavicular / media torácica / media baja abdominal / baja pélvica. Eje metodológico transversal.' }
+  ],
+  'ARC-019': [
+    { tipo:'marco institucional de', destino:'TODO el proyecto', texto:'Fuente más completa sobre IP, 27 coinvestigadores, 4 grupos institucionales y línea de investigación.' },
+    { tipo:'incluye entrevistas a', destino:'Ana Vargas, Dubián Gallego, Violeta García, Angie Rodríguez', texto:'4 entrevistas semiestructuradas — posiblemente ARC-004 a ARC-009.' }
+  ],
+  'ARC-020': [
+    { tipo:'promociona a', destino:'ARC-021 + SUB-03 entera', texto:'Trailer y póster son las piezas de comunicación de la videodanza.' }
+  ],
+  'ARC-022': [
+    { tipo:'detonada por', destino:'video del perro muerto (vacío)', texto:'El video original NO está en la carpeta «Videos usados en la obra» (vacía). Posible huérfano.' }
+  ],
+  'SER-01': [
+    { tipo:'documenta visualmente', destino:'ARC-003', texto:'Las 70+ fotos profesionales son el registro fotográfico curado de la obra.' }
+  ],
+  'SER-02': [
+    { tipo:'fuente cruda de', destino:'ARC-003 / ARC-010', texto:'Los videos MOV/MTS (53 GB) son el banco crudo del que se editaron las versiones definitivas.' }
+  ],
+  'ARC-027': [
+    { tipo:'define esquema de', destino:'este catálogo', texto:'Los campos y listas de tipos/estados de la plantilla original son la base del libro.' }
+  ],
+  'SER-16': [
+    { tipo:'rastro parcial de', destino:'rama «De los Mundos de Plantación»', texto:'El nombre de la subcarpeta apunta a esa rama. Es lo único que la materializa.' }
+  ]
+};
+
+// ─── Paleta de nodos · sincronizada con sistema editorial del landing ─────
+// Tonos saturados (no apagados) para que las conexiones promedien colores vivos
+var TIPO_RGB = {
+  texto:    [168, 163, 165],  
+  video:    [ 47, 191, 113],  // verde
+  foto:     [237, 125,  58],  
+  dibujo:   [229, 181,  59],  // Amarillo dorado
+  bitacora: [237, 125,  58],  
+  hoja:     [242, 204, 107],  // Amarillo claro
+  plantilla:[156, 152, 154]   
+};
+// Ambientales: tonos atenuados de la misma familia para que se lean como "atmósfera"
+// pero con la misma temperatura cromática del sistema principal
+var AMBIENT_RGB = [
+  [180, 140,  50],  // Amarillo oscuro
+  [180,  95,  70],  
+  [ 47, 130,  85],  // verde oscuro
+  [180, 140,  50],  // Amarillo oscuro
+  [140, 135, 138],  
+  [195, 110,  60]   
+];
+
+/* ══════════════════════════════════════════
+   FUSIONAR ARCHIVOS → NODOS
+══════════════════════════════════════════ */
+var CONTENIDOS = [];
+ARCHIVOS.forEach(function(a) {
+  if (a.sub === 'SUB-01') return;  // gestión: no visible en plataforma
+  var item = Object.assign({}, a);
+  if (!item.tags) item.tags = [];
+  if (!item.esSerie) item.esSerie = false;
+  item.icono = iconoTipo(a.tipo);
+  CONTENIDOS.push(item);
+});
+
+function iconoTipo(t) {
+  return { texto:'T', video:'>', foto:'o', hoja:'#', plantilla:'■', dibujo:'*' }[t] || '·';
+}
+
+/* ══════════════════════════════════════════
+   NAVEGACIÓN DE VISTAS
+══════════════════════════════════════════ */
+var vistaActual = 'mapa';
+
+function mostrarVista(nombre) {
+  document.getElementById('vista-mapa').style.display = nombre === 'mapa' ? 'block' : 'none';
+  document.getElementById('panel').classList.remove('open');
+
+  document.querySelectorAll('.vista-pagina').forEach(function(p) { p.classList.remove('visible'); });
+
+  document.querySelectorAll('.nav-link').forEach(function(l) {
+    l.classList.toggle('active', l.dataset.vista === nombre);
+  });
+
+  if (nombre === 'mapa') {
+    document.getElementById('vista-mapa').style.display = 'block';
+    document.getElementById('sello-institucional').style.display = 'block';
+    vistaActual = 'mapa';
+    return;
+  }
+  document.getElementById('sello-institucional').style.display = 'none';
+
+  if (nombre === 'archivo') poblarArchivoPorRama();
+
+  document.getElementById('vista-mapa').style.display = 'none';
+  var el = document.getElementById('vista-' + nombre);
+  if (el) {
+    vistaActual = nombre;
+    requestAnimationFrame(function() { el.classList.add('visible'); });
+  }
+}
+
+function mostrarNodo(cont) {
+  document.getElementById('nodo-tipo').textContent = cont.tipo.toUpperCase();
+  document.getElementById('nodo-tipo').className = 'panel-tipo tipo-' + cont.tipo;
+  var sub = SUBPROYECTOS[cont.sub];
+  document.getElementById('nodo-rama').innerHTML = (sub ? sub.titulo : cont.sub) + ' · ' + cont.id;
+  document.getElementById('nodo-titulo').textContent = cont.titulo;
+  document.getElementById('nodo-desc').textContent = cont.desc;
+  document.getElementById('nodo-archivo-nombre').textContent = cont.archivo || '';
+
+  var tagsEl = document.getElementById('nodo-tags');
+  tagsEl.innerHTML = '';
+  (cont.tags || []).forEach(function(t) {
+    var sp = document.createElement('span');
+    sp.className = 'panel-tag'; sp.textContent = '#' + t;
+    tagsEl.appendChild(sp);
+  });
+  (cont.temas || []).forEach(function(t) {
+    var sp = document.createElement('span');
+    sp.className = 'panel-tag tema'; sp.textContent = '·' + t;
+    tagsEl.appendChild(sp);
+  });
+
+  // ── Media wrapper: YouTube embed o placeholder ──
+  var mediaEl = document.getElementById('nodo-media-wrapper');
+  var cuerpoEl = document.getElementById('nodo-cuerpo-extra');
+  if (cont.youtubeId) {
+    mediaEl.innerHTML = '<div style="position:relative;width:100%;padding-bottom:56.25%;background:#000;border-radius:2px;overflow:hidden;">' +
+      '<iframe style="position:absolute;inset:0;width:100%;height:100%;border:none;" ' +
+      'src="https://www.youtube.com/embed/' + cont.youtubeId + '?rel=0&modestbranding=1" ' +
+      'allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
+    cuerpoEl.innerHTML = '';
+  } else {
+    mediaEl.innerHTML = '<div style="width:100%;aspect-ratio:16/9;' +
+      'background:repeating-linear-gradient(45deg,rgba(236,230,220,0.02) 0 12px,rgba(236,230,220,0.04) 12px 13px);' +
+      'border:1px dashed rgba(236,230,220,0.12);display:flex;align-items:center;justify-content:center;' +
+      'font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;color:var(--text-dim);text-align:center;padding:24px;">' +
+      '<div>[ contenido · pendiente de publicación ]<br><br>' +
+      '<span style="font-style:italic;font-size:10px;">video · galería · pdf · repositorio · según tipo de archivo</span></div></div>';
+    cuerpoEl.innerHTML = '<p>El catálogo registra este archivo y sus conexiones en el rizoma. El contenido se publicará en la segunda fase de deploy en la VM de la universidad.</p>';
+  }
+
+  mostrarVista('nodo');
+}
+
+document.querySelectorAll('.nav-link').forEach(function(a) {
+  a.addEventListener('click', function(e) { e.preventDefault(); mostrarVista(this.dataset.vista); });
+});
+document.getElementById('nav-home').addEventListener('click', function() { mostrarVista('mapa'); });
+document.querySelectorAll('[data-back]').forEach(function(btn) {
+  btn.addEventListener('click', function() { mostrarVista('mapa'); });
+});
+
+/* ── Toggle nav ── */
+document.getElementById('nav-toggle').addEventListener('click', function() {
+  var hidden = document.body.classList.toggle('nav-hidden');
+  document.getElementById('nav-toggle-label').textContent = hidden ? 'mostrar menú' : 'ocultar menú';
+  // Calcular nuevo navH y disparar evento para que p5 redistribuya nodos
+  var newNavH = hidden ? 0 : parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'));
+  window.dispatchEvent(new CustomEvent('nav-toggled', { detail: { navH: newNavH } }));
+});
+
+/* ══════════════════════════════════════════
+   ARCHIVO: GRID POR RAMA + FILTROS
+══════════════════════════════════════════ */
+var filtroRamaActivo = 'todos';
+var filtroTemaActivo = 'todos';
+
+function poblarArchivoPorRama() {
+  var cont = document.getElementById('archivo-por-rama');
+  cont.innerHTML = '';
+  var ordenRamas = ['SUB-02','SUB-03','SUB-04','SUB-05','SUB-06'];
+  ordenRamas.forEach(function(subId) {
+    var sub = SUBPROYECTOS[subId];
+    var items = CONTENIDOS.filter(function(c) { return c.sub === subId; });
+    if (items.length === 0) return;
+
+    var bloque = document.createElement('div');
+    bloque.className = 'rama-bloque';
+    bloque.dataset.rama = subId;
+
+    bloque.innerHTML = '' +
+      '<div class="rama-header">' +
+        '<span class="rama-id">' + subId + '</span>' +
+        '<span class="rama-tipo-tag tipo-' + sub.tipo + '">' + sub.rotulo + '</span>' +
+        '<h2 class="rama-titulo">' + sub.titulo + '</h2>' +
+        '<div class="rama-meta">' +
+          '<span><strong>Grupo:</strong> ' + sub.grupo + '</span>' +
+          '<span><strong>Archivos catalogados:</strong> ' + items.length + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rama-desc">' + sub.desc + '</div>' +
+      '<div class="archivos-grid" data-grid-rama="' + subId + '"></div>';
+
+    cont.appendChild(bloque);
+
+    var grid = bloque.querySelector('.archivos-grid');
+    items.forEach(function(c) {
+      var tagsHTML = (c.tags || []).slice(0,4).map(function(t) {
+        return '<span class="card-tag">#' + t + '</span>';
+      }).join('');
+      var temasHTML = (c.temas || []).map(function(t) {
+        return '<span class="card-tag tema">·' + t + '</span>';
+      }).join('');
+      var estadoCls = c.estado === 'apto' ? 'estado-apto' : 'estado-sinrevisar';
+
+      var card = document.createElement('div');
+      card.className = 'archivo-card' + (c.esSerie ? ' is-serie' : '');
+      card.dataset.id = c.id;
+      card.dataset.tipo = c.tipo;
+      card.dataset.temas = (c.temas || []).join(',');
+
+      card.innerHTML = '' +
+        '<div class="card-header">' +
+          '<span class="card-id">' + c.id + '</span>' +
+          '<span class="card-tipo tipo-' + c.tipo + '">' + c.tipo + '</span>' +
+        '</div>' +
+        '<div style="margin-bottom:10px;">' +
+          '<div style="font-family:var(--font-italic);font-size:17px;color:var(--crema);line-height:1.35;margin-bottom:8px;">' + c.titulo + '</div>' +
+          (c.esSerie ? '<div class="card-serie-meta">serie · ' + c.conteo + (c.tam && c.tam !== '—' ? ' · ' + c.tam : '') + '</div>' : '') +
+          '<div class="card-archivo">' + c.archivo + '</div>' +
+        '</div>' +
+        '<div class="card-desc">' + c.desc + '</div>' +
+        '<div class="card-tags">' + tagsHTML + temasHTML + '<span class="estado-badge ' + estadoCls + '">' + (c.estado || '') + '</span></div>';
+
+      card.addEventListener('click', function() { mostrarNodo(c); });
+      grid.appendChild(card);
+    });
+  });
+  aplicarFiltros();
+}
+
+function aplicarFiltros() {
+  var totalVisible = 0;
+  document.querySelectorAll('.rama-bloque').forEach(function(b) {
+    var rama = b.dataset.rama;
+    var ramaOk = filtroRamaActivo === 'todos' || filtroRamaActivo === rama;
+    var visiblesEnBloque = 0;
+    b.querySelectorAll('.archivo-card').forEach(function(card) {
+      var temas = (card.dataset.temas || '').split(',').filter(Boolean);
+      var temaOk = filtroTemaActivo === 'todos' || temas.indexOf(filtroTemaActivo) !== -1;
+      var visible = ramaOk && temaOk;
+      card.classList.toggle('hidden', !visible);
+      if (visible) visiblesEnBloque++;
+    });
+    b.classList.toggle('hidden', !ramaOk || visiblesEnBloque === 0);
+    if (ramaOk) totalVisible += visiblesEnBloque;
+  });
+  document.getElementById('conteo-num').textContent = totalVisible;
+}
+
+document.getElementById('filtros-rama').addEventListener('click', function(e) {
+  if (!e.target.classList.contains('filtro-btn')) return;
+  document.querySelectorAll('#filtros-rama .filtro-btn').forEach(function(b) { b.classList.remove('active'); });
+  e.target.classList.add('active');
+  filtroRamaActivo = e.target.dataset.filtroRama;
+  aplicarFiltros();
+});
+document.getElementById('filtros-tema').addEventListener('click', function(e) {
+  if (!e.target.classList.contains('filtro-btn')) return;
+  document.querySelectorAll('#filtros-tema .filtro-btn').forEach(function(b) { b.classList.remove('active'); });
+  e.target.classList.add('active');
+  filtroTemaActivo = e.target.dataset.filtroTema;
+  aplicarFiltros();
+});
+
+/* ══════════════════════════════════════════
+   PANEL NODO (en mapa)
+══════════════════════════════════════════ */
+var panel       = document.getElementById('panel');
+var panelTipo   = document.getElementById('panel-tipo');
+var panelRama   = document.getElementById('panel-rama');
+var panelTitulo = document.getElementById('panel-titulo');
+var panelArchivoNombre = document.getElementById('panel-archivo-nombre');
+var panelMeta   = document.getElementById('panel-meta');
+var panelDesc   = document.getElementById('panel-desc');
+var panelTags   = document.getElementById('panel-tags');
+var panelConexiones = document.getElementById('panel-conexiones');
+var panelConexionesLista = document.getElementById('panel-conexiones-lista');
+var panelLink   = document.getElementById('panel-link');
+var hint        = document.getElementById('hint');
+var nodeCountEl = document.getElementById('node-count');
+
+var cursorRing  = document.getElementById('cursor-ring');
+var cursorDot   = document.getElementById('cursor-dot');
+var cursorH     = document.getElementById('cursor-h');
+var cursorV     = document.getElementById('cursor-v');
+
+var selectedNode = null;
+var mouseAbsX = -999, mouseAbsY = -999, firstMove = false;
+var targetX = -999, targetY = -999;
+var cursorX = -999, cursorY = -999;
+
+document.addEventListener('mousemove', function(e) {
+  targetX = e.clientX; 
+  targetY = e.clientY;
+  mouseAbsX = e.clientX; 
+  mouseAbsY = e.clientY;
+  if (!firstMove) { 
+    firstMove = true; 
+    cursorX = targetX; // Se iguala para que no "vuele" desde fuera
+    cursorY = targetY;
+    setTimeout(function() { hint.classList.add('fade'); }, 4000); 
+  }
+});
+
+function animarCursor() {
+  if (firstMove) {
+    cursorX += (targetX - cursorX) * 0.45;
+    cursorY += (targetY - cursorY) * 0.45;
+    
+    cursorRing.style.left = cursorX + 'px';
+    cursorRing.style.top  = cursorY + 'px';
+    cursorDot.style.left  = cursorX + 'px';
+    cursorDot.style.top   = cursorY + 'px';
+    cursorH.style.left    = cursorX + 'px';
+    cursorH.style.top     = cursorY + 'px';
+    cursorV.style.left    = cursorX + 'px';
+    cursorV.style.top     = cursorY + 'px';
+  }
+  requestAnimationFrame(animarCursor);
+}
+animarCursor();
+
+document.getElementById('panel-close').addEventListener('click', function() {
+  panel.classList.remove('open'); selectedNode = null;
+});
+
+function abrirPanel(n) {
+  selectedNode = n;
+  var c = n.cont;
+  panelTipo.textContent = c.tipo.toUpperCase();
+  panelTipo.className = 'panel-tipo tipo-' + c.tipo;
+  var sub = SUBPROYECTOS[c.sub];
+  panelRama.innerHTML = c.id + ' · Rama <span>' + (sub ? sub.titulo : c.sub) + '</span>';
+  panelTitulo.textContent = c.titulo;
+  panelArchivoNombre.textContent = c.archivo;
+
+  panelMeta.innerHTML = '' +
+    (c.tam && c.tam !== '—' ? '<dt>tamaño</dt><dd>' + c.tam + '</dd>' : '') +
+    (c.fecha && c.fecha !== '—' ? '<dt>fecha</dt><dd>' + c.fecha + '</dd>' : '') +
+    (c.esSerie ? '<dt>conteo</dt><dd>' + c.conteo + '</dd>' : '') +
+    '<dt>estado</dt><dd>' + (c.estado || '—') + '</dd>';
+
+  panelDesc.textContent = c.desc;
+
+  panelTags.innerHTML = '';
+  (c.tags || []).forEach(function(t) {
+    var sp = document.createElement('span'); sp.className = 'panel-tag'; sp.textContent = '#' + t;
+    panelTags.appendChild(sp);
+  });
+  (c.temas || []).forEach(function(t) {
+    var sp = document.createElement('span'); sp.className = 'panel-tag tema'; sp.textContent = '·' + t;
+    panelTags.appendChild(sp);
+  });
+
+  // Conexiones (si existen para este nodo)
+  var conexs = CONEXIONES_TEXTO[c.id];
+  if (conexs && conexs.length) {
+    panelConexiones.style.display = 'block';
+    panelConexionesLista.innerHTML = conexs.map(function(con) {
+      return '<div class="panel-conexion"><strong>' + con.tipo + '</strong> → <em>' + con.destino + '</em><br>' + con.texto + '</div>';
+    }).join('');
+  } else {
+    panelConexiones.style.display = 'none';
+  }
+
+  panel.classList.add('open');
+}
+
+/* ══════════════════════════════════════════
+   p5.js — MAPA RIZOMÁTICO
+══════════════════════════════════════════ */
+var nCont = [];
+var nAmb  = [];
+var navH  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'));
+
+var sketch = new p5(function(p) {
+  var RADIO    = 130;   // v16: lupa más pequeña e íntima (195→130)
+  var MAX_CON  = 260;   // rango de conexión: se mantiene alto (más conexiones visibles)
+  var SOFT     = 60;
+
+  // ── PLANO FOCAL DE PROFUNDIDAD ─────────────────────────────────
+  // Cada nodo tiene n.z en [-1, 1]. focalZ es el "plano" del observador.
+  // Los nodos cerca de focalZ se ven plenos; los lejanos siguen visibles
+  // pero tenues. El hover del cursor "atrae" un nodo hacia el plano focal.
+  var focalZ = 0;
+  var focalZTarget = 0;
+  var DEPTH_RANGE = 0.7;    // ancho de la ventana de foco
+  var DEPTH_FLOOR = 0.28;   // piso de visibilidad: nodos lejos no desaparecen
+  var focalUIFadeFrames = 0;
+
+  // depthFactor calcula visibilidad por profundidad. Cuando hoverBoost > 0,
+  // el nodo "se acerca" virtualmente al plano focal (efecto de atracción).
+  function depthFactor(nz, hoverBoost) {
+    hoverBoost = hoverBoost || 0;
+    var d = Math.abs(nz - focalZ);
+    // hoverBoost reduce la distancia efectiva al plano focal
+    d = d * (1 - hoverBoost * 0.85);
+    if (d >= DEPTH_RANGE) return DEPTH_FLOOR * 0.6;  // muy lejos: tenue pero visible
+    var t = 1 - (d / DEPTH_RANGE);
+    var smooth = t * t * (3 - 2 * t);
+    // mapeo: piso DEPTH_FLOOR cuando t=0, lleno 1.0 cuando t=1
+    return DEPTH_FLOOR + (1 - DEPTH_FLOOR) * smooth;
+  }
+
+  p.setup = function() {
+    var c = p.createCanvas(window.innerWidth, window.innerHeight - navH);
+    c.parent('canvas-wrapper');
+    p.colorMode(p.RGB);
+
+    // Distribución inicial en grilla con jitter: garantiza que los nodos
+    // nazcan dispersos por todo el canvas, no agrupados por azar.
+    var nTotal = CONTENIDOS.length;
+    var cols = Math.ceil(Math.sqrt(nTotal * p.width / p.height));
+    var rows = Math.ceil(nTotal / cols);
+    var cellW = (p.width  - 160) / cols;
+    var cellH = (p.height - 160) / rows;
+    var idx = 0;
+
+    CONTENIDOS.forEach(function(c) {
+      var rgb = TIPO_RGB[c.tipo] || [120,120,120];
+      var col = idx % cols;
+      var row = Math.floor(idx / cols);
+      // Centro de la celda + jitter aleatorio dentro de ella
+      var cx = 80 + cellW * (col + 0.5) + p.random(-cellW * 0.35, cellW * 0.35);
+      var cy = 80 + cellH * (row + 0.5) + p.random(-cellH * 0.35, cellH * 0.35);
+      idx++;
+
+      nCont.push({
+        cont: c,
+        x: cx,
+        y: cy,
+        vx: p.random(-0.3, 0.3),  // velocidad inicial leve para que se asienten orgánicamente
+        vy: p.random(-0.3, 0.3),
+        // +30% sobre v14: bases 8→10.4 (serie) y 6→7.8 (archivo), multiplicador peso 1.5→1.95
+        size: c.esSerie ? 10.4 + (c.peso || 1) * 1.95 : 7.8 + (c.peso || 1) * 1.95,
+        ph: p.random(p.TWO_PI),
+        z: p.random(-1, 1),
+        rgb: rgb,
+        wisps: []
+      });
+    });
+
+    // Nodos ambientales — distribución totalmente aleatoria, son fondo
+    for (var i = 0; i < 40; i++) {
+      var rgb = AMBIENT_RGB[Math.floor(p.random(AMBIENT_RGB.length))];
+      nAmb.push({
+        x: p.random(p.width), y: p.random(p.height),
+        vx: p.random(-0.3, 0.3), vy: p.random(-0.3, 0.3),
+        // +30% sobre v14: rango 3-6 → 3.9-7.8
+        size: p.random(3.9, 7.8),
+        ph: p.random(p.TWO_PI),
+        z: p.random(-1, 1),
+        rgb: rgb,
+        wisps: []
+      });
+    }
+    nodeCountEl.textContent = nCont.length;
+  };
+
+  // Easing tipo v10: la gota sale con impulso y frena cerca del destino
+  function easeOutQuint(x) { return 1 - Math.pow(1 - x, 5); }
+
+  function mkWisp(parentSize) {
+    // Tamaño y alcance RELATIVOS al nodo madre (no fijos): así las gotas
+    // son siempre proporcionales al nodo, no se ven enormes en uno chico
+    // ni minúsculas en uno grande.
+    var startD = parentSize * p.random(0.35, 0.75);
+    var reach  = parentSize * p.random(1.2, 2.4);
+    var ang    = p.random(p.TWO_PI);
+    return {
+      ox: 0, oy: 0,
+      tx: p.cos(ang) * reach,
+      ty: p.sin(ang) * reach,
+      x: 0, y: 0,
+      d: startD,
+      d0: startD,
+      t: 0,
+      tEnd: p.floor(p.random(70, 180)),
+      dead: false
+    };
+  }
+
+  function updateWisp(w) {
+    w.t++;
+    if (w.t < w.tEnd) {
+      var n = w.t / w.tEnd;
+      var e = easeOutQuint(n);
+      w.x = p.lerp(w.ox, w.tx, e);
+      w.y = p.lerp(w.oy, w.ty, e);
+      // Encoge linealmente — la gota se disuelve sin cambiar de forma
+      w.d = p.lerp(w.d0, 0, n);
+    } else {
+      w.dead = true;
+    }
+  }
+
+  // Puente metaball entre nodo madre y gota: dos arcos tangentes que se unen
+  // formando una "gota" continua. Adaptado de Okazz, idéntico a v10.
+  function aetherLinkVerts(x1, y1, d1, x2, y2, d2, dst) {
+    var r  = dst / 2;
+    var r1 = d1 / 2;
+    var r2 = d2 / 2;
+    var R1 = r1 + r;
+    var R2 = r2 + r;
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    var d  = p.sqrt(dx*dx + dy*dy);
+    if (d > R1 + R2) return false;
+    if (d < 0.001) return false;
+    var dirX = dx / d;
+    var dirY = dy / d;
+    var a = (R1*R1 - R2*R2 + d*d) / (2*d);
+    var underRoot = R1*R1 - a*a;
+    if (underRoot < 0) return false;
+    var h = p.sqrt(underRoot);
+    var midX = x1 + dirX * a;
+    var midY = y1 + dirY * a;
+    var perpX = -dirY * h;
+    var perpY =  dirX * h;
+    var cx1 = midX + perpX, cy1 = midY + perpY;
+    var cx2 = midX - perpX, cy2 = midY - perpY;
+    if (p.dist(cx1, cy1, cx2, cy2) < r * 2) return false;
+    var ang1 = p.atan2(y1 - cy1, x1 - cx1);
+    var ang2 = p.atan2(y2 - cy1, x2 - cx1);
+    var ang3 = p.atan2(y2 - cy2, x2 - cx2);
+    var ang4 = p.atan2(y1 - cy2, x1 - cx2);
+    if (ang2 < ang1) ang2 += p.TWO_PI;
+    if (ang4 < ang3) ang4 += p.TWO_PI;
+    p.beginShape();
+    for (var ia = ang1; ia < ang2; ia += p.TWO_PI / 90) {
+      p.vertex(cx1 + r * p.cos(ia), cy1 + r * p.sin(ia));
+    }
+    for (var ib = ang3; ib < ang4; ib += p.TWO_PI / 90) {
+      p.vertex(cx2 + r * p.cos(ib), cy2 + r * p.sin(ib));
+    }
+    p.endShape(p.CLOSE);
+    return true;
+  }
+
+  p.draw = function() {
+    // Background sólido (sin trail) — la lupa ya no deja rastro
+    p.background(19, 19, 15);
+
+    // Suavizar el plano focal hacia su target
+    focalZ += (focalZTarget - focalZ) * 0.08;
+
+    // Actualizar la posición visual del puntito del indicador
+    // focalZ va de -1 (cerca) a 1 (lejos) → top va de 0% a 100%
+    if (focalUIFadeFrames > 0) {
+      var depthInd = document.getElementById('depth-indicator');
+      if (depthInd && depthInd._ball === undefined) {
+        depthInd._ball = depthInd.querySelector('::before');
+      }
+      // como ::before no es accesible vía JS, controlamos su top con CSS var
+      if (depthInd) {
+        var pct = ((focalZ + 1) / 2) * 100;
+        depthInd.style.setProperty('--depth-pct', pct + '%');
+      }
+      focalUIFadeFrames--;
+    }
+
+    // ── FLOTAR PERPETUO (v16) ───────────────────────────────────────
+    // Cada nodo flota muy lentamente alrededor de un punto de anclaje, con
+    // una deriva basada en ruido Perlin que avanza con el tiempo y NUNCA se
+    // detiene (a diferencia del drift v15 que decaía por damping). El efecto
+    // es de objetos suspendidos en un medio denso: agua, aire, savia.
+    //
+    // El anclaje también deriva imperceptiblemente, así que la nube entera
+    // respira y se reorganiza con lentitud a lo largo de minutos.
+    var marginX = 90, marginY = 90;
+    var maxX = p.width - marginX, maxY = p.height - marginY;
+    var all = nCont.concat(nAmb);
+    var tFloat = p.frameCount * 0.0016;   // reloj lento para el flotar
+    var tAnchor = p.frameCount * 0.00018; // reloj aún más lento para el anclaje
+    for (var i = 0; i < all.length; i++) {
+      var n = all[i];
+
+      // Inicializar anclaje y fase la primera vez
+      if (n.ax === undefined) {
+        n.ax = n.x; n.ay = n.y;
+        n.floatPh = p.random(p.TWO_PI);          // fase oscilatoria propia
+        n.floatSpd = 0.6 + p.random() * 0.9;     // velocidad de flotar propia
+        n.floatAmp = 7 + p.random() * 11;        // amplitud propia (7-18 px)
+        n.floatSeed = p.random(1000);            // semilla de ruido propia
+      }
+
+      // El anclaje deriva lentísimo por todo el lienzo (ruido muy lento).
+      // Mantenido muy bajo: la nube se reorganiza a escala de minutos, no segundos.
+      var anx = p.noise(n.floatSeed * 0.07, tAnchor);
+      var any = p.noise(n.floatSeed * 0.07 + 50, tAnchor);
+      n.ax += (anx - 0.5) * 0.05;
+      n.ay += (any - 0.5) * 0.05;
+
+      // Confinar el anclaje al marco (suave, directo)
+      if (n.ax < marginX) n.ax += (marginX - n.ax) * 0.02;
+      if (n.ax > maxX)    n.ax -= (n.ax - maxX) * 0.02;
+      if (n.ay < marginY) n.ay += (marginY - n.ay) * 0.02;
+      if (n.ay > maxY)    n.ay -= (n.ay - maxY) * 0.02;
+
+      // Flotar alrededor del anclaje: combinación de oscilación senoidal
+      // (respiración regular) + ruido Perlin (deriva orgánica irregular).
+      // Las dos juntas dan un movimiento que nunca se siente mecánico ni se detiene.
+      var oscX = p.cos(tFloat * n.floatSpd + n.floatPh);
+      var oscY = p.sin(tFloat * n.floatSpd * 0.83 + n.floatPh * 1.3);
+      var driftX = (p.noise(n.floatSeed + tFloat * 0.5,      100) - 0.5) * 2;
+      var driftY = (p.noise(n.floatSeed + tFloat * 0.5 + 30, 200) - 0.5) * 2;
+
+      // Posición = anclaje + flotar. Mezcla 55% oscilación / 45% ruido.
+      var offX = (oscX * 0.55 + driftX * 0.45) * n.floatAmp;
+      var offY = (oscY * 0.55 + driftY * 0.45) * n.floatAmp;
+
+      n.x = n.ax + offX;
+      n.y = n.ay + offY;
+
+      // Red de seguridad
+      n.x = p.constrain(n.x, 20, p.width - 20);
+      n.y = p.constrain(n.y, 20, p.height - 20);
+    }
+
+    // CONEXIONES inkstroke (triple capa: nube difusa + nube principal + partículas viajeras)
+    // v16: optimización para escalar al doble de nodos — se descarta el nodo `a`
+    // temprano si está demasiado lejos del cursor, evitando el bucle interno entero.
+    // El radio de corte contempla MAX_CON para no perder conexiones válidas.
+    p.noStroke();
+    var cutoff = RADIO * 1.8 + MAX_CON;  // margen para que ningún par válido se pierda
+    for (var i = 0; i < nCont.length; i++) {
+      var a = nCont[i];
+      // Descarte temprano: si `a` está más lejos que cutoff del cursor, ninguna
+      // de sus conexiones tendrá su punto medio dentro del radio de la lupa.
+      if (p.dist(a.x, a.y, p.mouseX, p.mouseY) > cutoff) continue;
+      for (var j = i + 1; j < nCont.length; j++) {
+        var b = nCont[j];
+        var d = p.dist(a.x, a.y, b.x, b.y);
+        if (d > MAX_CON) continue;
+
+        var midX = (a.x + b.x) / 2, midY = (a.y + b.y) / 2;
+        var dMouse = p.dist(midX, midY, p.mouseX, p.mouseY);
+        if (dMouse > RADIO * 1.8) continue;
+
+        // Boost individual de cada nodo por cercanía al cursor
+        var hoverA = smoothstep(RADIO, RADIO * 0.2, p.dist(a.x, a.y, p.mouseX, p.mouseY));
+        var hoverB = smoothstep(RADIO, RADIO * 0.2, p.dist(b.x, b.y, p.mouseX, p.mouseY));
+        var depthA = depthFactor(a.z, hoverA);
+        var depthB = depthFactor(b.z, hoverB);
+        var depthMin = Math.min(depthA, depthB);
+        if (depthMin < 0.2) continue;
+
+        // Conexión "reforzada" si está en CONEXIONES_VISUALES
+        var esPreferente = false;
+        for (var k = 0; k < CONEXIONES_VISUALES.length; k++) {
+          var par = CONEXIONES_VISUALES[k];
+          if ((par[0] === a.cont.id && par[1] === b.cont.id) ||
+              (par[0] === b.cont.id && par[1] === a.cont.id)) {
+            esPreferente = true; break;
+          }
+        }
+
+        var avgR = (a.rgb[0] + b.rgb[0]) / 2;
+        var avgG = (a.rgb[1] + b.rgb[1]) / 2;
+        var avgB = (a.rgb[2] + b.rgb[2]) / 2;
+        // Atenuación por distancia entre los nodos (más cerca = más densa, como v10)
+        var distAlp = p.map(d, 0, MAX_CON, 1.0, 0.0);
+        // v15: alpha base subida (130→185 / 180→235) para conexiones más visibles
+        var alph = (esPreferente ? 235 : 185) * depthMin * distAlp;
+        var seed = i * 31 + j * 17;
+
+        // CAPA 1: nube difusa de partículas pequeñas (fondo) — opacidad subida (0.35→0.45)
+        p.fill(avgR, avgG, avgB, alph * 0.45);
+        inkStroke(a.x, a.y, b.x, b.y, seed, false);
+
+        // CAPA 2: nube principal — partículas más grandes y sólidas (0.95→1.0)
+        p.fill(avgR, avgG, avgB, alph * 1.0);
+        inkStroke(a.x, a.y, b.x, b.y, seed, true);
+
+        // CAPA 3 (v15): partículas viajeras direccionales
+        // Pequeñas luces que recorren el eje de la conexión — como savia,
+        // esporas o luciérnagas siguiendo el cauce. Cada conexión tiene
+        // un puñado con velocidades, tamaños y opacidades distintas.
+        // Más visibles si es preferente o si el cursor está cerca.
+        var stirMid = smoothstep(RADIO * 1.8, 0, dMouse);
+        travelers(a.x, a.y, b.x, b.y, seed, avgR, avgG, avgB,
+                  alph, esPreferente, stirMid);
+      }
+    }
+
+    // NODOS AMBIENTALES (siempre visibles, suavemente moduladas por profundidad)
+    for (var i = 0; i < nAmb.length; i++) {
+      var n = nAmb[i];
+      var dMouse = p.dist(n.x, n.y, p.mouseX, p.mouseY);
+      var foco = smoothstep(RADIO * 2, RADIO * 0.5, dMouse);
+      // los ambientales reciben un boost suave con el cursor cerca
+      var depth = depthFactor(n.z, foco * 0.5);
+      var vis = depth * (0.4 + foco * 0.6);
+      var pls = p.sin(p.frameCount * 0.04 + n.ph);
+      var sz  = (n.size + p.map(pls, -1, 1, -0.6, 1.4)) * (0.7 + depth * 0.5);
+      p.noStroke();
+      p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 50 * vis);
+      p.circle(n.x, n.y, sz * 2.2);
+      p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 110 * vis);
+      p.circle(n.x, n.y, sz);
+      if (foco > 0.1) updateAndDrawWisps(n, sz, n.rgb[0], n.rgb[1], n.rgb[2], vis, false);
+    }
+
+    // NODOS DE CONTENIDO (siempre visibles · hover atrae profundidad + agranda)
+    for (var i = 0; i < nCont.length; i++) {
+      var n = nCont[i];
+      var dMouse = p.dist(n.x, n.y, p.mouseX, p.mouseY);
+      // foco extendido para que el hover empiece a actuar antes
+      var foco = smoothstep(RADIO * 2.4, 0, dMouse);
+      // hoverBoost: cuán fuertemente el cursor "atrae" este nodo al plano focal.
+      // Solo se activa cuando el cursor está bien cerca (< RADIO).
+      var hoverBoost = smoothstep(RADIO, RADIO * 0.2, dMouse);
+      // n.z efectivo: si el cursor está encima, el nodo "se acerca" virtualmente
+      var depth = depthFactor(n.z, hoverBoost);
+
+      var pls = p.sin(p.frameCount * 0.05 + n.ph);
+      // tamaño escala con profundidad (80%→130%) y con hover (extra +25% si está encima)
+      var depthScale = 0.8 + depth * 0.55;
+      var hoverScale = 1 + hoverBoost * 0.35;  // hasta 35% más grande con hover
+      var sz  = (n.size + p.map(pls, -1, 1, -0.8, 2)) * depthScale * hoverScale;
+
+      // visibilidad: piso 40% por profundidad, hasta 100% con cursor encima
+      var vis = depth * (0.55 + foco * 0.45);
+
+      p.noStroke();
+      // Halo
+      p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 38 * vis);
+      p.circle(n.x, n.y, sz * 3.5);
+      // Cuerpo
+      p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 210 * vis);
+      p.circle(n.x, n.y, sz * 1.6);
+      // Núcleo (siempre presente — es lo que permite localizar el nodo)
+      p.fill(236, 230, 220, 230 * depth * (0.45 + foco * 0.55));
+      p.circle(n.x, n.y, sz * 0.55);
+
+      updateAndDrawWisps(n, sz, n.rgb[0], n.rgb[1], n.rgb[2], vis, foco > 0.5);
+
+      // Etiqueta cerca del cursor
+      if (dMouse < RADIO * 0.9) {
+        var labelAlp = smoothstep(RADIO * 0.9, RADIO * 0.3, dMouse);
+        // Doble glifo para series, simple para archivos
+        p.fill(19, 19, 15, 225 * labelAlp);
+        p.rectMode(p.CENTER);
+        var glyph = n.cont.icono;
+        var labelW = 20 + (glyph.length - 1) * 7;
+        p.rect(n.x + 22, n.y - 14, labelW, 18, 3);
+        p.noFill();
+        p.stroke(n.rgb[0], n.rgb[1], n.rgb[2], 140 * labelAlp);
+        p.strokeWeight(0.7);
+        p.rect(n.x + 22, n.y - 14, labelW, 18, 3);
+        p.noStroke();
+        p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 230 * labelAlp);
+        p.textFont('JetBrains Mono');
+        p.textSize(10);
+        p.textAlign(p.CENTER, p.CENTER);
+        p.text(glyph, n.x + 22, n.y - 13);
+
+        // ID + título compacto
+        if (labelAlp > 0.5) {
+          p.fill(236, 230, 220, 200 * (labelAlp - 0.5) * 2);
+          p.textSize(9);
+          p.textAlign(p.LEFT, p.CENTER);
+          p.text(n.cont.id, n.x + 36, n.y - 14);
+
+          p.fill(232, 227, 213, 180 * (labelAlp - 0.5) * 2);
+          p.textFont('Instrument Serif');
+          p.textSize(12);
+          var maxT = n.cont.titulo.length > 32 ? n.cont.titulo.slice(0,30) + '…' : n.cont.titulo;
+          p.text(maxT, n.x + 36, n.y);
+        }
+      }
+    }
+
+    // NODO SELECCIONADO
+    if (selectedNode) {
+      var sn = selectedNode;
+      var sp3 = p.sin(p.frameCount * 0.07);
+      var sr  = sn.size * 1.7 + p.map(sp3, -1, 1, 4, 10);
+      var zFs = p.map(sn.z, -1, 1, 0.45, 1.3);
+      p.noFill();
+      p.stroke(sn.rgb[0], sn.rgb[1], sn.rgb[2], 90); p.strokeWeight(0.8);
+      p.circle(sn.x, sn.y, sr * 2 * zFs);
+      p.stroke(sn.rgb[0], sn.rgb[1], sn.rgb[2], 40); p.strokeWeight(0.4);
+      p.circle(sn.x, sn.y, sr * 3.2 * zFs);
+    }
+
+    drawLupa();
+  };
+
+  function updateAndDrawWisps(n, motherSize, r, g, b, zAlp, inFocus) {
+    var maxWisps = inFocus ? 3 : 2;
+    var emitProb = inFocus ? 0.020 : 0.006;
+    if (n.wisps.length < maxWisps && p.random() < emitProb) {
+      n.wisps.push(mkWisp(motherSize));
+    }
+    for (var wi = n.wisps.length - 1; wi >= 0; wi--) {
+      updateWisp(n.wisps[wi]);
+      if (n.wisps[wi].dead) n.wisps.splice(wi, 1);
+    }
+    var baseAlp = inFocus ? 220 : 160;
+    p.noStroke();
+    for (var wj = 0; wj < n.wisps.length; wj++) {
+      var w = n.wisps[wj];
+      // lifeAlpha: nace con fuerza y se desvanece (la gota deja un rastro
+      // pero el cuerpo principal vive). Ajuste suave al inicio y al final.
+      var lifeN = w.t / w.tEnd;
+      var lifeAlp = lifeN < 0.15
+        ? lifeN / 0.15
+        : 1 - (lifeN - 0.15) / 0.85;
+      var alpha = baseAlp * lifeAlp * zAlp;
+      var wx = n.x + w.x, wy = n.y + w.y;
+      // dst (grosor del puente metaball): proporcional al wisp, no fijo
+      var dst = p.constrain(w.d * 0.6, 1, motherSize * 0.5);
+      p.fill(r, g, b, alpha);
+      // Puente metaball — usar diámetros reales, no inflar la madre
+      aetherLinkVerts(n.x, n.y, motherSize, wx, wy, w.d, dst);
+      // Cuerpo de la gota
+      p.circle(wx, wy, w.d);
+    }
+  }
+
+  function drawLupa() {
+    var pls2 = p.sin(p.frameCount * 0.05);
+    var r2   = RADIO + p.map(pls2, -1, 1, -3, 5);
+    var alp2 = p.map(pls2, -1, 1, 25, 60);
+    p.noFill();
+    p.stroke(236, 230, 220, alp2); p.strokeWeight(0.8);
+    p.circle(p.mouseX, p.mouseY, r2 * 2);
+    p.stroke(236, 230, 220, alp2 * 0.2); p.strokeWeight(0.3);
+    p.circle(p.mouseX, p.mouseY, r2 * 2.4);
+  }
+
+  function smoothstep(edge0, edge1, x) {
+    x = p.constrain((x - edge0) / (edge1 - edge0), 0, 1);
+    return x * x * (3 - 2 * x);
+  }
+
+  function fractalNoise(nx, ny, nz) {
+    var v = 0;
+    v += 1.00 * (p.noise(nx,       ny,       nz)       - 0.5) * 2;
+    v += 0.50 * (p.noise(nx * 2,   ny * 2,   nz * 1.3) - 0.5) * 2;
+    v += 0.25 * (p.noise(nx * 4,   ny * 4,   nz * 1.7) - 0.5) * 2;
+    return v / 1.75;
+  }
+
+  // inkStroke: campo de partículas suspendidas que se concentran en torno al eje
+  // entre dos nodos. Cada partícula tiene vida propia: aparece, flota con ruido
+  // fractal, se disuelve, reaparece en otro punto. El cursor amplifica la deriva.
+  // La línea emerge como densidad estadística, no como orden lineal.
+  // ── Calibrada al rango de v10 (INK_RANGE=140) aunque MAX_CON sea mayor ──
+  // v15: count subido (40-72 → 60-110) y variedad de tamaños expandida
+  function inkStroke(x1, y1, x2, y2, seed, withPressure) {
+    var INK_RANGE = 140;   // rango de referencia de v10 para la curva de densidad
+    var INK_RADIO = 90;    // radio de referencia de v10 para influencia del cursor
+
+    var t2 = p.frameCount * 0.006;
+    var dist = p.dist(x1, y1, x2, y2);
+    // v15: más partículas (líneas más densas y visibles)
+    var count = p.floor(p.map(dist, 0, 200, 60, 110));
+    count = p.constrain(count, 60, 110);
+
+    // Amplitud lateral del plasma — siempre activa, se intensifica cerca del cursor
+    var ampBase = p.map(dist, 0, INK_RANGE, 22, 11, true);
+
+    // Ancho perpendicular del "campo" (las partículas en una franja, no en línea)
+    var fieldWidth = p.map(dist, 0, INK_RANGE, 9, 5, true);
+
+    var dx = x2 - x1, dy = y2 - y1;
+    var dLen = p.max(0.001, p.sqrt(dx * dx + dy * dy));
+    var ux = dx / dLen, uy = dy / dLen;
+    var px_perp = -uy, py_perp = ux;
+
+    for (var k = 0; k < count; k++) {
+      // Semilla única por partícula (estable entre frames)
+      var pSeed = seed * 17.3 + k * 2.71;
+
+      // ── Cada partícula tiene su propio ritmo de vida (no periodo común) ──
+      var lifeRand = p.noise(pSeed * 0.71);
+      var lifePeriod = 60 + lifeRand * lifeRand * 220;
+      var lifeOffset = p.noise(pSeed * 1.13) * 1000;
+      var lifeT = ((p.frameCount + lifeOffset) % lifePeriod) / lifePeriod;
+
+      // Curva de vida asimétrica: aparición rápida, decaimiento lento
+      var asymBias = p.noise(pSeed * 2.4) * 0.5 + 0.25;
+      var lifeAlpha;
+      if (lifeT < asymBias) lifeAlpha = lifeT / asymBias;
+      else lifeAlpha = 1 - (lifeT - asymBias) / (1 - asymBias);
+      lifeAlpha = lifeAlpha * lifeAlpha * (3 - 2 * lifeAlpha);
+      if (lifeAlpha < 0.04) continue;
+
+      // ── Deriva en el eje: cada partícula con su velocidad propia ──
+      var driftSpeed = p.map(p.noise(pSeed * 3.7), 0, 1, -0.0015, 0.0015);
+      var baseT = p.noise(pSeed) + (p.frameCount * driftSpeed);
+      baseT = baseT - p.floor(baseT);
+      var axisX = p.lerp(x1, x2, baseT);
+      var axisY = p.lerp(y1, y2, baseT);
+
+      // ── Offset perpendicular con drift lento propio ──
+      var sideRand = p.noise(pSeed * 1.7, t2 * 0.3);
+      var sideOffset = (sideRand - 0.5) * 2 * fieldWidth;
+
+      // ── Ruido fractal: deriva plasmática ──
+      var nx_f = fractalNoise(axisX * 0.012 + pSeed,       axisY * 0.012,       t2);
+      var ny_f = fractalNoise(axisX * 0.012 + 100 + pSeed, axisY * 0.012 + 100, t2);
+
+      // ── Microjitter de alta frecuencia ──
+      var jitterScale = p.noise(pSeed * 5.9) * 1.5;
+      var jitterSpeed = 0.04 + p.noise(pSeed * 6.3) * 0.06;
+      var jx = (p.noise(pSeed * 7.1 + p.frameCount * jitterSpeed) - 0.5) * jitterScale;
+      var jy = (p.noise(pSeed * 7.7 + p.frameCount * jitterSpeed) - 0.5) * jitterScale;
+
+      // ── Modulación por cursor (con radio de v10) ──
+      var dMouse = p.dist(axisX, axisY, p.mouseX, p.mouseY);
+      var stir = smoothstep(INK_RADIO * 3.5, 0, dMouse);
+      var driftAmp = ampBase * (0.35 + stir * 1.6);
+
+      // Posición final
+      var fx = axisX + px_perp * sideOffset + nx_f * driftAmp + jx;
+      var fy = axisY + py_perp * sideOffset + ny_f * driftAmp + jy;
+
+      // ── Tamaño: distribución sesgada (muchas pequeñas, pocas grandes) ──
+      // v15: rango ampliado para mayor variedad visual (0.3-4.1 → 0.3-5.4)
+      var sizeRand = p.noise(pSeed * 3.3);
+      var intrinsicSize = 0.3 + sizeRand * sizeRand * sizeRand * 5.1;
+      var breathSpeed = 0.5 + p.noise(pSeed * 4.5) * 2.5;
+      var breathing = 0.7 + p.noise(pSeed * 5.1, t2 * breathSpeed) * 0.6;
+      var sz = intrinsicSize * breathing;
+
+      // v15: multiplicador subido (1.4→1.7 difusa, 2.4→2.9 principal)
+      if (withPressure) p.circle(fx, fy, sz * 2.9 * lifeAlpha);
+      else              p.circle(fx, fy, sz * 1.7 * lifeAlpha);
+    }
+  }
+
+  /* ══════════════════════════════════════════
+     TRAVELERS (v15) — partículas viajeras direccionales
+     ──────────────────────────────────────────
+     Pequeñas luces que recorren el eje de la conexión con velocidad,
+     tamaño y opacidad variables — savia, esporas o luciérnagas
+     siguiendo el cauce de la rama. Le da al rizoma sentido de flujo,
+     no solo geometría estática.
+
+     - Cada conexión emite 3-5 viajeras (más si es preferente o si el
+       cursor está cerca).
+     - Cada viajera tiene seed propia → velocidad, tamaño y "luz" únicas.
+     - El recorrido es leve-curvo (offset perpendicular con ruido).
+     - Algunas viajan en sentido contrario (variedad direccional).
+     - Halo + núcleo para que se lean como puntos vivos, no manchas.
+  ══════════════════════════════════════════ */
+  function travelers(x1, y1, x2, y2, seed, r, g, b, baseAlpha, esPreferente, stirMid) {
+    var dist = p.dist(x1, y1, x2, y2);
+    if (dist < 30) return;  // conexiones muy cortas no necesitan viajeras
+
+    // Cantidad: 3-5 base, +1-2 si preferente, +1-2 si el cursor está cerca
+    var nBase = esPreferente ? 5 : 3;
+    var nExtra = p.floor(stirMid * 2.5);
+    var n = nBase + nExtra;
+
+    var dx = x2 - x1, dy = y2 - y1;
+    var dLen = p.max(0.001, p.sqrt(dx * dx + dy * dy));
+    var ux = dx / dLen, uy = dy / dLen;
+    var px_perp = -uy, py_perp = ux;
+
+    var t2 = p.frameCount * 0.006;
+
+    for (var k = 0; k < n; k++) {
+      // Seed distinta a inkStroke para evitar superposición de patrones
+      var tSeed = seed * 23.7 + k * 5.13 + 999;
+
+      // ── Dirección: 70% recorren a→b, 30% recorren b→a (variedad) ──
+      var goesForward = p.noise(tSeed * 0.41) > 0.30;
+
+      // ── Velocidad propia: variable amplia (algunas lentas, algunas rápidas) ──
+      // 0.0008-0.005 ciclos por frame → recorre la conexión en 200-1250 frames
+      var speedRand = p.noise(tSeed * 1.31);
+      var speed = 0.0008 + speedRand * speedRand * 0.0042;
+
+      // ── Posición a lo largo del eje [0, 1] con loop ──
+      var phase = p.noise(tSeed * 0.83);  // offset inicial único
+      var raw = phase + (p.frameCount * speed);
+      var t = raw - p.floor(raw);  // [0, 1)
+      if (!goesForward) t = 1 - t;
+
+      // ── Vida: las viajeras aparecen y desaparecen suavemente al entrar/salir ──
+      // Fade-in en el primer 12% del recorrido, fade-out en el último 12%
+      var lifeAlpha;
+      if (t < 0.12)       lifeAlpha = t / 0.12;
+      else if (t > 0.88)  lifeAlpha = (1 - t) / 0.12;
+      else                lifeAlpha = 1;
+      lifeAlpha = lifeAlpha * lifeAlpha * (3 - 2 * lifeAlpha);
+      if (lifeAlpha < 0.05) continue;
+
+      // ── Posición en el eje (con curvatura leve por ruido perpendicular) ──
+      var axisX = p.lerp(x1, x2, t);
+      var axisY = p.lerp(y1, y2, t);
+
+      // Curvatura: pequeño desplazamiento perpendicular con ruido lento — la
+      // viajera no va recta, serpentea apenas como agua corriendo
+      var curveRand = p.noise(tSeed * 2.7, t2 * 0.4 + t * 1.5);
+      var curveAmp = p.map(dist, 0, MAX_CON, 3, 7, true);
+      var curve = (curveRand - 0.5) * 2 * curveAmp;
+
+      // Microjitter alta frecuencia — pulso vital
+      var jSpeed = 0.08 + p.noise(tSeed * 3.4) * 0.08;
+      var jx = (p.noise(tSeed * 4.1 + p.frameCount * jSpeed) - 0.5) * 1.2;
+      var jy = (p.noise(tSeed * 4.7 + p.frameCount * jSpeed) - 0.5) * 1.2;
+
+      var fx = axisX + px_perp * curve + jx;
+      var fy = axisY + py_perp * curve + jy;
+
+      // ── Tamaño: variedad amplia (algunas mínimas, algunas notorias) ──
+      // distribución sesgada (mayoría pequeñas, pocas grandes)
+      var szRand = p.noise(tSeed * 5.9);
+      var coreSize = 1.0 + szRand * szRand * 3.2;  // 1.0 - 4.2 px
+
+      // Pulso de luz: respira con el tiempo + brilla más cerca del cursor
+      var breath = 0.75 + p.noise(tSeed * 6.3, t2 * 1.8) * 0.5;
+      coreSize *= breath;
+
+      // ── Alpha: base * vida * pulso. Las preferentes brillan más. ──
+      var alphaCore = baseAlpha * lifeAlpha * (esPreferente ? 1.5 : 1.15);
+      alphaCore = p.constrain(alphaCore, 0, 255);
+
+      // Halo difuso (3x más grande, alpha mucho menor) — sensación de luz
+      p.fill(r, g, b, alphaCore * 0.22);
+      p.circle(fx, fy, coreSize * 3.4);
+
+      // Núcleo (color saturado)
+      p.fill(r, g, b, alphaCore);
+      p.circle(fx, fy, coreSize);
+
+      // Punto blanco interno solo en las más grandes y las preferentes —
+      // remata la sensación de "luz" en lugar de "mancha de color"
+      if (coreSize > 2.4 || esPreferente) {
+        p.fill(236, 230, 220, alphaCore * 0.65);
+        p.circle(fx, fy, coreSize * 0.45);
+      }
+    }
+  }
+
+  p.mousePressed = function() {
+    if (vistaActual !== 'mapa') return;
+    if (mouseAbsX > window.innerWidth - 460 && panel.classList.contains('open')) return;
+    var best = null, bestD = 65;  // +30% sobre v14 (50→65) para click confortable con nodos más grandes
+    for (var i = 0; i < nCont.length; i++) {
+      var n = nCont[i];
+      var d = p.dist(p.mouseX, p.mouseY, n.x, n.y);
+      // Hover boost: nodos atraídos por el cursor son clickeables aunque estén lejos
+      var hoverBoost = smoothstep(RADIO, RADIO * 0.2, d);
+      if (depthFactor(n.z, hoverBoost) < 0.35) continue;
+      if (d < RADIO && d < bestD) { bestD = d; best = n; }
+    }
+    if (best) abrirPanel(best);
+    else { panel.classList.remove('open'); selectedNode = null; }
+  };
+
+  // Rueda del mouse: mover el plano focal de profundidad
+  p.mouseWheel = function(event) {
+    if (vistaActual !== 'mapa') return true;
+    focalZTarget += event.delta * 0.0015;
+    focalZTarget = p.constrain(focalZTarget, -1, 1);
+    focalUIFadeFrames = 120;  // mostrar el indicador unos 2 segundos
+    // mostrar también el indicador del DOM
+    var depthInd = document.getElementById('depth-indicator');
+    if (depthInd) {
+      depthInd.classList.add('visible');
+      clearTimeout(p._depthHideTimer);
+      p._depthHideTimer = setTimeout(function() { depthInd.classList.remove('visible'); }, 1800);
+    }
+    return false;  // bloquea scroll del navegador
+  };
+
+  p.windowResized = function() {
+    var newH = window.innerHeight - navH;
+    var prevW = p.width, prevH = p.height;
+    p.resizeCanvas(window.innerWidth, newH);
+    // Remapar nodos proporcionalmente al nuevo canvas
+    var scaleX = p.width  / (prevW || p.width);
+    var scaleY = p.height / (prevH || p.height);
+    nCont.forEach(function(n) { n.x *= scaleX; n.y *= scaleY; });
+    nAmb.forEach(function(n)  { n.x *= scaleX; n.y *= scaleY; });
+  };
+
+  // Redistribución animada al toggle del nav
+  window.addEventListener('nav-toggled', function(e) {
+    navH = e.detail.navH;
+    var newH = window.innerHeight - navH;
+    var prevW = p.width, prevH = p.height;
+    p.resizeCanvas(window.innerWidth, newH);
+    var scaleX = p.width  / (prevW || p.width);
+    var scaleY = p.height / (prevH || p.height);
+
+    // Mover nodos hacia sus posiciones remapeadas con impulso suave
+    nCont.forEach(function(n) {
+      var tx = n.x * scaleX;
+      var ty = n.y * scaleY;
+      // Velocidad proporcional a la distancia de destino — arriba/abajo según expansión
+      n.vx += (tx - n.x) * 0.04;
+      n.vy += (ty - n.y) * 0.04;
+      n.x = tx;
+      n.y = ty;
+    });
+    nAmb.forEach(function(n) {
+      var tx = n.x * scaleX;
+      var ty = n.y * scaleY;
+      n.x = tx;
+      n.y = ty;
+    });
+  });
+
+  // Cuando el landing revela la app, el canvas pudo haberse creado con
+  // dimensiones incorrectas (la app estaba en display:none). Recalcular.
+  window.addEventListener('app-revealed', function() {
+    setTimeout(function() {
+      p.resizeCanvas(window.innerWidth, window.innerHeight - navH);
+    }, 50);
+  });
+
+}, document.getElementById('canvas-wrapper'));
+
+</script>
+</body>
+</html>
