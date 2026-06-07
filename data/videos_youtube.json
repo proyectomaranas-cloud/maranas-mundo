@@ -1,0 +1,25 @@
+﻿{
+  "videos": [
+    {
+      "id": "enmara_video_trailer",
+      "youtube_id": "2dhOlxuE2nA",
+      "titulo": "Enmarañar-Ser (videodanza)",
+      "subproyecto": "SUB-03",
+      "tipo": "trailer"
+    },
+    {
+      "id": "obra_video_completa",
+      "youtube_id": "Tcyzxk4IEl4",
+      "titulo": "Qué hacemos Para dónde Vamos (obra completa)",
+      "subproyecto": "SUB-02",
+      "tipo": "obra_completa"
+    },
+    {
+      "id": "cartografias_performance",
+      "youtube_id": "IDmTLHw_Brc",
+      "titulo": "Cartografías Sur (performance)",
+      "subproyecto": "SUB-02",
+      "tipo": "performance"
+    }
+  ]
+}

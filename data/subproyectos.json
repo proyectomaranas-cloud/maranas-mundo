@@ -1,0 +1,64 @@
+﻿{
+  "subproyectos": [
+    {
+      "id": "SUB-01",
+      "slug": "docs",
+      "titulo": "Documentos de entrega",
+      "tipo": "raiz",
+      "descripcion": "Placeholder para la descripcion de Documentos de entrega.",
+      "color_nodo": "#5C4033",
+      "fotos": [],
+      "videos": []
+    },
+    {
+      "id": "SUB-02",
+      "slug": "obra",
+      "titulo": "Que hacemos Para donde Vamos",
+      "tipo": "tronco",
+      "descripcion": "Placeholder para la descripcion de Que hacemos Para donde Vamos.",
+      "color_nodo": "#8B5A2B",
+      "fotos": [],
+      "videos": []
+    },
+    {
+      "id": "SUB-03",
+      "slug": "enmara",
+      "titulo": "Enmaranar-Ser",
+      "tipo": "rama",
+      "descripcion": "Placeholder para la descripcion de Enmaranar-Ser.",
+      "color_nodo": "#2E5A1C",
+      "fotos": [],
+      "videos": []
+    },
+    {
+      "id": "SUB-04",
+      "slug": "perro",
+      "titulo": "Per(r)o mundo",
+      "tipo": "rama",
+      "descripcion": "Placeholder para la descripcion de Per(r)o mundo.",
+      "color_nodo": "#A0522D",
+      "fotos": [],
+      "videos": []
+    },
+    {
+      "id": "SUB-05",
+      "slug": "grinplart",
+      "titulo": "GRINPLART",
+      "tipo": "rama",
+      "descripcion": "Placeholder para la descripcion de GRINPLART.",
+      "color_nodo": "#6B8E23",
+      "fotos": [],
+      "videos": []
+    },
+    {
+      "id": "SUB-06",
+      "slug": "lema",
+      "titulo": "De los mundos de",
+      "tipo": "rama",
+      "descripcion": "Placeholder para la descripcion de De los mundos de.",
+      "color_nodo": "#D2B48C",
+      "fotos": [],
+      "videos": []
+    }
+  ]
+}
