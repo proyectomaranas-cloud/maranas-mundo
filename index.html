@@ -1809,7 +1809,10 @@ function mostrarVista(nombre) {
   var el = document.getElementById('vista-' + nombre);
   if (el) {
     vistaActual = nombre;
-    requestAnimationFrame(function() { el.classList.add('visible'); });
+    el.style.pointerEvents = 'all';  // forzar antes del RAF
+    requestAnimationFrame(function() {
+      el.classList.add('visible');
+    });
   }
 }
 
@@ -1860,7 +1863,7 @@ function mostrarNodo(cont) {
         '<span style="font-style:italic;font-size:10px;">video · galería · pdf · repositorio · según tipo de archivo</span></div></div>';
       cuerpoEl.innerHTML = '<p>El catálogo registra este archivo y sus conexiones en el rizoma. El contenido se publicará en la segunda fase de deploy en la VM de la universidad.</p>';
     }
-  }, 80);
+  }, 200);
 }
 
 document.querySelectorAll('.nav-link').forEach(function(a) {
@@ -2842,4 +2845,4 @@ var sketch = new p5(function(p) {
 
 </script>
 </body>
-</html><!-- deploy Sun Jun  7 14:26:05 UTC 2026 -->
+</html>
