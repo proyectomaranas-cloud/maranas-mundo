@@ -2097,12 +2097,15 @@ function abrirPanel(n) {
 
   // YouTube embed en el panel
   var panelMedia = document.getElementById('panel-media');
+  var panelLink = document.getElementById('panel-link');
   if (c.youtubeId) {
+    panelLink.style.display = 'none';
     panelMedia.innerHTML = '<div style="position:relative;width:100%;padding-bottom:56.25%;background:#000;margin-top:8px;">' +
       '<iframe style="position:absolute;inset:0;width:100%;height:100%;border:none;" ' +
       'src="https://www.youtube.com/embed/' + c.youtubeId + '?rel=0&modestbranding=1" ' +
       'allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
   } else {
+    panelLink.style.display = '';
     panelMedia.innerHTML = '';
   }
 }
