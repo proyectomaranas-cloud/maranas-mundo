@@ -3386,7 +3386,17 @@ LB.init();
 // p5.js escucha wheel en window con preventDefault, así que capturamos
 // en la fase de captura (useCapture=true) para llegar antes que p5.
 window.addEventListener('wheel', function(e) {
+  // Si el landing está visible, dejarlo scrollear normalmente
+  var landing = document.getElementById('landing');
+  if (landing && !landing.classList.contains('fade-out') && landing.style.display !== 'none') {
+    landing.scrollTop += e.deltaY;
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+  // En el mapa sin landing: p5 maneja el wheel
   if (vistaActual === 'mapa') return;
+  // En vistas de página: reenviar scroll al elemento visible
   var vista = document.querySelector('.vista-pagina.visible');
   if (vista) {
     vista.scrollTop += e.deltaY;
