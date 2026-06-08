@@ -80,7 +80,7 @@ html, body {
   font-feature-settings: "ss01", "ss02";
   -webkit-font-smoothing: antialiased;
   cursor: none;
-  overflow: hidden;
+  overflow: hidden; /* se cambia a auto cuando vistaActual !== 'mapa' — ver mostrarVista() */
 }
 
 /* ══════════════════════════════════════════
@@ -1811,6 +1811,17 @@ var TIPO_RGB = {
   hoja:     [242, 204, 107],  // Amarillo claro
   plantilla:[156, 152, 154]   
 };
+
+// Color base por subproyecto (grupo) — prevalece sobre TIPO_RGB en el rizoma
+// I·Dramaturgias=pumpkin · II·Danzario=emerald · III·Aulide=watermelon · IV·Creación=willow · VI·Campo=azul suave
+var SUB_RGB = {
+  'SUB-01': [168, 163, 165],   // gestión — neutro
+  'SUB-02': [237, 125,  58],   // Dramaturgias · pumpkin/naranja
+  'SUB-03': [ 47, 210, 120],   // Arte Danzario · emerald/verde vibrante
+  'SUB-04': [220,  80,  90],   // Aulide · watermelon/rojo-rosa
+  'SUB-05': [242, 210,  80],   // Creación Artística · willow/amarillo
+  'SUB-06': [100, 180, 230]    // Salidas de campo · azul cielo
+};
 // Ambientales: tonos atenuados de la misma familia para que se lean como "atmósfera"
 // pero con la misma temperatura cromática del sistema principal
 var AMBIENT_RGB = [
@@ -1857,9 +1868,11 @@ function mostrarVista(nombre) {
   if (nombre === 'mapa') {
     document.getElementById('vista-mapa').style.display = 'block';
     document.getElementById('sello-institucional').style.display = 'block';
+    document.body.style.overflow = 'hidden';  // mapa: sin scroll de página
     vistaActual = 'mapa';
     return;
   }
+  document.body.style.overflow = 'auto';  // otras vistas: scroll habilitado
   document.getElementById('sello-institucional').style.display = 'none';
 
   if (nombre === 'archivo') poblarArchivoPorRama();
@@ -2237,7 +2250,8 @@ var sketch = new p5(function(p) {
     var idx = 0;
 
     CONTENIDOS.forEach(function(c) {
-      var rgb = TIPO_RGB[c.tipo] || [120,120,120];
+      // Color por grupo (SUB) — con fallback a tipo si no hay mapeo de grupo
+      var rgb = SUB_RGB[c.sub] || TIPO_RGB[c.tipo] || [120,120,120];
       var col = idx % cols;
       var row = Math.floor(idx / cols);
       // Centro de la celda + jitter aleatorio dentro de ella
@@ -2543,17 +2557,28 @@ var sketch = new p5(function(p) {
       var vis = depth * (0.55 + foco * 0.45);
 
       p.noStroke();
-      // Halo
-      p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 38 * vis);
+
+      // Glow: shadowBlur escalado por visibilidad y hover
+      var glowIntensity = (8 + hoverBoost * 18) * vis;
+      p.drawingContext.shadowBlur = glowIntensity;
+      p.drawingContext.shadowColor = 'rgba(' + n.rgb[0] + ',' + n.rgb[1] + ',' + n.rgb[2] + ',' + (0.7 * vis) + ')';
+
+      // Halo (alpha subido: 38→65 para más presencia)
+      p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 65 * vis);
       p.circle(n.x, n.y, sz * 3.5);
-      // Cuerpo
-      p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 210 * vis);
+      // Cuerpo (alpha subido: 210→240)
+      p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 240 * vis);
       p.circle(n.x, n.y, sz * 1.6);
+
+      // Apagar glow antes del núcleo para que no se contamine
+      p.drawingContext.shadowBlur = 0;
+
       // Núcleo (siempre presente — es lo que permite localizar el nodo)
-      p.fill(236, 230, 220, 230 * depth * (0.45 + foco * 0.55));
+      p.fill(236, 230, 220, 240 * depth * (0.45 + foco * 0.55));
       p.circle(n.x, n.y, sz * 0.55);
 
       updateAndDrawWisps(n, sz, n.rgb[0], n.rgb[1], n.rgb[2], vis, foco > 0.5);
+      p.drawingContext.shadowBlur = 0;  // reset definitivo después de wisps
 
       // Etiqueta cerca del cursor
       if (dMouse < RADIO * 0.9) {
