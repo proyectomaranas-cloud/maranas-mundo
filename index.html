@@ -3052,5 +3052,18 @@ var LB = {
   }
 };
 LB.init();
+
+// Reenviar scroll de rueda a la vista visible cuando no estamos en el mapa.
+// p5.js escucha wheel en window con preventDefault, así que capturamos
+// en la fase de captura (useCapture=true) para llegar antes que p5.
+window.addEventListener('wheel', function(e) {
+  if (vistaActual === 'mapa') return;
+  var vista = document.querySelector('.vista-pagina.visible');
+  if (vista) {
+    vista.scrollTop += e.deltaY;
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}, { passive: false, capture: true });
 </script></body>
 </html>
