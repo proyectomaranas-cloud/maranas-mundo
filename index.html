@@ -1242,6 +1242,8 @@ nav.nav--pagina .nav-links a.active {
 /* Estado con nav oculto */
 body.nav-hidden nav {
   transform: translateY(100%);
+  backdrop-filter: none;
+  visibility: hidden;
 }
 body.nav-hidden #vista-mapa {
   height: 100vh;
@@ -2297,6 +2299,23 @@ function mostrarNodo(cont) {
         '<iframe style="position:absolute;inset:0;width:100%;height:100%;border:none;" ' +
         'src="https://www.youtube.com/embed/' + youtubeId + '?rel=0&modestbranding=1" ' +
         'allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
+    } else if (cont.cloudinaryFolder && cont.cloudinaryFiles && cont.cloudinaryFiles.length > 0) {
+      var files = cont.cloudinaryFiles;
+      window._lbFolder = '';
+      window._lbFiles  = files;
+      var base = 'https://res.cloudinary.com/dt6cvonyy/image/upload/w_400,h_300,c_fill,q_auto/';
+      var html = '<div style="margin-top:8px;">';
+      html += '<div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:var(--musgo);text-transform:uppercase;margin-bottom:10px;">' + files.length + ' fotografías · click para ampliar</div>';
+      html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">';
+      files.forEach(function(fname, i) {
+        html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:rgba(255,255,255,0.04);" ' +
+          'onclick="LB.open(\'\', window._lbFiles, ' + i + ')">' +
+          '<img src="' + base + fname + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy" ' +
+          'onerror="this.parentElement.style.display=\'none\'">' +
+          '</div>';
+      });
+      html += '</div></div>';
+      mediaEl.innerHTML = html;
     } else {
       mediaEl.innerHTML = '<div style="width:100%;aspect-ratio:16/9;' +
         'background:repeating-linear-gradient(45deg,rgba(236,230,220,0.02) 0 12px,rgba(236,230,220,0.04) 12px 13px);' +
@@ -2390,7 +2409,7 @@ function poblarArchivoPorRama() {
         '</div>' +
         '<div class="card-desc">' + c.desc + '</div>' +
         '<div class="card-tags">' + tagsHTML + temasHTML + '<span class="estado-badge ' + estadoCls + '">' + (c.estado || '') + '</span></div>' +
-        '<button class="card-mapa-btn" onclick="event.stopPropagation();irAlMapaDesdeArchivo(\'' + c.id + '\')">◉ ver en mapa</button>';
+        '<button class="card-mapa-btn" data-node-id="' + c.id + '">◉ ver en mapa</button>';
 
       card.addEventListener('click', function() { mostrarNodo(c); });
       grid.appendChild(card);
@@ -2434,6 +2453,14 @@ document.getElementById('filtros-tema').addEventListener('click', function(e) {
   filtroTemaActivo = e.target.dataset.filtroTema;
   aplicarFiltros();
 });
+document.getElementById('archivo-por-rama').addEventListener('click', function(e) {
+  var btn = e.target.closest('.card-mapa-btn');
+  if (btn) {
+    e.stopPropagation();
+    irAlMapaDesdeArchivo(btn.dataset.nodeId);
+  }
+});
+
 document.getElementById('filtros-practica').addEventListener('click', function(e) {
   if (!e.target.classList.contains('filtro-btn')) return;
   document.querySelectorAll('#filtros-practica .filtro-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -2446,25 +2473,33 @@ document.getElementById('filtros-practica').addEventListener('click', function(e
 // Desde el panel del mapa → ir a la tarjeta en el archivo
 function irAlArchivoDesdeMapa() {
   var nodeId = document.getElementById('panel-btn-archivo').dataset.nodeId;
+  // Asegurar que el archivo se pueble antes de buscar la tarjeta
   mostrarVista('archivo');
-  setTimeout(function() {
+  // Esperar a que poblarArchivoPorRama termine y el DOM esté listo
+  var intentos = 0;
+  function buscarTarjeta() {
     var card = document.querySelector('.archivo-card[data-id="' + nodeId + '"]');
     if (card) {
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      card.style.outline = '1px solid var(--willow)';
-      setTimeout(function() { card.style.outline = ''; }, 1800);
+      card.style.outline = '2px solid rgba(242,204,107,0.8)';
+      setTimeout(function() {
+        card.style.outline = '';
+        card.style.transition = 'outline 0.6s';
+      }, 2000);
+    } else if (intentos++ < 10) {
+      setTimeout(buscarTarjeta, 150);
     }
-  }, 300);
+  }
+  setTimeout(buscarTarjeta, 200);
 }
 
-// Desde una tarjeta del archivo → volver al mapa y resaltar el nodo
+// Desde una tarjeta del archivo → volver al mapa y abrir el panel del nodo
 function irAlMapaDesdeArchivo(nodeId) {
   mostrarVista('mapa');
   setTimeout(function() {
-    // Encontrar el nodo en nCont y abrirlo
     var nodo = nCont.find(function(n) { return n.cont.id === nodeId; });
     if (nodo) abrirPanel(nodo);
-  }, 400);
+  }, 500);
 }
 /* ══════════════════════════════════════════
    PANEL NODO (en mapa)
