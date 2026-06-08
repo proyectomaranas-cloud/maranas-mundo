@@ -416,6 +416,7 @@ nav {
   opacity: 0; pointer-events: none;
   transform: translateY(16px);
   transition: opacity 0.4s ease, transform 0.4s ease;
+  outline: none;  /* sin borde de foco visible */
 }
 .vista-pagina.visible {
   opacity: 1; pointer-events: all;
@@ -1868,13 +1869,15 @@ function mostrarVista(nombre) {
   if (nombre === 'mapa') {
     document.getElementById('vista-mapa').style.display = 'block';
     document.getElementById('sello-institucional').style.display = 'block';
-    document.body.style.overflow = 'hidden';  // mapa: sin scroll de página
     document.getElementById('canvas-wrapper').style.pointerEvents = 'all';
+    if (typeof sketch !== 'undefined' && sketch.loop) sketch.loop();
     vistaActual = 'mapa';
     return;
   }
-  document.body.style.overflow = 'hidden';  // vista-pagina scrollea internamente
-  document.getElementById('canvas-wrapper').style.pointerEvents = 'none';  // canvas no interfiere
+
+  // Fuera del mapa: pausar p5 completamente y bloquear su canvas
+  document.getElementById('canvas-wrapper').style.pointerEvents = 'none';
+  if (typeof sketch !== 'undefined' && sketch.noLoop) sketch.noLoop();
   document.getElementById('sello-institucional').style.display = 'none';
 
   if (nombre === 'archivo') poblarArchivoPorRama();
@@ -1883,9 +1886,11 @@ function mostrarVista(nombre) {
   var el = document.getElementById('vista-' + nombre);
   if (el) {
     vistaActual = nombre;
-    el.style.pointerEvents = 'all';  // forzar antes del RAF
+    el.style.pointerEvents = 'all';
+    el.setAttribute('tabindex', '-1');   // hace el div focusable
     requestAnimationFrame(function() {
       el.classList.add('visible');
+      el.focus({ preventScroll: true }); // foco para recibir scroll de teclado
     });
   }
 }
