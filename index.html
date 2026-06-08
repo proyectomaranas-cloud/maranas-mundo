@@ -2235,6 +2235,59 @@ function iconoTipo(t) {
 ══════════════════════════════════════════ */
 var vistaActual = 'mapa';
 
+// ── Extensiones de video reconocidas en Cloudinary ────────────────
+var VIDEO_EXT = ['mp4','mov','avi','webm','mkv','MP4','MOV','AVI','WEBM'];
+function esVideo(fname) {
+  var ext = fname.split('.').pop().toLowerCase();
+  // Cloudinary también sube videos sin extensión visible — detectar por path
+  var lower = fname.toLowerCase();
+  return VIDEO_EXT.indexOf(ext) !== -1 ||
+         lower.indexOf('.mov') !== -1 || lower.indexOf('.mp4') !== -1;
+}
+
+function renderGaleria(files, contenedor) {
+  window._lbFolder = '';
+  window._lbFiles  = files;
+  var baseImg   = 'https://res.cloudinary.com/dt6cvonyy/image/upload/w_400,h_300,c_fill,q_auto/';
+  var baseVideo = 'https://res.cloudinary.com/dt6cvonyy/video/upload/w_400,h_300,c_fill,q_auto/';
+  var baseVideoFull = 'https://res.cloudinary.com/dt6cvonyy/video/upload/';
+
+  var fotos  = files.filter(function(f) { return !esVideo(f); });
+  var videos = files.filter(function(f) { return esVideo(f); });
+  var total  = files.length;
+
+  var html = '<div style="margin-top:8px;">';
+  html += '<div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:var(--musgo);text-transform:uppercase;margin-bottom:10px;">' +
+    total + ' archivos · ' + fotos.length + ' fotos · ' + videos.length + ' videos · click para ampliar</div>';
+
+  html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">';
+
+  files.forEach(function(fname, i) {
+    if (esVideo(fname)) {
+      // Thumbnail del video con play overlay
+      var thumb = baseVideo + fname + '.jpg';  // Cloudinary genera thumbnail automático
+      var src   = baseVideoFull + fname;
+      html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:#000;position:relative;" ' +
+        'onclick="LB.open(\'\', window._lbFiles, ' + i + ')">' +
+        '<img src="' + thumb + '" style="width:100%;height:100%;object-fit:cover;opacity:0.8;" loading="lazy" ' +
+        'onerror="this.style.display=\'none\'">' +
+        '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">' +
+        '<div style="width:32px;height:32px;border:2px solid rgba(236,230,220,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;">' +
+        '<div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:12px solid rgba(236,230,220,0.8);margin-left:3px;"></div>' +
+        '</div></div></div>';
+    } else {
+      html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:rgba(255,255,255,0.04);" ' +
+        'onclick="LB.open(\'\', window._lbFiles, ' + i + ')">' +
+        '<img src="' + baseImg + fname + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy" ' +
+        'onerror="this.parentElement.style.display=\'none\'">' +
+        '</div>';
+    }
+  });
+
+  html += '</div></div>';
+  contenedor.innerHTML = html;
+}
+
 function mostrarVista(nombre) {
   document.getElementById('vista-mapa').style.display = nombre === 'mapa' ? 'block' : 'none';
   document.getElementById('panel').classList.remove('open');
@@ -2317,22 +2370,7 @@ function mostrarNodo(cont) {
         'src="https://www.youtube.com/embed/' + youtubeId + '?rel=0&modestbranding=1" ' +
         'allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
     } else if (cont.cloudinaryFolder && cont.cloudinaryFiles && cont.cloudinaryFiles.length > 0) {
-      var files = cont.cloudinaryFiles;
-      window._lbFolder = '';
-      window._lbFiles  = files;
-      var base = 'https://res.cloudinary.com/dt6cvonyy/image/upload/w_400,h_300,c_fill,q_auto/';
-      var html = '<div style="margin-top:8px;">';
-      html += '<div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:var(--musgo);text-transform:uppercase;margin-bottom:10px;">' + files.length + ' fotografías · click para ampliar</div>';
-      html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">';
-      files.forEach(function(fname, i) {
-        html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:rgba(255,255,255,0.04);" ' +
-          'onclick="LB.open(\'\', window._lbFiles, ' + i + ')">' +
-          '<img src="' + base + fname + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy" ' +
-          'onerror="this.parentElement.style.display=\'none\'">' +
-          '</div>';
-      });
-      html += '</div></div>';
-      mediaEl.innerHTML = html;
+      renderGaleria(cont.cloudinaryFiles, mediaEl);
     } else {
       mediaEl.innerHTML = '<div style="width:100%;aspect-ratio:16/9;' +
         'background:repeating-linear-gradient(45deg,rgba(236,230,220,0.02) 0 12px,rgba(236,230,220,0.04) 12px 13px);' +
@@ -2639,22 +2677,7 @@ function abrirPanel(n) {
 
   } else if (c.cloudinaryFolder && c.cloudinaryFiles && c.cloudinaryFiles.length > 0) {
     panelLink.style.display = 'none';
-    var files = c.cloudinaryFiles;
-    window._lbFolder = '';
-    window._lbFiles  = files;
-    var base = 'https://res.cloudinary.com/dt6cvonyy/image/upload/w_400,h_300,c_fill,q_auto/';
-    var html = '<div style="margin-top:12px;">';
-    html += '<div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:var(--musgo);text-transform:uppercase;margin-bottom:10px;">' + files.length + ' fotografías · click para ampliar</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">';
-    files.forEach(function(fname, i) {
-      html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:rgba(255,255,255,0.04);" ' +
-        'onclick="LB.open(\'\', window._lbFiles, ' + i + ')">' +
-        '<img src="' + base + fname + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy" ' +
-        'onerror="this.parentElement.style.display=\'none\'">' +
-        '</div>';
-    });
-    html += '</div></div>';
-    panelMedia.innerHTML = html;
+    renderGaleria(c.cloudinaryFiles, panelMedia);
 
   } else {
     panelLink.style.display = '';
