@@ -417,6 +417,41 @@ nav.nav--pagina .nav-links a.active {
 .panel-btn.pendiente:hover {
   background: rgba(237,125,58,0.1);
 }
+.panel-btn-archivo {
+  display: none;
+  margin-top: 12px; margin-bottom: 4px;
+  padding: 8px 16px;
+  border: 1px solid rgba(242,204,107,0.3);
+  background: transparent;
+  color: var(--willow);
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; cursor: none;
+  transition: background 0.2s, border-color 0.2s;
+  align-self: flex-start;
+}
+.panel-btn-archivo:hover {
+  background: rgba(242,204,107,0.1);
+  border-color: rgba(242,204,107,0.6);
+}
+
+/* Botón "ver en mapa" dentro de tarjeta de archivo */
+.card-mapa-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px;
+  padding: 5px 10px;
+  border: 1px solid rgba(47,191,113,0.25);
+  background: transparent;
+  color: var(--musgo);
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; cursor: none;
+  transition: color 0.2s, border-color 0.2s;
+}
+.card-mapa-btn:hover {
+  color: var(--verde-luz);
+  border-color: rgba(47,191,113,0.5);
+}
 
 /* ══════════════════════════════════════════
    HINT
@@ -1217,6 +1252,12 @@ body.nav-hidden #nav-toggle {
 body.nav-hidden #nav-toggle .toggle-icon {
   transform: rotate(180deg);
 }
+/* En vistas de página, ocultar el nav-toggle completamente cuando el nav está hidden */
+body.nav-hidden .vista-pagina.visible ~ * #nav-toggle,
+body.nav-hidden #nav-toggle.nav--pagina {
+  opacity: 0;
+  pointer-events: none;
+}
 nav {
   transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
 }
@@ -1380,6 +1421,7 @@ nav {
     <div class="panel-conexiones-titulo">Conexiones en el rizoma</div>
     <div id="panel-conexiones-lista"></div>
   </div>
+  <button class="panel-btn-archivo" id="panel-btn-archivo" style="display:none;" onclick="irAlArchivoDesdeMapa()">→ ver en archivo</button>
   <a href="#" class="panel-btn pendiente" id="panel-link">Ver archivo · pendiente de publicación</a>
   <div id="panel-media" style="margin-top:20px;"></div>
 </div>
@@ -2347,7 +2389,8 @@ function poblarArchivoPorRama() {
           '<div class="card-archivo">' + c.archivo + '</div>' +
         '</div>' +
         '<div class="card-desc">' + c.desc + '</div>' +
-        '<div class="card-tags">' + tagsHTML + temasHTML + '<span class="estado-badge ' + estadoCls + '">' + (c.estado || '') + '</span></div>';
+        '<div class="card-tags">' + tagsHTML + temasHTML + '<span class="estado-badge ' + estadoCls + '">' + (c.estado || '') + '</span></div>' +
+        '<button class="card-mapa-btn" onclick="event.stopPropagation();irAlMapaDesdeArchivo(\'' + c.id + '\')">◉ ver en mapa</button>';
 
       card.addEventListener('click', function() { mostrarNodo(c); });
       grid.appendChild(card);
@@ -2398,6 +2441,31 @@ document.getElementById('filtros-practica').addEventListener('click', function(e
   filtroPracticaActivo = e.target.dataset.filtroPractica;
   aplicarFiltros();
 });
+
+// ── Navegación cruzada: mapa ↔ archivo ────────────────────────────
+// Desde el panel del mapa → ir a la tarjeta en el archivo
+function irAlArchivoDesdeMapa() {
+  var nodeId = document.getElementById('panel-btn-archivo').dataset.nodeId;
+  mostrarVista('archivo');
+  setTimeout(function() {
+    var card = document.querySelector('.archivo-card[data-id="' + nodeId + '"]');
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.style.outline = '1px solid var(--willow)';
+      setTimeout(function() { card.style.outline = ''; }, 1800);
+    }
+  }, 300);
+}
+
+// Desde una tarjeta del archivo → volver al mapa y resaltar el nodo
+function irAlMapaDesdeArchivo(nodeId) {
+  mostrarVista('mapa');
+  setTimeout(function() {
+    // Encontrar el nodo en nCont y abrirlo
+    var nodo = nCont.find(function(n) { return n.cont.id === nodeId; });
+    if (nodo) abrirPanel(nodo);
+  }, 400);
+}
 /* ══════════════════════════════════════════
    PANEL NODO (en mapa)
 ══════════════════════════════════════════ */
@@ -2499,6 +2567,11 @@ function abrirPanel(n) {
   } else {
     panelConexiones.style.display = 'none';
   }
+
+  // Botón "ver en archivo" — siempre visible desde el mapa
+  var btnArchivo = document.getElementById('panel-btn-archivo');
+  btnArchivo.style.display = 'inline-flex';
+  btnArchivo.dataset.nodeId = c.id;
 
   panel.classList.add('open');
 
