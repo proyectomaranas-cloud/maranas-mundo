@@ -2164,21 +2164,23 @@ function abrirPanel(n) {
   } else if (c.cloudinaryFolder && c.cloudinaryFiles && c.cloudinaryFiles.length > 0) {
     panelLink.style.display = 'none';
     var files = c.cloudinaryFiles;
-    var base = 'https://res.cloudinary.com/dt6cvonyy/image/upload/w_400,h_300,c_fill,q_auto,f_auto/' + c.cloudinaryFolder + '/';
+    var folder = c.cloudinaryFolder;
+    // Guardar globalmente para el lightbox
+    window._lbFolder = folder;
+    window._lbFiles  = files;
+    var base = 'https://res.cloudinary.com/dt6cvonyy/image/upload/w_400,h_300,c_fill,q_auto,f_auto/' + folder + '/';
     var html = '<div style="margin-top:12px;">';
     html += '<div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:var(--musgo);text-transform:uppercase;margin-bottom:10px;">' + files.length + ' fotografías · click para ampliar</div>';
     html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">';
     files.forEach(function(fname, i) {
       html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:rgba(255,255,255,0.04);" ' +
-        'onclick="LB.open(\'' + c.cloudinaryFolder + '\',' + 'window._galFiles' + c.id + ',' + i + ')">' +
+        'onclick="LB.open(window._lbFolder, window._lbFiles, ' + i + ')">' +
         '<img src="' + base + fname + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy" ' +
         'onerror="this.parentElement.style.display=\'none\'">' +
         '</div>';
     });
     html += '</div></div>';
     panelMedia.innerHTML = html;
-    // Guardar referencia al array para el lightbox
-    window['_galFiles' + c.id] = files;
 
   } else {
     panelLink.style.display = '';
