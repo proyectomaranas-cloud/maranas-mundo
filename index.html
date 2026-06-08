@@ -1869,10 +1869,12 @@ function mostrarVista(nombre) {
     document.getElementById('vista-mapa').style.display = 'block';
     document.getElementById('sello-institucional').style.display = 'block';
     document.body.style.overflow = 'hidden';  // mapa: sin scroll de página
+    document.getElementById('canvas-wrapper').style.pointerEvents = 'all';
     vistaActual = 'mapa';
     return;
   }
-  document.body.style.overflow = 'auto';  // otras vistas: scroll habilitado
+  document.body.style.overflow = 'hidden';  // vista-pagina scrollea internamente
+  document.getElementById('canvas-wrapper').style.pointerEvents = 'none';  // canvas no interfiere
   document.getElementById('sello-institucional').style.display = 'none';
 
   if (nombre === 'archivo') poblarArchivoPorRama();
@@ -2239,6 +2241,17 @@ var sketch = new p5(function(p) {
     var c = p.createCanvas(window.innerWidth, window.innerHeight - navH);
     c.parent('canvas-wrapper');
     p.colorMode(p.RGB);
+
+    // p5.js registra su propio listener 'wheel' en el canvas con preventDefault.
+    // Lo reemplazamos con uno pasivo que solo bloquea el scroll cuando estamos en el mapa.
+    var canvasEl = c.elt;
+    canvasEl.addEventListener('wheel', function(e) {
+      if (vistaActual !== 'mapa') {
+        // Fuera del mapa: propagar el scroll a la vista de página visible
+        var vistaVisible = document.querySelector('.vista-pagina.visible');
+        if (vistaVisible) vistaVisible.scrollTop += e.deltaY;
+      }
+    }, { passive: true });
 
     // Distribución inicial en grilla con jitter: garantiza que los nodos
     // nazcan dispersos por todo el canvas, no agrupados por azar.
@@ -2901,7 +2914,7 @@ var sketch = new p5(function(p) {
 
   // Rueda del mouse: mover el plano focal de profundidad
   p.mouseWheel = function(event) {
-    if (vistaActual !== 'mapa') return true;
+    if (vistaActual !== 'mapa') return true;  // deja pasar el scroll a la página
     focalZTarget += event.delta * 0.0015;
     focalZTarget = p.constrain(focalZTarget, -1, 1);
     focalUIFadeFrames = 120;  // mostrar el indicador unos 2 segundos
