@@ -472,6 +472,76 @@ nav {
 .pag-cuerpo p { margin-bottom: 28px; }
 .pag-cuerpo strong { color: var(--crema); font-weight: normal; }
 
+/* ── Visor de publicación académica ── */
+.publicacion-bloque {
+  margin-top: 56px;
+  border-top: 1px solid rgba(236,230,220,0.08);
+  padding-top: 48px;
+}
+.publicacion-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--text-dim);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 16px;
+}
+.publicacion-eyebrow::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(236,230,220,0.08);
+}
+.publicacion-cita {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-size: 18px; line-height: 1.5;
+  color: var(--crema);
+  max-width: 780px;
+  margin-bottom: 8px;
+}
+.publicacion-meta {
+  font-family: var(--font-mono);
+  font-size: 10px; color: var(--text-dim);
+  letter-spacing: 0.06em;
+  margin-bottom: 28px;
+}
+.publicacion-meta a {
+  color: var(--verde-luz); text-decoration: none;
+}
+.publicacion-meta a:hover { text-decoration: underline; }
+.publicacion-pdf-wrap {
+  width: 100%;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(236,230,220,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.publicacion-pdf-wrap iframe {
+  width: 100%; height: 680px;
+  border: none; display: block;
+}
+.publicacion-pdf-link {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--verde-luz);
+  border: 1px solid rgba(47,191,113,0.35);
+  padding: 8px 16px; border-radius: 2px;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+.publicacion-pdf-link:hover {
+  border-color: var(--verde-luz);
+  color: var(--crema);
+}
+
+/* ── Filtros de prácticas emergentes ── */
+.filtro-btn.practica { }
+.filtro-btn.practica.active {
+  border-color: var(--ocre);
+  color: var(--ocre);
+}
+
 /* ── Vista archivo: más compacta — es catálogo, no página editorial ── */
 #vista-archivo .pag-inner {
   padding-top: 28px;
@@ -1274,6 +1344,21 @@ nav {
       <p>El proyecto se pregunta por los modos de hacer-sentir-pensar que pueden movilizarse desde las prácticas artísticas como respuesta a los tiempos de una crisis ecológica nunca antes enfrentada por la humanidad. Dicha labor requiere de una imaginación activa que permita despertar posibilidades para la construcción de nuevos proyectos de mundo, nuevas colaboraciones, y experiencias de compartir —siempre más allá de lo humano— que no son el resultado de un sujeto individual sino de modos de existencia que sostienen las redes de vulnerabilidad compartidas que llamamos ecología.</p>
       <p>El movimiento que da título al proyecto —de los <em>Mundos de Plantación</em> (monocultivo, extracción, colonialidad) a las <em>Marañas Mundo</em> (multiplicidad, coexistencia más-que-humana)— no es solo un argumento teórico: es la forma misma de organizar tres años de trabajo colectivo de cuatro grupos de investigación. La producción investigativa pasa por artículos académicos, escrituras creativas, escrituras performativas, prácticas a campo abierto, conferencias performativas, partituras, proposiciones y registros múltiples de la experiencia.</p>
     </div>
+
+    <div class="publicacion-bloque">
+      <div class="publicacion-eyebrow">Publicación académica · texto fundacional</div>
+      <div class="publicacion-cita">Esbozos para un hacer enmarañado con y a través del proyecto de investigación-creación <em>Prácticas artísticas para una Colombia más-que-humana: de los mundos de plantación a las marañas-mundo</em></div>
+      <div class="publicacion-meta">
+        Álvaro Iván Hernández Rodríguez · Regina María Gutiérrez Bermúdez<br>
+        <em>Cuadernos de Música, Artes Visuales y Artes Escénicas</em>, Vol. 20 (2), pp. 148–165, julio–diciembre 2025 · Pontificia Universidad Javeriana<br>
+        <a href="https://doi.org/10.11144/javeriana.mavae20-2.pcmh" target="_blank">doi 10.11144/javeriana.mavae20-2.pcmh</a>
+      </div>
+      <div class="publicacion-pdf-wrap">
+        <iframe src="https://res.cloudinary.com/dt6cvonyy/image/upload/v1/articulo_maranas.pdf" title="Esbozos para un hacer enmarañado — Hernández Rodríguez & Gutiérrez Bermúdez (2025)"></iframe>
+      </div>
+      <a class="publicacion-pdf-link" href="https://doi.org/10.11144/javeriana.mavae20-2.pcmh" target="_blank">→ acceder al artículo completo</a>
+    </div>
+
     <div style="margin-top:64px;">
       <div class="pag-eyebrow">Cuatro grupos de investigación</div>
       <div class="grupos-grid">
@@ -1399,6 +1484,19 @@ nav {
         <button class="filtro-btn tema" data-filtro-tema="pajaros">Pájaros</button>
         <button class="filtro-btn tema" data-filtro-tema="agua">Agua</button>
         <button class="filtro-btn tema" data-filtro-tema="enmara%C3%B1amientos">Enmarañamientos</button>
+      </div>
+    </div>
+
+    <div class="filtros-bloque">
+      <div class="filtros-bloque-label">Cruzar por práctica emergente</div>
+      <div class="filtros-row" id="filtros-practica">
+        <button class="filtro-btn practica active" data-filtro-practica="todos">Todas</button>
+        <button class="filtro-btn practica" data-filtro-practica="encauchamientos">Encauchamientos</button>
+        <button class="filtro-btn practica" data-filtro-practica="toque">Toque</button>
+        <button class="filtro-btn practica" data-filtro-practica="desbordamientos">Desbordamientos</button>
+        <button class="filtro-btn practica" data-filtro-practica="sonar">Sonar</button>
+        <button class="filtro-btn practica" data-filtro-practica="jardinamientos">Jardinamientos</button>
+        <button class="filtro-btn practica" data-filtro-practica="estudios-con-hojas">Estudios con hojas</button>
       </div>
     </div>
 
@@ -1651,62 +1749,105 @@ var ARCHIVOS = [
   { id:'ARC-001', sub:'SUB-01', tipo:'texto', archivo:'Plan de Trabajo Inicial - Matriz de organización del material recopilado.pdf',
     titulo:'Plan de Trabajo Inicial', tam:'0.13 MB', fecha:'2025-11-27',
     desc:'Documento fundacional del catálogo. Define la arquitectura conceptual del archivo y la tipología de contenido. Punto de partida para la cartografía digital del proyecto.',
-    tags:['cartografía viva','archivo digital','tipología'], temas:[], estado:'apto', peso:3 },
+    tags:['cartografía viva','archivo digital','tipología'], temas:[], practicas:[], estado:'apto', peso:3 },
   { id:'ARC-002', sub:'SUB-01', tipo:'texto', archivo:'Requerimientos_Tecnicos_Maranas.docx',
     titulo:'Requerimientos Técnicos', tam:'0.03 MB', fecha:'2025-11-25',
     desc:'Especificaciones técnicas de la plataforma digital. Identifica los 4 grupos de investigación participantes y las condiciones de producción del archivo web.',
-    tags:['stack tecnológico','infraestructura','4 grupos'], temas:[], estado:'apto', peso:2 },
+    tags:['stack tecnológico','infraestructura','4 grupos'], temas:[], practicas:[], estado:'apto', peso:2 },
+  // SUB-02 · Publicación académica
+  { id:'ARC-ART-01', sub:'SUB-02', tipo:'texto', archivo:'articulo_maranas.pdf',
+    titulo:'Esbozos para un hacer enmarañado · Hernández Rodríguez & Gutiérrez Bermúdez (2025)',
+    tam:'~2 MB', fecha:'2025-07-01',
+    desc:'Texto fundacional del proyecto. Artículo publicado en Cuadernos de Música, Artes Visuales y Artes Escénicas (Javeriana), Vol. 20(2), pp. 148–165. Propone la maraña como práctica, ideación experimental y método de ideación. doi: 10.11144/javeriana.mavae20-2.pcmh',
+    tags:['publicación académica','texto fundacional','maraña','encauchamientos','toque'],
+    temas:['plantaciones','enmarañamientos'],
+    practicas:['encauchamientos','toque','desbordamientos','sonar','jardinamientos','estudios-con-hojas'],
+    estado:'apto', peso:5,
+    icono:'◎ ART' },
   // SUB-02 · Dramaturgias — obra principal
   { id:'ARC-003', sub:'SUB-02', tipo:'video', archivo:'Obra_Completa_Dramaturgias.mp4',
     titulo:'De los mundos de plantación a las marañas mundo · obra completa', tam:'—', fecha:'2025',
     desc:'Registro completo del performance en vivo. 15 performers. 1h 30 min. 8 nichos somato-poéticos. Dirección: Álvaro Iván Hernández Rodríguez. Co-dirección: Regina María Gutiérrez Bermúdez.',
-    tags:['performance','obra completa','8 nichos','15 performers'], temas:['plantaciones','enmara\u00f1amientos'], estado:'apto', peso:4 },
+    tags:['performance','obra completa','8 nichos','15 performers'],
+    temas:['plantaciones','enmarañamientos'],
+    practicas:['encauchamientos','enmarañamientos'],
+    estado:'apto', peso:4 },
   { id:'ARC-004', sub:'SUB-02', tipo:'foto', archivo:'Fotos_obra_Dramaturgias/',
     titulo:'Registro fotográfico · Dramaturgias', tam:'—', fecha:'2025',
     desc:'Galería fotográfica del performance. Fotos de función y detrás de cámara. Afectografías: María Camila Largo Casallas.',
-    tags:['fotos','performance','registro','afectografías'], temas:['enmara\u00f1amientos'], estado:'sinrevisar', peso:3 },
-  // SUB-02 · Videos YouTube (obra colectiva — Obra Completa Hernán, Cartografías)
+    tags:['fotos','performance','registro','afectografías'],
+    temas:['enmarañamientos'],
+    practicas:['encauchamientos'],
+    estado:'sinrevisar', peso:3 },
   { id:'ARC-YT-01', sub:'SUB-02', tipo:'video', archivo:'youtube:Tcyzxk4IEl4',
     titulo:'Obra Completa · Hernán Darío Guzmán', tam:'YouTube', fecha:'2025',
     desc:'Video de la obra completa publicado en YouTube. Registro del performance de gran formato del Grupo Dramaturgias del Cuerpo. Música y creación sonora: Hernán Darío Guzmán.',
-    tags:['youtube','obra completa','música','Hernán Guzmán'], temas:['plantaciones','encauchamientos'], estado:'apto', peso:4,
-    youtubeId:'Tcyzxk4IEl4' },
+    tags:['youtube','obra completa','música','Hernán Guzmán'],
+    temas:['plantaciones','encauchamientos'],
+    practicas:['encauchamientos','sonar'],
+    estado:'apto', peso:4, youtubeId:'Tcyzxk4IEl4' },
   { id:'ARC-YT-03', sub:'SUB-06', tipo:'video', archivo:'youtube:pendiente',
     titulo:'Cartografías Sur · salidas de campo', tam:'pendiente', fecha:'2025',
     desc:'Video que documenta las salidas de campo al sur: San Francisco de Sales, Los Copetones, Villa Rosil. Registro del proceso colectivo de investigación-creación en territorio.',
-    tags:['salidas de campo','territorio','cartografías'], temas:['agua','pajaros'], estado:'sinrevisar', peso:3 },
+    tags:['salidas de campo','territorio','cartografías'],
+    temas:['agua','pajaros'],
+    practicas:['desbordamientos','sonar'],
+    estado:'sinrevisar', peso:3 },
   // SUB-03 · Arte Danzario — Enmarañar-Ser
   { id:'ARC-YT-02', sub:'SUB-03', tipo:'video', archivo:'youtube:2dhOlxuE2nA',
     titulo:'Enmarañar-Ser · videodanza completa', tam:'YouTube', fecha:'2025',
     desc:'Videodanza completa publicada en YouTube. Dirección y creación colectiva: Ana Cecilia Vargas Núñez, Diana Lucía León Bohórquez, Yina Erazo Coral. Música original: Villy Glez. Cámara: Soraya Vargas.',
-    tags:['youtube','videodanza','enmarañar-ser'], temas:['toque','enmara\u00f1amientos'], estado:'apto', peso:4,
-    youtubeId:'2dhOlxuE2nA' },
+    tags:['youtube','videodanza','enmarañar-ser'],
+    temas:['toque','enmarañamientos'],
+    practicas:['toque','jardinamientos'],
+    estado:'apto', peso:4, youtubeId:'2dhOlxuE2nA' },
   { id:'ARC-010', sub:'SUB-03', tipo:'texto', archivo:'Marañas guión avances (1).docx',
     titulo:'Guion · Enmarañar-Ser', tam:'—', fecha:'—',
     desc:'Guion de la videodanza estructurado en 16 escenas en 5 bloques temáticos. Locaciones: Hospital San Juan de Dios y San Lucas. Intérpretes: Ana Vargas, Diana León, Yina Erazo, Tatán Luna.',
-    tags:['guion','16 escenas','5 bloques','videodanza'], temas:['toque','agua'], estado:'apto', peso:3 },
+    tags:['guion','16 escenas','5 bloques','videodanza'],
+    temas:['toque','agua'],
+    practicas:['toque'],
+    estado:'apto', peso:3 },
   { id:'ARC-011', sub:'SUB-03', tipo:'hoja', archivo:'Tabla de lectura - texto base.xlsx',
     titulo:'Texto base · 18 Árboles · El silencio del salvaje', tam:'—', fecha:'—',
     desc:'«El silencio del salvaje: viaje interior por los laticíferos de la siringa» de Álvaro Hernández, estructurado en 18 Árboles. Lectura coral. Eje metodológico del proyecto y fuente literaria de la videodanza.',
-    tags:['texto base','18 árboles','siringa','Álvaro Hernández'], temas:['respiracion','plantaciones'], estado:'apto', peso:3 },
+    tags:['texto base','18 árboles','siringa','Álvaro Hernández'],
+    temas:['respiracion','plantaciones'],
+    practicas:['encauchamientos'],
+    estado:'apto', peso:3 },
   { id:'ARC-012', sub:'SUB-03', tipo:'foto', archivo:'PÓSTER ENMARAÑAR - SER AGOSTO 2025.jpg',
     titulo:'Póster oficial · Enmarañar-Ser', tam:'—', fecha:'2025-08',
     desc:'Póster oficial de la videodanza Enmarañar-Ser. Identidad gráfica del estreno en Teatro Taller de Colombia.',
-    tags:['póster','identidad gráfica','estreno','Teatro Taller'], temas:['enmara\u00f1amientos'], estado:'apto', peso:2 },
+    tags:['póster','identidad gráfica','estreno','Teatro Taller'],
+    temas:['enmarañamientos'],
+    practicas:[],
+    estado:'apto', peso:2 },
   { id:'ARC-013', sub:'SUB-03', tipo:'video', archivo:'Enmarañar-Ser_TRAILER FINAL.mp4',
     titulo:'Trailer final · Enmarañar-Ser', tam:'—', fecha:'—',
     desc:'Pieza promocional definitiva de la videodanza. Junto al póster, es la comunicación principal de la obra.',
-    tags:['trailer','pieza promocional','videodanza'], temas:['toque','enmara\u00f1amientos'], estado:'apto', peso:3 },
+    tags:['trailer','pieza promocional','videodanza'],
+    temas:['toque','enmarañamientos'],
+    practicas:['toque'],
+    estado:'apto', peso:3 },
   { id:'SER-ES-01', sub:'SUB-03', tipo:'foto', titulo:'Fotos proceso · Enmarañar-Ser', conteo:'19 fotos', tam:'~30 MB', fecha:'2024-10 a 2025-09',
-    desc:'Fotos de proceso, making-off y póster de la videodanza Enmarañar-Ser.', temas:['toque','agua'], estado:'sinrevisar', peso:3,
+    desc:'Fotos de proceso, making-off y póster de la videodanza Enmarañar-Ser.',
+    temas:['toque','agua'],
+    practicas:['toque','jardinamientos'],
+    estado:'sinrevisar', peso:3,
     esSerie:true, archivo:'[ serie · 19 fotos ]',
     cloudinaryFolder:'enmararanarse_fotos_proce',
     cloudinaryFiles:['WhatsApp_Image_2025-07-03_at_5.4','POSTER_ENMARA\u00d1AR_-_SER_AGOST','WhatsApp_Image_2025-07-03_at_5.4','WhatsApp_Image_2025-07-03_at_5.4','IMG_20250904_105235_imykm4','IMG_20241026_090114_emcwjq','IMG_20241026_142501_feksfm','IMG_20241026_142515_nqfrrp','IMG_20241026_165117_qp0zyn','Screenshot_2024-10-26-14-03-03-83','IMG_20250308_090900_wdxv1v','IMG_20250308_091007_pmbdvw','IMG_20250308_085438_wdpcox','IMG_20241026_154926_mg33sl','IMG_20250308_090918_ikicao','IMG_20250308_090853_aa0tjm','IMG_20250308_085414_hvcyun','IMG_20250308_090322_droalo','IMG_20241026_164928_memt6y'] },
   { id:'SER-ES-02', sub:'SUB-03', tipo:'video', titulo:'Making-of · Enmarañar-Ser', conteo:'11 videos', tam:'~4 GB', fecha:'2024-10 a 2025-10',
-    desc:'Videos del making-of y proceso de creación de la videodanza. Sesiones de ensayo y registro de proceso.', temas:['toque','enmara\u00f1amientos'], estado:'sinrevisar', peso:2,
+    desc:'Videos del making-of y proceso de creación de la videodanza. Sesiones de ensayo y registro de proceso.',
+    temas:['toque','enmarañamientos'],
+    practicas:['toque'],
+    estado:'sinrevisar', peso:2,
     esSerie:true, archivo:'[ serie · 11 videos ]' },
   { id:'SER-DSCF', sub:'SUB-02', tipo:'foto', titulo:'Fotos obra · Dramaturgias · DSCF', conteo:'71 fotos', tam:'~120 MB', fecha:'2025',
-    desc:'Galería profesional de la obra De los mundos de plantación a las marañas mundo. 71 fotografías de alta resolución.', temas:['enmara\u00f1amientos'], estado:'apto', peso:4,
+    desc:'Galería profesional de la obra De los mundos de plantación a las marañas mundo. 71 fotografías de alta resolución.',
+    temas:['enmarañamientos'],
+    practicas:['encauchamientos'],
+    estado:'apto', peso:4,
     esSerie:true, archivo:'[ serie · 71 fotos ]',
     cloudinaryFolder:'dramaturgias_fotos_obra',
     cloudinaryFiles:['DSCF3270-Mejorado-NR_aqez5m','DSCF3309-Mejorado-NR_wdhzwc','DSCF3307-Mejorado-NR_qipcwp','DSCF3308-Mejorado-NR_edjhmw','DSCF3420-Mejorado-NR_eh81oj','DSCF3305-Mejorado-NR_pg1pwy','DSCF3356-Mejorado-NR_zbmzho','DSCF3425-Mejorado-NR_tb64kx','DSCF3413-Mejorado-NR_st7f0p','DSCF3342-Mejorado-NR_dm6zpg','DSCF3362-Mejorado-NR_jvoljw','DSCF3359-Mejorado-NR_fhvtln','DSCF3622-Mejorado-NR_fhzzrz','DSCF3379-Mejorado-NR_o0lf5b','DSCF3378-Mejorado-NR_ui3n5t','DSCF3377-Mejorado-NR_ai56k6','DSCF3375_-Mejorado-NR_mf8ptp','DSCF3371-Mejorado-NR_taxe7c','DSCF3369-Mejorado-NR_oxf7dt','DSCF3364-Mejorado-NR_kqtyts','DSCF3382-Mejorado-NR_wzyxfb','DSCF3367-Mejorado-NR_fpqf7z','DSCF3399-Mejorado-NR_yvsqzn','DSCF3656-Mejorado-NR_tzvbel','DSCF3250-Mejorado-NR_dlx5py','DSCF3312-Mejorado-NR_j9a0xk','DSCF3254-Mejorado-NR_yli9xo','DSCF3728-Mejorado-NR_hs9swl','DSCF3328-Mejorado-NR_cwjo5v','DSCF3724-Mejorado-NR_szy0m5','DSCF3610-Mejorado-NR_reinbq','DSCF3625-Mejorado-NR_q07vxq','DSCF3652-Mejorado-NR_dxmd92','DSCF3314-Mejorado-NR_xckj3d','DSCF3318-Mejorado-NR_np2bzd','DSCF3538-Mejorado-NR_k4fr2p','DSCF3393-Mejorado-NR_ibiuag','DSCF3558-Mejorado-NR_lvwsdt','DSCF3397-Mejorado-NR_ohry0w','DSCF3469-Mejorado-NR_u1vn5h','DSCF3277-Mejorado-NR_xucu5z','DSCF3320-Mejorado-NR_zaaebt','DSCF3667-Mejorado-NR_vho5ma','DSCF3467-Mejorado-NR_f5gu9a','DSCF3406-Mejorado-NR_woygrg','DSCF3400-Mejorado-NR_cpzrgr','DSCF3381-Mejorado-NR_lvwf84','DSCF3525-Mejorado-NR_nlhcuy','DSCF3579-Mejorado-NR_lov1qr','DSCF3328_-Mejorado-NR_kzka8t','DSCF3319-Mejorado-NR_gojfcy','DSCF3255-Mejorado-NR_mupcka','DSCF3576-Mejorado-NR_kvyssk','DSCF3283-Mejorado-NR_tbn363','DSCF3593-Mejorado-NR_by5wpy','DSCF3545-Mejorado-NR_pebfcg','DSCF3533-Mejorado-NR_xsstaw','DSCF3551-Mejorado-NR_pn47ry','DSCF3333-Mejorado-NR_nxqlof','DSCF3351-Mejorado-NR_igxbms','DSCF3277_-Mejorado-NR_ll2egz','DSCF3302-Mejorado-NR_jrurhd','DSCF3718-Mejorado-NR_rsguxt','DSCF3344-Mejorado-NR_cp1dd8','DSCF3353-Mejorado-NR_zqzzae','DSCF3355-Mejorado-NR_prgwgp','DSCF3475-Mejorado-NR_f2gmjl','DSCF3597-Mejorado-NR_sgzxcq','DSCF3336-Mejorado-NR_gpt6wj','DSCF3298-Mejorado-NR_lgmubb','DSCF3334-Mejorado-NR_xti9zf'] },
@@ -1714,42 +1855,71 @@ var ARCHIVOS = [
   { id:'ARC-020', sub:'SUB-04', tipo:'texto', archivo:'Cadena JVACD.pdf',
     titulo:'Per(r)o mundo · escritura coral (v.1)', tam:'—', fecha:'—',
     desc:'Escritura coral de siete autores (Alexánder Llerena, Daniela Botero, Dubián Gallego, Javier Mican, Isabel García, Marcela Ayala, Vicente Bernal). Indagación sobre las fronteras de lo humano y lo no-humano.',
-    tags:['escritura coral','7 autores','Aulide'], temas:['toque','pajaros'], estado:'apto', peso:3 },
+    tags:['escritura coral','7 autores','Aulide'],
+    temas:['toque','pajaros'],
+    practicas:['toque','estudios-con-hojas'],
+    estado:'apto', peso:3 },
   { id:'ARC-021', sub:'SUB-04', tipo:'foto', archivo:'Flyer Per(r)o mundo.jpg',
     titulo:'Flyer · Per(r)o mundo', tam:'—', fecha:'—',
     desc:'Pieza gráfica de difusión de la obra Per(r)o mundo.',
-    tags:['flyer','difusión','Aulide'], temas:['enmara\u00f1amientos'], estado:'apto', peso:1 },
+    tags:['flyer','difusión','Aulide'],
+    temas:['enmarañamientos'],
+    practicas:[],
+    estado:'apto', peso:1 },
   { id:'SER-PM-01', sub:'SUB-04', tipo:'foto', titulo:'Fotos proceso · Per(r)o mundo', conteo:'por inventariar', tam:'—', fecha:'—',
-    desc:'Fotos y videos detrás de cámara del proceso de creación. Textos y fotos de manuscritos.', temas:['toque','pajaros'], estado:'sinrevisar', peso:2,
+    desc:'Fotos y videos detrás de cámara del proceso de creación. Textos y fotos de manuscritos.',
+    temas:['toque','pajaros'],
+    practicas:['toque'],
+    estado:'sinrevisar', peso:2,
     esSerie:true, archivo:'[ serie · proceso ]' },
   // SUB-05 · Creación Artística — Carne de mis bosques corporados
   { id:'ARC-030', sub:'SUB-05', tipo:'video', archivo:'youtube:IDmTLHw_Brc',
     titulo:'Carne de mis bosques corporados · videoperformance', tam:'YouTube', fecha:'2025',
     desc:'Videoperformance del Grupo para la Creación Artística. Registro completo de la obra. Los créditos están al final del videoperformance. Una experiencia de inmersión entre cuerpos, bosques y entidades no humanas.',
-    tags:['videoperformance','bosques','creación artística','youtube'], temas:['encauchamientos','agua','enmara\u00f1amientos'], estado:'apto', peso:4,
-    youtubeId:'IDmTLHw_Brc' },
+    tags:['videoperformance','bosques','creación artística','youtube'],
+    temas:['encauchamientos','agua','enmarañamientos'],
+    practicas:['jardinamientos','desbordamientos'],
+    estado:'apto', peso:4, youtubeId:'IDmTLHw_Brc' },
   { id:'SER-CB-01', sub:'SUB-05', tipo:'foto', titulo:'Registro · Carne de mis bosques', conteo:'por inventariar', tam:'—', fecha:'—',
-    desc:'Fotos detrás de escena y videos del proceso de creación del videoperformance.', temas:['agua','enmara\u00f1amientos'], estado:'sinrevisar', peso:2,
+    desc:'Fotos detrás de escena y videos del proceso de creación del videoperformance.',
+    temas:['agua','enmarañamientos'],
+    practicas:['jardinamientos'],
+    estado:'sinrevisar', peso:2,
     esSerie:true, archivo:'[ serie · detrás de escena ]' },
   // SUB-06 · Salidas de campo
   { id:'SER-10', sub:'SUB-06', tipo:'foto', titulo:'GRINPLART · San Francisco de Sales · FOTOS', conteo:'194 fotos', tam:'—', fecha:'2024-11-23 a 2024-11-24',
-    desc:'Galería de la salida de campo a San Francisco de Sales. 27 investigadores. Metodología Integrada centrada en Respiración.', temas:['respiracion','agua'], estado:'sinrevisar', peso:3,
+    desc:'Galería de la salida de campo a San Francisco de Sales. 27 investigadores. Metodología Integrada centrada en Respiración.',
+    temas:['respiracion','agua'],
+    practicas:['desbordamientos','sonar'],
+    estado:'sinrevisar', peso:3,
     esSerie:true, archivo:'[ serie · 194 fotos ]',
     cloudinaryFolder:'grinplart/san_francisco',
     cloudinaryFiles:(function(){var a=[];for(var i=1;i<=194;i++)a.push('grinplart/san_francisco/grinplart_sanfrancisco_foto_'+String(i).padStart(4,'0')+'.webp');return a;})() },
   { id:'SER-11', sub:'SUB-06', tipo:'foto', titulo:'GRINPLART · campo · FOTOS', conteo:'151 fotos', tam:'—', fecha:'2024',
-    desc:'Fotos de salidas de campo del Grupo para la Creación Artística.', temas:['abejas','pajaros'], estado:'sinrevisar', peso:2,
+    desc:'Fotos de salidas de campo del Grupo para la Creación Artística.',
+    temas:['abejas','pajaros'],
+    practicas:['jardinamientos','estudios-con-hojas'],
+    estado:'sinrevisar', peso:2,
     esSerie:true, archivo:'[ serie · 151 fotos ]',
     cloudinaryFolder:'grinplart/campo',
     cloudinaryFiles:(function(){var a=[];for(var i=1;i<=125;i++)a.push('grinplart/campo/campo_foto_'+String(i).padStart(4,'0')+'.webp');return a;})() },
   { id:'SER-13', sub:'SUB-06', tipo:'video', titulo:'Los Copetones · videos', conteo:'por inventariar', tam:'—', fecha:'—',
-    desc:'Salida de campo a Los Copetones. Material en proceso de inventario.', temas:['pajaros'], estado:'sinrevisar', peso:1,
+    desc:'Salida de campo a Los Copetones. Material en proceso de inventario.',
+    temas:['pajaros'],
+    practicas:['sonar','estudios-con-hojas'],
+    estado:'sinrevisar', peso:1,
     esSerie:true, archivo:'[ serie · Los Copetones ]' },
   { id:'SER-14', sub:'SUB-06', tipo:'foto', titulo:'Villa Rosil · FOTOS', conteo:'por inventariar', tam:'—', fecha:'—',
-    desc:'Salida de campo a Villa Rosil. Fotografías en proceso de inventario.', temas:['agua','plantaciones'], estado:'sinrevisar', peso:1,
+    desc:'Salida de campo a Villa Rosil. Fotografías en proceso de inventario.',
+    temas:['agua','plantaciones'],
+    practicas:['jardinamientos','desbordamientos'],
+    estado:'sinrevisar', peso:1,
     esSerie:true, archivo:'[ serie · Villa Rosil fotos ]' },
   { id:'SER-16', sub:'SUB-02', tipo:'foto', titulo:'FOTO LEMA · «De los mundos de»', conteo:'16 fotos', tam:'~14 MB', fecha:'2025-09-24',
-    desc:'Sesión fotográfica profesional. 16 fotos 2K6A7xxx. Documenta el movimiento de los mundos de plantación a las marañas mundo.', temas:['plantaciones','enmara\u00f1amientos'], estado:'sinrevisar', peso:2,
+    desc:'Sesión fotográfica profesional. 16 fotos 2K6A7xxx. Documenta el movimiento de los mundos de plantación a las marañas mundo.',
+    temas:['plantaciones','enmarañamientos'],
+    practicas:['encauchamientos'],
+    estado:'sinrevisar', peso:2,
     esSerie:true, archivo:'[ serie · 16 fotos ]' }
 ];
 
@@ -1989,8 +2159,115 @@ document.getElementById('nav-toggle').addEventListener('click', function() {
 ══════════════════════════════════════════ */
 var filtroRamaActivo = 'todos';
 var filtroTemaActivo = 'todos';
+var filtroPracticaActivo = 'todos';
 
 function poblarArchivoPorRama() {
+  var cont = document.getElementById('archivo-por-rama');
+  cont.innerHTML = '';
+  var ordenRamas = ['SUB-02','SUB-03','SUB-04','SUB-05','SUB-06'];
+  ordenRamas.forEach(function(subId) {
+    var sub = SUBPROYECTOS[subId];
+    var items = CONTENIDOS.filter(function(c) { return c.sub === subId; });
+    if (items.length === 0) return;
+
+    var bloque = document.createElement('div');
+    bloque.className = 'rama-bloque';
+    bloque.dataset.rama = subId;
+
+    bloque.innerHTML = '' +
+      '<div class="rama-header">' +
+        '<span class="rama-id">' + subId + '</span>' +
+        '<span class="rama-tipo-tag tipo-' + sub.tipo + '">' + sub.rotulo + '</span>' +
+        '<h2 class="rama-titulo">' + sub.titulo + '</h2>' +
+        '<div class="rama-meta">' +
+          '<span><strong>Grupo:</strong> ' + sub.grupo + '</span>' +
+          '<span><strong>Archivos catalogados:</strong> ' + items.length + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rama-desc">' + sub.desc + '</div>' +
+      '<div class="archivos-grid" data-grid-rama="' + subId + '"></div>';
+
+    cont.appendChild(bloque);
+
+    var grid = bloque.querySelector('.archivos-grid');
+    items.forEach(function(c) {
+      var tagsHTML = (c.tags || []).slice(0,4).map(function(t) {
+        return '<span class="card-tag">#' + t + '</span>';
+      }).join('');
+      var temasHTML = (c.temas || []).map(function(t) {
+        return '<span class="card-tag tema">·' + t + '</span>';
+      }).join('');
+      var estadoCls = c.estado === 'apto' ? 'estado-apto' : 'estado-sinrevisar';
+
+      var card = document.createElement('div');
+      card.className = 'archivo-card' + (c.esSerie ? ' is-serie' : '');
+      card.dataset.id = c.id;
+      card.dataset.tipo = c.tipo;
+      card.dataset.temas = (c.temas || []).join(',');
+      card.dataset.practicas = (c.practicas || []).join(',');
+
+      card.innerHTML = '' +
+        '<div class="card-header">' +
+          '<span class="card-id">' + c.id + '</span>' +
+          '<span class="card-tipo tipo-' + c.tipo + '">' + c.tipo + '</span>' +
+        '</div>' +
+        '<div style="margin-bottom:10px;">' +
+          '<div style="font-family:var(--font-italic);font-size:17px;color:var(--crema);line-height:1.35;margin-bottom:8px;">' + c.titulo + '</div>' +
+          (c.esSerie ? '<div class="card-serie-meta">serie · ' + c.conteo + (c.tam && c.tam !== '—' ? ' · ' + c.tam : '') + '</div>' : '') +
+          '<div class="card-archivo">' + c.archivo + '</div>' +
+        '</div>' +
+        '<div class="card-desc">' + c.desc + '</div>' +
+        '<div class="card-tags">' + tagsHTML + temasHTML + '<span class="estado-badge ' + estadoCls + '">' + (c.estado || '') + '</span></div>';
+
+      card.addEventListener('click', function() { mostrarNodo(c); });
+      grid.appendChild(card);
+    });
+  });
+  aplicarFiltros();
+}
+
+function aplicarFiltros() {
+  var totalVisible = 0;
+  document.querySelectorAll('.rama-bloque').forEach(function(b) {
+    var rama = b.dataset.rama;
+    var ramaOk = filtroRamaActivo === 'todos' || filtroRamaActivo === rama;
+    var visiblesEnBloque = 0;
+    b.querySelectorAll('.archivo-card').forEach(function(card) {
+      var temas = (card.dataset.temas || '').split(',').filter(Boolean);
+      var practicas = (card.dataset.practicas || '').split(',').filter(Boolean);
+      var temaOk = filtroTemaActivo === 'todos' || temas.indexOf(filtroTemaActivo) !== -1;
+      var practicaOk = filtroPracticaActivo === 'todos' || practicas.indexOf(filtroPracticaActivo) !== -1;
+      var visible = ramaOk && temaOk && practicaOk;
+      card.classList.toggle('hidden', !visible);
+      if (visible) visiblesEnBloque++;
+    });
+    b.classList.toggle('hidden', !ramaOk || visiblesEnBloque === 0);
+    if (ramaOk) totalVisible += visiblesEnBloque;
+  });
+  document.getElementById('conteo-num').textContent = totalVisible;
+}
+
+document.getElementById('filtros-rama').addEventListener('click', function(e) {
+  if (!e.target.classList.contains('filtro-btn')) return;
+  document.querySelectorAll('#filtros-rama .filtro-btn').forEach(function(b) { b.classList.remove('active'); });
+  e.target.classList.add('active');
+  filtroRamaActivo = e.target.dataset.filtroRama;
+  aplicarFiltros();
+});
+document.getElementById('filtros-tema').addEventListener('click', function(e) {
+  if (!e.target.classList.contains('filtro-btn')) return;
+  document.querySelectorAll('#filtros-tema .filtro-btn').forEach(function(b) { b.classList.remove('active'); });
+  e.target.classList.add('active');
+  filtroTemaActivo = e.target.dataset.filtroTema;
+  aplicarFiltros();
+});
+document.getElementById('filtros-practica').addEventListener('click', function(e) {
+  if (!e.target.classList.contains('filtro-btn')) return;
+  document.querySelectorAll('#filtros-practica .filtro-btn').forEach(function(b) { b.classList.remove('active'); });
+  e.target.classList.add('active');
+  filtroPracticaActivo = e.target.dataset.filtroPractica;
+  aplicarFiltros();
+});
   var cont = document.getElementById('archivo-por-rama');
   cont.innerHTML = '';
   var ordenRamas = ['SUB-02','SUB-03','SUB-04','SUB-05','SUB-06'];
