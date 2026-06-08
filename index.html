@@ -2408,8 +2408,7 @@ function poblarArchivoPorRama() {
           '<div class="card-archivo">' + c.archivo + '</div>' +
         '</div>' +
         '<div class="card-desc">' + c.desc + '</div>' +
-        '<div class="card-tags">' + tagsHTML + temasHTML + '<span class="estado-badge ' + estadoCls + '">' + (c.estado || '') + '</span></div>' +
-        '<button class="card-mapa-btn" data-node-id="' + c.id + '">◉ ver en mapa</button>';
+        '<div class="card-tags">' + tagsHTML + temasHTML + '<span class="estado-badge ' + estadoCls + '">' + (c.estado || '') + '</span></div>';
 
       card.addEventListener('click', function() { mostrarNodo(c); });
       grid.appendChild(card);
