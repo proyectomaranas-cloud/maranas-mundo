@@ -1638,12 +1638,19 @@ var ARCHIVOS = [
     titulo:'Trailer final · Enmarañar-Ser', tam:'—', fecha:'—',
     desc:'Pieza promocional definitiva de la videodanza. Junto al póster, es la comunicación principal de la obra.',
     tags:['trailer','pieza promocional','videodanza'], temas:['naturaleza','dualidad'], estado:'apto', peso:3 },
-  { id:'SER-ES-01', sub:'SUB-03', tipo:'foto', titulo:'Fotos obra · Enmarañar-Ser', conteo:'70+ fotos', tam:'~70 MB', fecha:'2025-10-13',
-    desc:'Galería profesional retocada de la videodanza. Serie homogénea DSCF3xxx-Mejorado-NR. Material principal de imagen fija curada.', temas:['naturaleza','transformacion'], estado:'sinrevisar', peso:3,
-    esSerie:true, archivo:'[ serie · 70+ fotos ]' },
+  { id:'SER-ES-01', sub:'SUB-03', tipo:'foto', titulo:'Fotos proceso · Enmarañar-Ser', conteo:'19 fotos', tam:'~30 MB', fecha:'2024-10 a 2025-09',
+    desc:'Fotos de proceso, making-off y póster de la videodanza Enmarañar-Ser.', temas:['naturaleza','transformacion'], estado:'sinrevisar', peso:3,
+    esSerie:true, archivo:'[ serie · 19 fotos ]',
+    cloudinaryFolder:'enmararanarse_fotos_proce',
+    cloudinaryFiles:['POSTER_ENMARANA-SER_AGOSTO_2025','WhatsApp_Image_2025-07-03_at_9.28.33_PM','WhatsApp_Image_2025-07-03_at_9.28.34_PM','WhatsApp_Image_2025-09-04_at_12.19.14_PM','IMG_20250904_105254','IMG_20241026_090114','IMG_20241026_142501','IMG_20241026_142519','IMG_20241026_165117','Screenshot_2024-10-26-16-14-06-852_com.whatsapp','IMG_20250308_090909'] },
   { id:'SER-ES-02', sub:'SUB-03', tipo:'video', titulo:'Making-of · Enmarañar-Ser', conteo:'11 videos', tam:'~4 GB', fecha:'2024-10 a 2025-10',
     desc:'Videos del making-of y proceso de creación de la videodanza. Sesiones de ensayo y registro de proceso.', temas:['transformacion'], estado:'sinrevisar', peso:2,
     esSerie:true, archivo:'[ serie · 11 videos ]' },
+  { id:'SER-DSCF', sub:'SUB-02', tipo:'foto', titulo:'Fotos obra · Dramaturgias · DSCF', conteo:'71 fotos', tam:'~120 MB', fecha:'2025',
+    desc:'Galería profesional de la obra De los mundos de plantación a las marañas mundo. 71 fotografías de alta resolución.', temas:['naturaleza','transformacion'], estado:'apto', peso:4,
+    esSerie:true, archivo:'[ serie · 71 fotos ]',
+    cloudinaryFolder:'dramaturgias_fotos_obra',
+    cloudinaryFiles:['DSCF3270-Mejorado-NR_aqez5m','DSCF3309-Mejorado-NR_wdhzwc','DSCF3307-Mejorado-NR_qipcwp','DSCF3308-Mejorado-NR_edjhmw','DSCF3420-Mejorado-NR_eh81oj','DSCF3305-Mejorado-NR_pg1pwy','DSCF3356-Mejorado-NR_zbmzho','DSCF3425-Mejorado-NR_tb64kx','DSCF3413-Mejorado-NR_st7f0p','DSCF3342-Mejorado-NR_dm6zpg','DSCF3362-Mejorado-NR_jvoljw'] },
   // SUB-04 · Aulide — Per(r)o mundo
   { id:'ARC-020', sub:'SUB-04', tipo:'texto', archivo:'Cadena JVACD.pdf',
     titulo:'Per(r)o mundo · escritura coral (v.1)', tam:'—', fecha:'—',
@@ -1665,12 +1672,16 @@ var ARCHIVOS = [
     desc:'Fotos detrás de escena y videos del proceso de creación del videoperformance.', temas:['naturaleza'], estado:'sinrevisar', peso:2,
     esSerie:true, archivo:'[ serie · detrás de escena ]' },
   // SUB-06 · Salidas de campo
-  { id:'SER-10', sub:'SUB-06', tipo:'foto', titulo:'GRINPLART · San Francisco de Sales · FOTOS', conteo:'100+ fotos', tam:'—', fecha:'2024-11-23 a 2024-11-24',
-    desc:'Galería extensa de la salida de campo a San Francisco de Sales. 27 investigadores. Metodología Integrada centrada en Respiración.', temas:['naturaleza','silencio'], estado:'sinrevisar', peso:3,
-    esSerie:true, archivo:'[ serie · 100+ fotos ]' },
-  { id:'SER-11', sub:'SUB-06', tipo:'video', titulo:'GRINPLART · San Francisco de Sales · VIDEOS', conteo:'múltiples', tam:'—', fecha:'2024-11-23 a 2024-11-24',
-    desc:'Videos de la salida de San Francisco de Sales. 27 investigadores en campo.', temas:['naturaleza'], estado:'sinrevisar', peso:2,
-    esSerie:true, archivo:'[ serie · videos campo ]' },
+  { id:'SER-10', sub:'SUB-06', tipo:'foto', titulo:'GRINPLART · San Francisco de Sales · FOTOS', conteo:'194 fotos', tam:'—', fecha:'2024-11-23 a 2024-11-24',
+    desc:'Galería de la salida de campo a San Francisco de Sales. 27 investigadores. Metodología Integrada centrada en Respiración.', temas:['naturaleza','silencio'], estado:'sinrevisar', peso:3,
+    esSerie:true, archivo:'[ serie · 194 fotos ]',
+    cloudinaryFolder:'grinplart/san_francisco',
+    cloudinaryFiles:(function(){var a=[];for(var i=1;i<=194;i++)a.push('grinplart_sanfrancisco_foto_'+String(i).padStart(4,'0'));return a;})() },
+  { id:'SER-11', sub:'SUB-06', tipo:'foto', titulo:'GRINPLART · campo · FOTOS', conteo:'151 fotos', tam:'—', fecha:'2024',
+    desc:'Fotos de salidas de campo del Grupo para la Creación Artística.', temas:['naturaleza'], estado:'sinrevisar', peso:2,
+    esSerie:true, archivo:'[ serie · 151 fotos ]',
+    cloudinaryFolder:'grinplart/campo',
+    cloudinaryFiles:(function(){var a=[];for(var i=1;i<=125;i++)a.push('campo_foto_'+String(i).padStart(4,'0'));return a;})() },
   { id:'SER-13', sub:'SUB-06', tipo:'video', titulo:'Los Copetones · videos', conteo:'por inventariar', tam:'—', fecha:'—',
     desc:'Salida de campo a Los Copetones. Material en proceso de inventario.', temas:['naturaleza'], estado:'sinrevisar', peso:1,
     esSerie:true, archivo:'[ serie · Los Copetones ]' },
@@ -2102,15 +2113,34 @@ function abrirPanel(n) {
 
   panel.classList.add('open');
 
-  // YouTube embed en el panel
+  // YouTube embed o galería Cloudinary o placeholder
   var panelMedia = document.getElementById('panel-media');
   var panelLink = document.getElementById('panel-link');
+
   if (c.youtubeId) {
     panelLink.style.display = 'none';
     panelMedia.innerHTML = '<div style="position:relative;width:100%;padding-bottom:56.25%;background:#000;margin-top:8px;">' +
       '<iframe style="position:absolute;inset:0;width:100%;height:100%;border:none;" ' +
       'src="https://www.youtube.com/embed/' + c.youtubeId + '?rel=0&modestbranding=1" ' +
       'allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
+
+  } else if (c.cloudinaryFolder && c.cloudinaryFiles) {
+    panelLink.style.display = 'none';
+    var files = c.cloudinaryFiles;
+    var base = 'https://res.cloudinary.com/dt6cvonyy/image/upload/w_400,h_300,c_fill,q_auto,f_auto/' + c.cloudinaryFolder + '/';
+    var baseFullRes = 'https://res.cloudinary.com/dt6cvonyy/image/upload/q_auto,f_auto/' + c.cloudinaryFolder + '/';
+    var html = '<div style="margin-top:12px;">';
+    html += '<div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:var(--musgo);text-transform:uppercase;margin-bottom:10px;">' + files.length + ' fotografías · click para ampliar</div>';
+    html += '<div id="galeria-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">';
+    files.forEach(function(fname, i) {
+      html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:rgba(255,255,255,0.04);" onclick="window.open(\'' + baseFullRes + fname + '\',\'_blank\')">' +
+        '<img src="' + base + fname + '" style="width:100%;height:100%;object-fit:cover;transition:opacity 0.3s;" loading="lazy" ' +
+        'onerror="this.parentElement.style.display=\'none\'">' +
+        '</div>';
+    });
+    html += '</div></div>';
+    panelMedia.innerHTML = html;
+
   } else {
     panelLink.style.display = '';
     panelMedia.innerHTML = '';
