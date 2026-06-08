@@ -1721,6 +1721,11 @@ nav {
 
     setTimeout(function() {
       landingEl.style.display = 'none';
+      // landing-video y landing-overlay son position:fixed — escapan del padre oculto
+      var lv = document.getElementById('landing-video');
+      var lo = document.getElementById('landing-overlay');
+      if (lv) lv.style.display = 'none';
+      if (lo) lo.style.display = 'none';
       if (window._landingRAF) cancelAnimationFrame(window._landingRAF);
 
       // Navegar al destino. mostrarVista puede no existir aún si p5 falló;
