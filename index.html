@@ -125,7 +125,27 @@ nav {
   border-top: 1px solid rgba(236,230,220,0.07);
   background: rgba(19,19,15,0.92);
   backdrop-filter: blur(14px);
+  transition: background 0.35s ease, border-color 0.35s ease;
 }
+
+/* Nav en vistas de página — fondo amarillo oscuro, textos oscuros */
+nav.nav--pagina {
+  background: rgba(120, 95, 20, 0.97);
+  border-top-color: rgba(200, 160, 40, 0.25);
+  backdrop-filter: blur(14px);
+}
+nav.nav--pagina .nav-logo .line1,
+nav.nav--pagina .nav-logo .line3 { color: rgba(20, 15, 5, 0.65); }
+nav.nav--pagina .nav-logo .line2 { color: rgba(15, 10, 0, 0.9); }
+nav.nav--pagina .nav-logo:hover .line2 { color: rgba(0,0,0,1); }
+nav.nav--pagina .nav-links a { color: rgba(20, 15, 5, 0.55); }
+nav.nav--pagina .nav-links a:hover,
+nav.nav--pagina .nav-links a.active { color: rgba(0, 0, 0, 0.95); }
+nav.nav--pagina .nav-counter { color: rgba(20, 15, 5, 0.5); }
+nav.nav--pagina .nav-counter span { color: rgba(20, 15, 5, 0.85); }
+nav.nav--pagina #nav-home { color: rgba(20, 15, 5, 0.55); }
+nav.nav--pagina #nav-home:hover { color: rgba(0,0,0,0.9); }
+nav.nav--pagina .btn-nav-toggle { color: rgba(20, 15, 5, 0.55); }
 .nav-logo {
   display: flex; flex-direction: column; align-items: center;
   font-family: var(--font-display);
@@ -2130,6 +2150,7 @@ function mostrarVista(nombre) {
     document.getElementById('vista-mapa').style.display = 'block';
     document.getElementById('sello-institucional').style.display = 'block';
     document.getElementById('canvas-wrapper').style.pointerEvents = 'all';
+    document.querySelector('nav').classList.remove('nav--pagina');
     if (typeof sketch !== 'undefined' && sketch.loop) sketch.loop();
     vistaActual = 'mapa';
     return;
@@ -2137,6 +2158,7 @@ function mostrarVista(nombre) {
 
   // Fuera del mapa: pausar p5 completamente y bloquear su canvas
   document.getElementById('canvas-wrapper').style.pointerEvents = 'none';
+  document.querySelector('nav').classList.add('nav--pagina');
   if (typeof sketch !== 'undefined' && sketch.noLoop) sketch.noLoop();
   document.getElementById('sello-institucional').style.display = 'none';
 
