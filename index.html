@@ -423,7 +423,10 @@ nav {
   transform: translateY(0);
 }
 #vista-nodo {
-  pointer-events: all !important;
+  pointer-events: none;
+}
+#vista-nodo.visible {
+  pointer-events: all;
 }
 
 .pag-inner {
