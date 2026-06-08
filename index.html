@@ -2278,9 +2278,12 @@ function renderGaleria(files, contenedor) {
         '<div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:12px solid rgba(236,230,220,0.8);margin-left:3px;"></div>' +
         '</div></div></div>';
     } else {
+      // Si el public_id ya tiene extensión (.webp, .jpg) usarla; si no, pedir jpg
+      var ext = fname.match(/\.(webp|jpg|jpeg|png)$/i);
+      var imgUrl = ext ? baseImg + pid : baseImg + pid + '.jpg';
       html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:rgba(255,255,255,0.04);" ' +
         'onclick="LB.open(\'\', window._lbFiles, ' + i + ')">' +
-        '<img src="' + baseImg + pid + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy" ' +
+        '<img src="' + imgUrl + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy" ' +
         'onerror="this.parentElement.style.display=\'none\'">' +
         '</div>';
     }
