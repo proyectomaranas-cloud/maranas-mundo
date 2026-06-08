@@ -1648,10 +1648,10 @@ var ARCHIVOS = [
     desc:'Video de la obra completa publicado en YouTube. Registro del performance de gran formato del Grupo Dramaturgias del Cuerpo. Música y creación sonora: Hernán Darío Guzmán.',
     tags:['youtube','obra completa','música','Hernán Guzmán'], temas:['naturaleza','transformacion'], estado:'apto', peso:4,
     youtubeId:'Tcyzxk4IEl4' },
-{ id:'ARC-YT-03', sub:'SUB-06', tipo:'video', archivo:'youtube:IDmTLHw_Brc',
-    titulo:'Carne de mis bosques corporados · obra final', tam:'YouTube', fecha:'2025',
-    desc:'Obra final del Grupo para la Creación Artística GRINPLART. Registro audiovisual del proceso de investigación-creación en territorio.',
-    tags:['youtube','obra final','GRINPLART','bosque'], temas:['naturaleza','territorio'], estado:'apto', peso:3,
+  { id:'ARC-YT-03', sub:'SUB-06', tipo:'video', archivo:'youtube:IDmTLHw_Brc',
+    titulo:'Cartografías Sur · salidas de campo', tam:'YouTube', fecha:'2025',
+    desc:'Video que documenta las salidas de campo al sur: San Francisco de Sales, Los Copetones, Villa Rosil. Registro del proceso colectivo de investigación-creación en territorio.',
+    tags:['youtube','salidas de campo','territorio','cartografías'], temas:['naturaleza','silencio'], estado:'apto', peso:3,
     youtubeId:'IDmTLHw_Brc' },
   // SUB-03 · Arte Danzario — Enmarañar-Ser
   { id:'ARC-YT-02', sub:'SUB-03', tipo:'video', archivo:'youtube:2dhOlxuE2nA',
@@ -1679,7 +1679,7 @@ var ARCHIVOS = [
     desc:'Fotos de proceso, making-off y póster de la videodanza Enmarañar-Ser.', temas:['naturaleza','transformacion'], estado:'sinrevisar', peso:3,
     esSerie:true, archivo:'[ serie · 19 fotos ]',
     cloudinaryFolder:'enmararanarse_fotos_proce',
-    cloudinaryFiles:['POSTER_ENMARANA-SER_AGOSTO_2025','WhatsApp_Image_2025-07-03_at_9.28.33_PM','WhatsApp_Image_2025-07-03_at_9.28.34_PM','WhatsApp_Image_2025-09-04_at_12.19.14_PM','IMG_20250904_105254','IMG_20241026_090114','IMG_20241026_142501','IMG_20241026_142519','IMG_20241026_165117','Screenshot_2024-10-26-16-14-06-852_com.whatsapp','IMG_20250308_090909'] },
+    cloudinaryFiles:['WhatsApp_Image_2025-07-03_at_5.4','POSTER_ENMARA\u00d1AR_-_SER_AGOST','WhatsApp_Image_2025-07-03_at_5.4','WhatsApp_Image_2025-07-03_at_5.4','IMG_20250904_105235_imykm4','IMG_20241026_090114_emcwjq','IMG_20241026_142501_feksfm','IMG_20241026_142515_nqfrrp','IMG_20241026_165117_qp0zyn','Screenshot_2024-10-26-14-03-03-83','IMG_20250308_090900_wdxv1v','IMG_20250308_091007_pmbdvw','IMG_20250308_085438_wdpcox','IMG_20241026_154926_mg33sl','IMG_20250308_090918_ikicao','IMG_20250308_090853_aa0tjm','IMG_20250308_085414_hvcyun','IMG_20250308_090322_droalo','IMG_20241026_164928_memt6y'] },
   { id:'SER-ES-02', sub:'SUB-03', tipo:'video', titulo:'Making-of · Enmarañar-Ser', conteo:'11 videos', tam:'~4 GB', fecha:'2024-10 a 2025-10',
     desc:'Videos del making-of y proceso de creación de la videodanza. Sesiones de ensayo y registro de proceso.', temas:['transformacion'], estado:'sinrevisar', peso:2,
     esSerie:true, archivo:'[ serie · 11 videos ]' },
@@ -2164,17 +2164,15 @@ function abrirPanel(n) {
   } else if (c.cloudinaryFolder && c.cloudinaryFiles && c.cloudinaryFiles.length > 0) {
     panelLink.style.display = 'none';
     var files = c.cloudinaryFiles;
-    var folder = c.cloudinaryFolder;
-    // Guardar globalmente para el lightbox
-    window._lbFolder = folder;
+    window._lbFolder = '';
     window._lbFiles  = files;
-    var base = 'https://res.cloudinary.com/dt6cvonyy/image/upload/w_400,h_300,c_fill,q_auto,f_auto/' + folder + '/';
+    var base = 'https://res.cloudinary.com/dt6cvonyy/image/upload/w_400,h_300,c_fill,q_auto/';
     var html = '<div style="margin-top:12px;">';
     html += '<div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:var(--musgo);text-transform:uppercase;margin-bottom:10px;">' + files.length + ' fotografías · click para ampliar</div>';
     html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">';
     files.forEach(function(fname, i) {
       html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:rgba(255,255,255,0.04);" ' +
-        'onclick="LB.open(window._lbFolder, window._lbFiles, ' + i + ')">' +
+        'onclick="LB.open(\'\', window._lbFiles, ' + i + ')">' +
         '<img src="' + base + fname + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy" ' +
         'onerror="this.parentElement.style.display=\'none\'">' +
         '</div>';
@@ -2986,7 +2984,7 @@ var LB = {
 
   show: function() {
     var fname = this.files[this.index];
-    var url = 'https://res.cloudinary.com/dt6cvonyy/image/upload/q_auto,f_auto/' + this.folder + '/' + fname;
+    var url = 'https://res.cloudinary.com/dt6cvonyy/image/upload/q_auto/' + fname;
     this.img.style.opacity = '0';
     this.loading.style.display = 'block';
     this.img.onload = function() {
