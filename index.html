@@ -508,7 +508,7 @@ nav.nav--pagina .nav-links a.active {
   overflow-y: auto;
   opacity: 0; pointer-events: none;
   transform: translateY(16px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease, height 0.45s cubic-bezier(0.16,1,0.3,1);
   outline: none;  /* sin borde de foco visible */
 }
 .vista-pagina.visible {
@@ -1314,6 +1314,7 @@ body.nav-hidden nav {
 }
 body.nav-hidden .vista-pagina {
   height: 100vh;
+  transition: opacity 0.4s ease, transform 0.4s ease, height 0.45s cubic-bezier(0.16,1,0.3,1);
 }
 body.nav-hidden #nav-toggle {
   bottom: 12px;
