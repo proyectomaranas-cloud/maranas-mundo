@@ -1126,6 +1126,24 @@ nav.nav--pagina .nav-links a.active {
   transform-origin: left;
   transition: transform 0.5s cubic-bezier(0.2,0.8,0.2,1);
 }
+/* Flyer hover — imagen de fondo que aparece al hover */
+.portal-flyer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  z-index: 0;
+}
+.portal-flyer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(13,12,8,0.72);
+}
+.portal:hover .portal-flyer { opacity: 1; }
+.portal > *:not(.portal-flyer) { position: relative; z-index: 1; }
 .portal:hover { background: var(--bg-2); }
 .portal:hover::before { transform: scaleX(1); }
 
@@ -1332,24 +1350,28 @@ nav {
     <div class="portales-label">Cuatro grupos de investigación</div>
     <div class="portales">
       <div class="portal" data-portal="tronco" style="--portal-color: var(--willow);">
+        <div class="portal-flyer" style="background-image:url('https://res.cloudinary.com/dt6cvonyy/image/upload/w_600,c_fill,q_auto/flyers_obras/flyer_obra_DRAMATURGIAS_1')"></div>
         <div class="portal-num">I · Obra</div>
         <div class="portal-nombre">De los mundos de plantación<br>a las marañas mundo</div>
         <div class="portal-desc">Grupo Dramaturgias del Cuerpo y Escrituras del Espacio<br>Dirección: Álvaro Iván Hernández Rodríguez · Co-dirección: Regina María Gutiérrez Bermúdez</div>
         <div class="portal-cta"><span class="arrow">→</span> explorar la obra</div>
       </div>
       <div class="portal" data-portal="temas" style="--portal-color: var(--ocre);">
+        <div class="portal-flyer" style="background-image:url('https://res.cloudinary.com/dt6cvonyy/image/upload/w_600,c_fill,q_auto/flyers_obras/Flyer_obra_ARTE_DANZARIO_1')"></div>
         <div class="portal-num">II · Obra</div>
         <div class="portal-nombre">Enmarañar-Ser</div>
         <div class="portal-desc">Grupo Arte Danzario (PCAD)<br>Ana Cecilia Vargas Núñez · Diana Lucía León Bohórquez · Yina Erazo Coral · Jhonnatan Luna "Tatán"</div>
         <div class="portal-cta"><span class="arrow">→</span> explorar la obra</div>
       </div>
       <div class="portal" data-portal="archivo" style="--portal-color: var(--vino);">
+        <div class="portal-flyer" style="background-image:url('https://res.cloudinary.com/dt6cvonyy/image/upload/w_600,c_fill,q_auto/flyers_obras/Flyer_obra_AULIDE_1')"></div>
         <div class="portal-num">III · Obra</div>
         <div class="portal-nombre">Per(r)o mundo</div>
         <div class="portal-desc">Grupo Aulide<br>Alexánder Llerena · Daniela Botero · Dubián Gallego · Javier Mican · Isabel García · Marcela Ayala · Vicente Bernal</div>
         <div class="portal-cta"><span class="arrow">→</span> explorar la obra</div>
       </div>
       <div class="portal" data-portal="libre" style="--portal-color: var(--musgo);">
+        <div class="portal-flyer" style="background-image:url('https://res.cloudinary.com/dt6cvonyy/image/upload/w_600,c_fill,q_auto/flyers_obras/Flyer_obra_CREACI%C3%93N_ARTISTICA_1')"></div>
         <div class="portal-num">IV · Obra</div>
         <div class="portal-nombre">Carne de mis<br>bosques corporados</div>
         <div class="portal-desc">Grupo para la Creación Artística<br>Créditos completos al final del videoperformance</div>
