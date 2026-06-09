@@ -635,6 +635,48 @@ nav.nav--pagina .nav-links a.active {
   color: var(--ocre);
 }
 
+/* ── Botón Seguir la Maraña ── */
+#btn-seguir-marana {
+  position: fixed;
+  top: 28px;
+  right: 32px;
+  z-index: 320;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--verde-luz);
+  border: none;
+  padding: 10px 20px;
+  cursor: none;
+  transition: background 0.2s, transform 0.2s;
+  display: none;
+}
+#btn-seguir-marana:hover {
+  background: var(--crema);
+  transform: translateX(-3px);
+}
+#vista-nodo.visible #btn-seguir-marana {
+  display: block;
+}
+
+/* ── Etiqueta de afinidad que aparece bajo el botón ── */
+#marana-hint {
+  position: fixed;
+  top: 68px;
+  right: 32px;
+  z-index: 320;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  text-align: right;
+  display: none;
+  max-width: 200px;
+}
+#vista-nodo.visible #marana-hint { display: block; }
+
 /* ── Vista archivo: compacta pero con respiración ── */
 #vista-archivo .pag-inner {
   padding-top: 48px;
@@ -1715,6 +1757,13 @@ nav {
 <div class="vista-pagina" id="vista-nodo">
   <div class="pag-inner" style="max-width:860px;">
     <button class="btn-back" data-back>&#8592; Volver al mapa</button>
+
+    <!-- Botón Seguir la Maraña -->
+    <button id="btn-seguir-marana" onclick="seguirMarana()" title="Saltar a un archivo relacionado">
+      Seguir la maraña →
+    </button>
+    <div id="marana-hint"></div>
+
     <div style="margin-bottom:32px;">
       <span class="panel-tipo" id="nodo-tipo" style="margin-bottom:18px;display:inline-block;"></span>
       <div class="panel-rama" id="nodo-rama" style="margin-bottom:18px;"></div>
@@ -2317,6 +2366,80 @@ function renderGaleria(files, contenedor) {
   contenedor.innerHTML = html;
 }
 
+// ── SEGUIR LA MARAÑA — algoritmo de navegación rizomática ─────────
+var _maranaHistorial = [];   // IDs visitados en esta sesión
+var _maranaActual    = null; // ID del nodo actual
+
+function calcularAfinidad(a, b) {
+  // a y b son objetos CONTENIDOS
+  var score = 0;
+  var pracA = a.practicas || [];
+  var pracB = b.practicas || [];
+  var temA  = a.temas || [];
+  var temB  = b.temas || [];
+
+  // Prácticas compartidas × 3
+  pracA.forEach(function(p) { if (pracB.indexOf(p) !== -1) score += 3; });
+  // Nichos compartidos × 2
+  temA.forEach(function(t)  { if (temB.indexOf(t) !== -1) score += 2; });
+  // Distinto grupo × 1 (cruce entre SUBs)
+  if (a.sub !== b.sub) score += 1;
+
+  return score;
+}
+
+function seguirMarana() {
+  if (!_maranaActual) return;
+
+  var actual = CONTENIDOS.filter(function(c) { return c.id === _maranaActual; })[0];
+  if (!actual) return;
+
+  // Candidatos: todos excepto el actual
+  var candidatos = CONTENIDOS.filter(function(c) {
+    return c.id !== _maranaActual && c.sub !== 'SUB-01';
+  });
+
+  // Si todos fueron visitados, resetear historial (menos el actual)
+  var noVisitados = candidatos.filter(function(c) {
+    return _maranaHistorial.indexOf(c.id) === -1;
+  });
+  if (noVisitados.length === 0) {
+    _maranaHistorial = [_maranaActual];
+    noVisitados = candidatos;
+  }
+
+  // Calcular scores y ordenar
+  var scored = noVisitados.map(function(c) {
+    return { cont: c, score: calcularAfinidad(actual, c) };
+  });
+  scored.sort(function(a, b) { return b.score - a.score; });
+
+  // Tomar el top 5 y elegir uno al azar
+  var pool = scored.slice(0, Math.min(5, scored.length));
+  var elegido = pool[Math.floor(Math.random() * pool.length)];
+
+  if (!elegido) return;
+
+  // Registrar en historial
+  _maranaHistorial.push(elegido.cont.id);
+
+  // Mostrar hint de afinidad
+  var hint = document.getElementById('marana-hint');
+  if (hint) {
+    var pracComp = (actual.practicas || []).filter(function(p) {
+      return (elegido.cont.practicas || []).indexOf(p) !== -1;
+    });
+    var temComp = (actual.temas || []).filter(function(t) {
+      return (elegido.cont.temas || []).indexOf(t) !== -1;
+    });
+    var razon = pracComp.length > 0 ? pracComp[0] : (temComp.length > 0 ? temComp[0] : 'deriva');
+    hint.textContent = '↳ vía ' + razon + ' · ' + (_maranaHistorial.length - 1) + ' saltos';
+  }
+
+  // Navegar
+  mostrarNodo(elegido.cont);
+}
+
 function mostrarVista(nombre) {
   document.getElementById('vista-mapa').style.display = nombre === 'mapa' ? 'block' : 'none';
   document.getElementById('panel').classList.remove('open');
@@ -2361,6 +2484,12 @@ function mostrarVista(nombre) {
 }
 
 function mostrarNodo(cont) {
+  // Registrar nodo actual para seguirMarana
+  _maranaActual = cont.id;
+  if (_maranaHistorial.indexOf(cont.id) === -1) {
+    _maranaHistorial.push(cont.id);
+  }
+
   document.getElementById('nodo-tipo').textContent = cont.tipo.toUpperCase();
   document.getElementById('nodo-tipo').className = 'panel-tipo tipo-' + cont.tipo;
   var sub = SUBPROYECTOS[cont.sub];
