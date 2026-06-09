@@ -1136,14 +1136,9 @@ nav.nav--pagina .nav-links a.active {
   transition: opacity 0.45s ease;
   z-index: 0;
 }
-.portal-flyer::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(13,12,8,0.72);
-}
 .portal:hover .portal-flyer { opacity: 1; }
-.portal > *:not(.portal-flyer) { position: relative; z-index: 1; }
+.portal > *:not(.portal-flyer) { position: relative; z-index: 1; transition: opacity 0.3s ease; }
+.portal:hover > *:not(.portal-flyer) { opacity: 0; pointer-events: none; }
 .portal:hover { background: var(--bg-2); }
 .portal:hover::before { transform: scaleX(1); }
 
