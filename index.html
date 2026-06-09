@@ -635,21 +635,33 @@ nav.nav--pagina .nav-links a.active {
   color: var(--ocre);
 }
 
-/* ── Vista archivo: más compacta — es catálogo, no página editorial ── */
+/* ── Vista archivo: compacta pero con respiración ── */
 #vista-archivo .pag-inner {
-  padding-top: 28px;
+  padding-top: 48px;
 }
 #vista-archivo .pag-titulo {
-  font-size: clamp(22px, 3vw, 36px);
-  margin-bottom: 8px;
+  font-size: clamp(28px, 4vw, 48px);
+  margin-bottom: 12px;
 }
 #vista-archivo .pag-subtitulo {
-  font-size: 14px;
-  margin-bottom: 20px;
+  font-size: 15px;
+  margin-bottom: 28px;
   max-width: 100%;
 }
 #vista-archivo .pag-linea {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+}
+#vista-archivo .filtros-bloque-label {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  margin-bottom: 10px;
+}
+#vista-archivo .filtro-btn {
+  font-size: 11px;
+  padding: 6px 14px;
+}
+#vista-archivo .filtros-bloque {
+  margin-bottom: 18px;
 }
 
 /* ── Lightbox ── */
@@ -1889,6 +1901,7 @@ var ARCHIVOS = [
     temas:['plantaciones','enmarañamientos'],
     practicas:['encauchamientos','toque','desbordamientos','sonar','jardinamientos','estudios-con-hojas'],
     estado:'apto', peso:5,
+    driveEmbed:'https://drive.google.com/file/d/1jfQdICaJ322KFTcGU5mpV-GqAqxWlaxM/preview',
     icono:'◎ ART' },
   // SUB-02 · Dramaturgias — obra principal
   { id:'ARC-YT-01', sub:'SUB-02', tipo:'video', archivo:'youtube:Tcyzxk4IEl4',
@@ -2385,6 +2398,9 @@ function mostrarNodo(cont) {
         '<iframe style="position:absolute;inset:0;width:100%;height:100%;border:none;" ' +
         'src="https://www.youtube.com/embed/' + youtubeId + '?rel=0&modestbranding=1" ' +
         'allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
+    } else if (cont.driveEmbed) {
+      mediaEl.innerHTML = '<div style="width:100%;height:600px;border:1px solid rgba(236,230,220,0.08);border-radius:2px;overflow:hidden;">' +
+        '<iframe src="' + cont.driveEmbed + '" style="width:100%;height:100%;border:none;" allow="autoplay"></iframe></div>';
     } else if (cont.cloudinaryFolder && cont.cloudinaryFiles && cont.cloudinaryFiles.length > 0) {
       renderGaleria(cont.cloudinaryFiles, mediaEl);
     } else {
