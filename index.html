@@ -2559,6 +2559,15 @@ document.getElementById('nav-toggle').addEventListener('click', function() {
   // Calcular nuevo navH y disparar evento para que p5 redistribuya nodos
   var newNavH = hidden ? 0 : parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'));
   window.dispatchEvent(new CustomEvent('nav-toggled', { detail: { navH: newNavH } }));
+  // Forzar reflow en vista-pagina visible para que recalcule su scroll height
+  setTimeout(function() {
+    var vistaVisible = document.querySelector('.vista-pagina.visible');
+    if (vistaVisible) {
+      vistaVisible.style.overflow = 'hidden';
+      vistaVisible.offsetHeight; // trigger reflow
+      vistaVisible.style.overflow = '';
+    }
+  }, 460); // después de que termine la transición del nav (0.45s)
 });
 
 /* ══════════════════════════════════════════
