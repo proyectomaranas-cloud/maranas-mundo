@@ -1535,8 +1535,8 @@ nav {
       <div class="quees-item">
         <div class="quees-num">03 · para qué</div>
         <div class="quees-titulo">Un archivo abierto</div>
-        <div class="quees-desc">para recorrer, citar y descargar: cada nodo es un registro catalogado del proceso.</div>
-        <button class="quees-link" data-quees="datos">→ citar y descargar</button>
+        <div class="quees-desc">para recorrer y citar: cada nodo es un registro catalogado del proceso.</div>
+        <button class="quees-link" data-quees="datos">→ cómo citar</button>
       </div>
     </div>
 
@@ -1737,17 +1737,8 @@ nav {
       <p class="fase1-nota">Formato APA 7. Cada archivo del rizoma tiene además su propia cita al final de su ficha.</p>
     </div>
 
-    <div class="publicacion-bloque">
-      <div class="publicacion-eyebrow">Datos abiertos del catálogo</div>
-      <div class="pag-cuerpo" style="margin-bottom:24px;">
-        <p>El catálogo que da forma al rizoma se puede descargar completo para consulta, análisis o cruce con otras investigaciones: identificador, obra, grupo, tipo, fecha, descripción, etiquetas, nichos, prácticas emergentes y enlaces a los medios.</p>
-      </div>
-      <div class="cita-acciones">
-        <button class="btn-fase1" id="descargar-csv">↓ descargar CSV</button>
-        <button class="btn-fase1" id="descargar-json">↓ descargar JSON</button>
-      </div>
-      <p class="fase1-nota" id="datos-nota"></p>
-    </div>
+    <!-- Datos abiertos (CSV/JSON): desactivado hasta aprobación del IP. El código sigue en el script FASE 1;
+         para reactivarlo, volver a poner aquí los botones #descargar-csv y #descargar-json y la nota #datos-nota. -->
   </div>
 </div>
 
@@ -3968,7 +3959,7 @@ window.addEventListener('wheel', function(e) {
 
   /* ── Citas ──────────────────────────────── */
   function citaSitioHTML() {
-    return 'Hernández Rodríguez, Á. I. (Investigador principal) y Hernández, N. (Cartografía digital). (2026). ' +
+    return 'Hernández Rodríguez, Á. I. (2026). ' +
       '<em>Marañas Mundo: cartografía viva del proyecto «' + TITULO_PROYECTO + '»</em> [Plataforma web]. ' +
       'Universidad Distrital Francisco José de Caldas, Facultad de Artes ASAB. Recuperado el ' + hoy() + ', de ' + esc(urlSitio());
   }
