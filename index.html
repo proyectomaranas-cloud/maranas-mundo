@@ -1342,6 +1342,127 @@ nav {
 }
 .btn-inicio:hover { color: var(--crema); }
 
+
+/* ══════════════════════════════════════════
+   FASE 1 · patrones de plataforma de investigación
+   (Qué es · En cifras · Cómo citar · Datos abiertos)
+══════════════════════════════════════════ */
+.quees {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line);
+  margin: 0 0 72px;
+  opacity: 0;
+  animation: landRise 1s cubic-bezier(0.2,0.8,0.2,1) 0.85s forwards;
+}
+.quees-item {
+  padding: 26px 28px 28px 0;
+  border-right: 1px solid var(--line);
+}
+.quees-item + .quees-item { padding-left: 28px; }
+.quees-item:last-child { border-right: none; }
+.quees-num {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: var(--tr-label);
+  text-transform: uppercase; color: var(--ocre);
+  margin-bottom: 14px;
+}
+.quees-titulo {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-size: clamp(24px, 2.4vw, 32px);
+  line-height: 1.05; color: var(--blanco);
+  margin-bottom: 10px;
+}
+.quees-desc {
+  font-size: 14px; line-height: 1.6;
+  color: var(--text-mid); font-weight: 300;
+  max-width: 320px;
+}
+.quees-link {
+  display: inline-block; margin-top: 14px;
+  background: none; border: none; padding: 0;
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--verde-luz);
+  cursor: none;
+}
+.quees-link:hover { color: var(--crema); }
+@media (max-width: 860px) {
+  .quees { grid-template-columns: 1fr; }
+  .quees-item, .quees-item + .quees-item {
+    padding: 22px 0; border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .quees-item:last-child { border-bottom: none; }
+}
+
+/* ── En cifras ── */
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin: 0 0 72px;
+}
+.cifra {
+  background: var(--bg);
+  padding: 26px 22px 22px;
+}
+.cifra-num {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1; color: var(--willow);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 12px;
+}
+.cifra-label {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text-mid);
+  line-height: 1.6;
+}
+
+/* ── Cómo citar ── */
+.cita-caja {
+  position: relative;
+  border: 1px solid var(--line-strong);
+  background: rgba(255,255,255,0.02);
+  padding: 22px 24px;
+  font-size: 15px; line-height: 1.7;
+  color: var(--crema);
+  max-width: 860px;
+}
+.cita-caja em { font-family: var(--font-italic); font-size: 1.06em; }
+.cita-acciones { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.btn-fase1 {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--verde-luz);
+  background: none;
+  border: 1px solid rgba(47,191,113,0.35);
+  padding: 8px 16px; border-radius: 2px;
+  cursor: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-fase1:hover { border-color: var(--verde-luz); color: var(--crema); }
+.btn-fase1.ok { color: var(--willow); border-color: var(--willow); }
+.fase1-nota {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.06em;
+  color: var(--text-dim); line-height: 1.7;
+  margin-top: 14px; max-width: 760px;
+}
+.nodo-cita {
+  margin-top: 56px;
+  border-top: 1px solid var(--line);
+  padding-top: 28px;
+}
+.nodo-cita .cita-caja { font-size: 13px; }
 </style>
 </head>
 <body>
@@ -1394,6 +1515,28 @@ nav {
         <button class="entrar-directo" id="entrar-directo">
           <span class="dot"></span> Entrar al rizoma
         </button>
+      </div>
+    </div>
+
+    <!-- FASE 1 · Qué es Marañas (patrón Hílame) -->
+    <div class="quees" id="quees">
+      <div class="quees-item">
+        <div class="quees-num">01 · qué es</div>
+        <div class="quees-titulo">Una cartografía viva</div>
+        <div class="quees-desc">de cuatro obras, ocho nichos somato-poéticos y los archivos de su proceso, entretejidos como rizoma.</div>
+        <button class="quees-link" data-quees="mapa">→ entrar al rizoma</button>
+      </div>
+      <div class="quees-item">
+        <div class="quees-num">02 · quiénes</div>
+        <div class="quees-titulo">Un proyecto de investigación-creación</div>
+        <div class="quees-desc">de 30 creadores-investigadores de la Facultad de Artes ASAB, Universidad Distrital Francisco José de Caldas.</div>
+        <button class="quees-link" data-quees="sobre">→ conocer el proyecto</button>
+      </div>
+      <div class="quees-item">
+        <div class="quees-num">03 · para qué</div>
+        <div class="quees-titulo">Un archivo abierto</div>
+        <div class="quees-desc">para recorrer, citar y descargar: cada nodo es un registro catalogado del proceso.</div>
+        <button class="quees-link" data-quees="datos">→ citar y descargar</button>
       </div>
     </div>
 
@@ -1515,6 +1658,17 @@ nav {
     <h1 class="pag-titulo">Prácticas artísticas para una<br><em>Colombia más que humana</em></h1>
     <p class="pag-subtitulo"><strong>De los Mundos de Plantación a las Marañas Mundo.</strong> Proyecto ganador de la Convocatoria Banco de Proyectos 2023 de la Universidad Distrital Francisco José de Caldas, financiado por la Oficina de Investigaciones. Investigación-creación con 30 creadores-investigadores de la Facultad de Artes ASAB.</p>
     <div class="pag-linea"></div>
+    <!-- FASE 1 · En cifras (patrón Hílame) — se calcula desde el catálogo -->
+    <div class="pag-eyebrow">Marañas en cifras</div>
+    <div class="cifras" id="cifras">
+      <div class="cifra"><div class="cifra-num" data-cifra="archivos">0</div><div class="cifra-label">archivos<br>en el rizoma</div></div>
+      <div class="cifra"><div class="cifra-num" data-cifra="fotos">0</div><div class="cifra-label">fotografías<br>publicadas</div></div>
+      <div class="cifra"><div class="cifra-num" data-cifra="videos">0</div><div class="cifra-label">videos<br>publicados</div></div>
+      <div class="cifra"><div class="cifra-num" data-cifra="investigadores">30</div><div class="cifra-label">creadores-<br>investigadores</div></div>
+      <div class="cifra"><div class="cifra-num" data-cifra="grupos">4</div><div class="cifra-label">grupos ·<br>4 obras</div></div>
+      <div class="cifra"><div class="cifra-num" data-cifra="nichos">8</div><div class="cifra-label">nichos<br>somato-poéticos</div></div>
+    </div>
+
     <div class="pag-cuerpo">
       <p>El proyecto toma la obra de dramaturgia <em>«El silencio del salvaje: viaje interior por los laticíferos de la Siringa»</em> —escrita en 2014 por Álvaro Iván Hernández— como eje metodológico y movilizador de prácticas performativas orientadas a un agenciamiento reparador y restitutivo del continuo naturaleza-cultura. Desde ese eje, el hacer performativo se propone como lugar de emergencia de múltiples mundos imaginados y modos de existencia que favorecen el cultivo de capacidades afectivas propicias para activar formas de relacionamiento con humanos y entidades más que humanas.</p>
       <p>El proyecto se pregunta por los modos de hacer-sentir-pensar que pueden movilizarse desde las prácticas artísticas como respuesta a los tiempos de una crisis ecológica nunca antes enfrentada por la humanidad. Dicha labor requiere de una imaginación activa que permita despertar posibilidades para la construcción de nuevos proyectos de mundo, nuevas colaboraciones, y experiencias de compartir —siempre más allá de lo humano— que no son el resultado de un sujeto individual sino de modos de existencia que sostienen las redes de vulnerabilidad compartidas que llamamos ecología.</p>
@@ -1571,6 +1725,28 @@ nav {
           <div class="grupo-nombre">2023 — 2026</div>
         </div>
       </div>
+    </div>
+
+    <!-- FASE 1 · Cómo citar + Datos abiertos (patrón Hílame) -->
+    <div class="publicacion-bloque" id="marana-datos">
+      <div class="publicacion-eyebrow">Cómo citar esta plataforma</div>
+      <div class="cita-caja" id="cita-sitio"></div>
+      <div class="cita-acciones">
+        <button class="btn-fase1" data-copiar="cita-sitio">copiar cita</button>
+      </div>
+      <p class="fase1-nota">Formato APA 7. Cada archivo del rizoma tiene además su propia cita al final de su ficha.</p>
+    </div>
+
+    <div class="publicacion-bloque">
+      <div class="publicacion-eyebrow">Datos abiertos del catálogo</div>
+      <div class="pag-cuerpo" style="margin-bottom:24px;">
+        <p>El catálogo que da forma al rizoma se puede descargar completo para consulta, análisis o cruce con otras investigaciones: identificador, obra, grupo, tipo, fecha, descripción, etiquetas, nichos, prácticas emergentes y enlaces a los medios.</p>
+      </div>
+      <div class="cita-acciones">
+        <button class="btn-fase1" id="descargar-csv">↓ descargar CSV</button>
+        <button class="btn-fase1" id="descargar-json">↓ descargar JSON</button>
+      </div>
+      <p class="fase1-nota" id="datos-nota"></p>
     </div>
   </div>
 </div>
@@ -3737,6 +3913,200 @@ window.addEventListener('wheel', function(e) {
   new MutationObserver(arreglar).observe(document.body,{attributes:true,subtree:true,attributeFilter:['class','style']});
   window.addEventListener('hashchange',function(){ setTimeout(arreglar,100); });
   document.addEventListener('click',function(){ setTimeout(arreglar,150); });
+})();
+</script>
+<script>
+/* ══════════════════════════════════════════
+   FASE 1 · Qué es · En cifras · Cómo citar · Datos abiertos
+   Todo se calcula desde CONTENIDOS / SUBPROYECTOS: al crecer el
+   catálogo, las cifras y las descargas se actualizan solas.
+══════════════════════════════════════════ */
+(function () {
+  if (typeof CONTENIDOS === 'undefined' || typeof SUBPROYECTOS === 'undefined') return;
+
+  var TITULO_PROYECTO = 'Prácticas artísticas para una Colombia más-que-humana: de los mundos de plantación a las marañas-mundo';
+  var esVid = (typeof esVideo === 'function') ? esVideo : function () { return false; };
+
+  function urlSitio() { return location.origin + location.pathname.replace(/index\.html$/, ''); }
+  function hoy() {
+    return new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function ytDe(c) {
+    if (c.youtubeId) return c.youtubeId;
+    var m = /^youtube:([\w-]{6,})$/.exec(c.archivo || '');
+    return m ? m[1] : '';
+  }
+
+  /* ── Cifras ─────────────────────────────── */
+  function calcularCifras() {
+    var fotos = 0, videos = 0;
+    CONTENIDOS.forEach(function (c) {
+      if (ytDe(c)) videos++;
+      (c.cloudinaryFiles || []).forEach(function (f) { if (esVid(f)) videos++; else fotos++; });
+    });
+    return { archivos: CONTENIDOS.length, fotos: fotos, videos: videos };
+  }
+  var CIFRAS = calcularCifras();
+
+  function animarCifras() {
+    document.querySelectorAll('#cifras [data-cifra]').forEach(function (el) {
+      var clave = el.dataset.cifra;
+      var meta = (clave in CIFRAS) ? CIFRAS[clave] : parseInt(el.textContent, 10) || 0;
+      var t0 = performance.now(), dur = 1400;
+      (function paso(t) {
+        var k = Math.min(1, (t - t0) / dur);
+        el.textContent = Math.round(meta * (1 - Math.pow(1 - k, 4))).toLocaleString('es-CO');
+        if (k < 1) requestAnimationFrame(paso);
+      })(t0);
+    });
+  }
+
+  /* ── Citas ──────────────────────────────── */
+  function citaSitioHTML() {
+    return 'Hernández Rodríguez, Á. I. (Investigador principal) y Hernández, N. (Cartografía digital). (2026). ' +
+      '<em>Marañas Mundo: cartografía viva del proyecto «' + TITULO_PROYECTO + '»</em> [Plataforma web]. ' +
+      'Universidad Distrital Francisco José de Caldas, Facultad de Artes ASAB. Recuperado el ' + hoy() + ', de ' + esc(urlSitio());
+  }
+  function autorDe(c) {
+    var sub = SUBPROYECTOS[c.sub] || {};
+    var g = (sub.grupo || '').split(' · ')[0];
+    return /^Grupo/.test(g) ? g : 'Proyecto Marañas Mundo';
+  }
+  function citaNodoHTML(c) {
+    var anio = /^\d{4}/.test(c.fecha || '') ? c.fecha.slice(0, 4) : 's. f.';
+    return esc(autorDe(c)) + '. (' + anio + '). <em>' + esc(c.titulo) + '</em> [' + esc(c.tipo) + ', registro ' + esc(c.id) + ']. ' +
+      'En <em>Marañas Mundo</em>. Universidad Distrital Francisco José de Caldas. ' + esc(urlSitio());
+  }
+
+  function copiar(id, btn) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var txt = el.innerText.trim();
+    var listo = function () {
+      var o = btn.textContent; btn.textContent = '✓ copiada'; btn.classList.add('ok');
+      setTimeout(function () { btn.textContent = o; btn.classList.remove('ok'); }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(listo, function () { seleccionar(el); });
+    } else { seleccionar(el); }
+  }
+  function seleccionar(el) {
+    var r = document.createRange(); r.selectNodeContents(el);
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-copiar]');
+    if (b) copiar(b.dataset.copiar, b);
+  });
+
+  /* ── Datos abiertos ─────────────────────── */
+  function filas() {
+    return CONTENIDOS.map(function (c) {
+      var sub = SUBPROYECTOS[c.sub] || {};
+      var files = c.cloudinaryFiles || [];
+      var yt = ytDe(c);
+      return {
+        id: c.id,
+        obra: sub.titulo || c.sub,
+        grupo: sub.grupo || '',
+        tipo: c.tipo || '',
+        titulo: c.titulo || '',
+        fecha: c.fecha || '',
+        descripcion: c.desc || '',
+        etiquetas: (c.tags || []).join(' | '),
+        nichos: (c.temas || []).join(' | '),
+        practicas: (c.practicas || []).join(' | '),
+        estado: c.estado || '',
+        youtube: yt ? 'https://www.youtube.com/watch?v=' + yt : '',
+        fotos_publicadas: files.filter(function (f) { return !esVid(f); }).length,
+        videos_en_galeria: files.filter(function (f) { return esVid(f); }).length,
+        carpeta_cloudinary: c.cloudinaryFolder || ''
+      };
+    });
+  }
+  function bajar(nombre, contenido, tipo) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([contenido], { type: tipo }));
+    a.download = nombre;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function aCSV(rows) {
+    var cols = Object.keys(rows[0] || {});
+    var q = function (v) { v = String(v == null ? '' : v); return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    return '﻿' + [cols.join(',')].concat(rows.map(function (r) {
+      return cols.map(function (k) { return q(r[k]); }).join(',');
+    })).join('\r\n');
+  }
+  var fecha = new Date().toISOString().slice(0, 10);
+  var bCSV = document.getElementById('descargar-csv');
+  var bJSON = document.getElementById('descargar-json');
+  if (bCSV) bCSV.addEventListener('click', function () {
+    bajar('maranas-mundo_catalogo_' + fecha + '.csv', aCSV(filas()), 'text/csv;charset=utf-8');
+  });
+  if (bJSON) bJSON.addEventListener('click', function () {
+    bajar('maranas-mundo_catalogo_' + fecha + '.json', JSON.stringify({
+      proyecto: TITULO_PROYECTO,
+      plataforma: 'Marañas Mundo',
+      institucion: 'Universidad Distrital Francisco José de Caldas · Facultad de Artes ASAB',
+      url: urlSitio(),
+      generado: new Date().toISOString(),
+      registros: filas()
+    }, null, 2), 'application/json');
+  });
+  var nota = document.getElementById('datos-nota');
+  if (nota) nota.textContent = CIFRAS.archivos + ' registros · UTF-8 · el CSV abre directo en Excel, Google Sheets o LibreOffice. ' +
+    'Para reutilizar imágenes o videos, escribir al equipo del proyecto.';
+
+  /* ── Enganches con la navegación existente ─ */
+  var citaSitio = document.getElementById('cita-sitio');
+  if (citaSitio) citaSitio.innerHTML = citaSitioHTML();
+
+  if (typeof mostrarVista === 'function') {
+    var _mostrarVista = mostrarVista;
+    mostrarVista = function (nombre) {
+      _mostrarVista.apply(this, arguments);
+      if (nombre === 'sobre') setTimeout(animarCifras, 250);
+    };
+  }
+  if (typeof mostrarNodo === 'function') {
+    var _mostrarNodo = mostrarNodo;
+    mostrarNodo = function (cont) {
+      _mostrarNodo.apply(this, arguments);
+      var cuerpo = document.getElementById('nodo-cuerpo-extra');
+      var previa = document.getElementById('nodo-cita-bloque');
+      if (previa) previa.remove();
+      if (!cuerpo || !cont) return;
+      var bloque = document.createElement('div');
+      bloque.className = 'nodo-cita'; bloque.id = 'nodo-cita-bloque';
+      bloque.innerHTML = '<div class="publicacion-eyebrow">Cómo citar este archivo</div>' +
+        '<div class="cita-caja" id="cita-nodo">' + citaNodoHTML(cont) + '</div>' +
+        '<div class="cita-acciones"><button class="btn-fase1" data-copiar="cita-nodo">copiar cita</button></div>';
+      cuerpo.parentNode.insertBefore(bloque, cuerpo.nextSibling);
+    };
+  }
+
+  /* Botones del bloque «Qué es» en el landing */
+  document.querySelectorAll('[data-quees]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var destino = this.dataset.quees;
+      if (typeof window.entrarAlRizoma !== 'function') return;
+      window.entrarAlRizoma('libre');
+      if (destino === 'mapa') return;
+      setTimeout(function () {
+        mostrarVista('sobre');
+        if (destino === 'datos') setTimeout(function () {
+          var d = document.getElementById('marana-datos');
+          if (d) d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+      }, 950);
+    });
+  });
 })();
 </script>
 </body>
