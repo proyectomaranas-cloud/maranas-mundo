@@ -149,9 +149,10 @@
   </div>
   <div class="nav-right">
     <ul class="nav-links">
+      <li><a href="#" data-vista="mapa"     class="nav-link">Rizoma</a></li>
+      <li><a href="#" data-vista="archivo"  class="nav-link">Archivo</a></li>
       <li><a href="#" data-vista="sobre"    class="nav-link">Proyecto</a></li>
       <li><a href="#" data-vista="metodo"   class="nav-link">Método</a></li>
-      <li><a href="#" data-vista="archivo"  class="nav-link">Archivo</a></li>
       <li><a href="#" data-vista="grupos"   class="nav-link">Grupos</a></li>
       <li><a href="#" data-vista="contacto" class="nav-link">Contacto</a></li>
     </ul>
@@ -165,6 +166,41 @@
 <button id="nav-toggle" title="Ocultar/mostrar menú">
   <span class="toggle-icon">▼</span> <span id="nav-toggle-label">ocultar menú</span>
 </button>
+
+<!-- FASE 2 · Explorador: panel izquierdo compartido por rizoma, archivo y lista -->
+<aside id="exp" aria-label="Explorar el archivo">
+  <div class="exp-scroll">
+    <div class="exp-rotulo">Explorar · ver como</div>
+    <div class="exp-vistas" id="exp-vistas">
+      <button data-exp-vista="rizoma">Rizoma</button>
+      <button data-exp-vista="archivo">Archivo</button>
+      <button data-exp-vista="lista">Lista</button>
+      <button data-exp-vista="mapa" disabled title="Mapa geográfico · próximamente">Mapa</button>
+    </div>
+
+    <div class="exp-buscar">
+      <input type="search" id="exp-q" placeholder="buscar título, descripción, etiqueta…" autocomplete="off" spellcheck="false" aria-label="Buscar en el archivo">
+      <button id="exp-q-x" aria-label="Borrar búsqueda">×</button>
+    </div>
+
+    <div class="exp-rotulo exp-rotulo--fila">
+      <span>Categorías</span>
+      <button id="exp-cat-todas">prender todas</button>
+    </div>
+    <div id="exp-cats"></div>
+
+    <div id="exp-extra"></div>
+
+    <div class="exp-rotulo">Filtrar por</div>
+    <div id="exp-filtros"></div>
+  </div>
+  <div class="exp-pie">
+    <div class="exp-pie-conteo"><span id="exp-conteo">0</span><span id="exp-conteo-rotulo">archivos visibles</span></div>
+    <button id="exp-limpiar">limpiar filtros</button>
+  </div>
+</aside>
+<button id="exp-tirador" aria-controls="exp">‹ plegar</button>
+<div id="exp-velo"></div>
 
 <div id="vista-mapa">
   <div id="canvas-wrapper"></div>
@@ -345,56 +381,17 @@
 </div>
 
 <div class="vista-pagina" id="vista-archivo">
-  <div class="pag-inner">
-    <button class="btn-back" data-back>&#8592; Volver al mapa</button>
-    <div class="pag-eyebrow">Archivo completo · catalogado</div>
-    <h1 class="pag-titulo">El tejido<br><em>visto en columnas</em></h1>
-    <p class="pag-subtitulo">Lo que en el mapa se mueve como rizoma, aquí se ordena por grupos. Cada bloque es una obra de investigación-creación; cada tarjeta, un archivo real del proceso.</p>
-    <div class="pag-linea"></div>
-
-    <div class="filtros-bloque">
-      <div class="filtros-bloque-label">Filtrar por rama</div>
-      <div class="filtros-row" id="filtros-rama">
-        <button class="filtro-btn active" data-filtro-rama="todos">Todas las obras</button>
-        <button class="filtro-btn" data-filtro-rama="SUB-02">Dramaturgias · De los mundos</button>
-        <button class="filtro-btn" data-filtro-rama="SUB-03">Arte Danzario · Enmarañar-Ser</button>
-        <button class="filtro-btn" data-filtro-rama="SUB-04">Aulide · Per(r)o mundo</button>
-        <button class="filtro-btn" data-filtro-rama="SUB-05">Creación Artística · Carne de mis bosques</button>
-        <button class="filtro-btn" data-filtro-rama="SUB-06">Salidas de campo</button>
-      </div>
+  <div class="arc-inner">
+    <div class="arc-cab">
+      <div class="pag-eyebrow">Archivo completo · catalogado · <span id="arc-modo-rotulo">cuadrícula</span></div>
+      <div class="arc-conteo"><span id="conteo-num">0</span> de <span id="conteo-total">0</span> archivos</div>
     </div>
-
-    <div class="filtros-bloque">
-      <div class="filtros-bloque-label">Cruzar por nicho somato-poético</div>
-      <div class="filtros-row" id="filtros-tema">
-        <button class="filtro-btn tema active" data-filtro-tema="todos">Todos</button>
-        <button class="filtro-btn tema" data-filtro-tema="respiracion">Respiración</button>
-        <button class="filtro-btn tema" data-filtro-tema="toque">Toque</button>
-        <button class="filtro-btn tema" data-filtro-tema="encauchamientos">Encauchamientos</button>
-        <button class="filtro-btn tema" data-filtro-tema="plantaciones">Plantaciones</button>
-        <button class="filtro-btn tema" data-filtro-tema="abejas">Abejas</button>
-        <button class="filtro-btn tema" data-filtro-tema="pajaros">Pájaros</button>
-        <button class="filtro-btn tema" data-filtro-tema="agua">Agua</button>
-        <button class="filtro-btn tema" data-filtro-tema="enmara%C3%B1amientos">Enmarañamientos</button>
-      </div>
-    </div>
-
-    <div class="filtros-bloque">
-      <div class="filtros-bloque-label">Cruzar por práctica emergente</div>
-      <div class="filtros-row" id="filtros-practica">
-        <button class="filtro-btn practica active" data-filtro-practica="todos">Todas</button>
-        <button class="filtro-btn practica" data-filtro-practica="encauchamientos">Encauchamientos</button>
-        <button class="filtro-btn practica" data-filtro-practica="toque">Toque</button>
-        <button class="filtro-btn practica" data-filtro-practica="desbordamientos">Desbordamientos</button>
-        <button class="filtro-btn practica" data-filtro-practica="sonar">Sonar</button>
-        <button class="filtro-btn practica" data-filtro-practica="jardinamientos">Jardinamientos</button>
-        <button class="filtro-btn practica" data-filtro-practica="estudios-con-hojas">Estudios con hojas</button>
-      </div>
-    </div>
-
-    <div class="conteo-resultados">mostrando <span id="conteo-num">0</span> archivos del catálogo</div>
-
-    <div id="archivo-por-rama"></div>
+    <div id="arc-categorias"></div>
+    <div id="arc-activos"></div>
+    <div id="arc-grid" class="arc-grid"></div>
+    <div id="arc-lista" class="arc-lista"></div>
+    <div id="arc-vacio">Ningún archivo coincide con esta búsqueda. <button id="arc-limpiar">limpiar filtros</button></div>
+    <button id="arc-mas">mostrar más</button>
   </div>
 </div>
 
@@ -501,6 +498,7 @@
 <!-- Catálogo: obras/grupos, archivos y conexiones. Se edita en data/catalogo.js -->
 <script src="data/catalogo.js"></script>
 <script src="js/app.js"></script>
+<script src="js/explorar.js"></script>
 <div id="lightbox">
   <button id="lightbox-close">✕ cerrar</button>
   <button id="lightbox-prev">←</button>

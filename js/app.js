@@ -3,19 +3,27 @@
    viven en data/catalogo.js
 ══════════════════════════════════════════ */
 
-// ─── Paleta de nodos · sincronizada con sistema editorial del landing ─────
-// Tonos saturados (no apagados) para que las conexiones promedien colores vivos
-var TIPO_RGB = {
-  texto:    [168, 163, 165],  
-  video:    [ 47, 191, 113],  // verde
-  foto:     [237, 125,  58],  
-  dibujo:   [229, 181,  59],  // Amarillo dorado
-  bitacora: [237, 125,  58],  
-  hoja:     [242, 204, 107],  // Amarillo claro
-  plantilla:[156, 152, 154]   
+// ─── CATEGORÍAS · un color propio por tipo de archivo ─────────────────────
+// Se muestran en el panel, las tarjetas, la lista y (opcional) los nodos.
+// Solo aparecen en pantalla las que existan de verdad en el catálogo.
+// Para un tipo nuevo basta agregar aquí su nombre y color.
+var CATEGORIAS = {
+  foto:      { nombre: 'Fotografía', plural: 'Fotografías', rgb: [237, 125,  58] },  // ocre
+  video:     { nombre: 'Video',      plural: 'Videos',      rgb: [242, 204, 107] },  // willow
+  texto:     { nombre: 'Texto',      plural: 'Textos',      rgb: [ 47, 191, 113] },  // verde
+  hoja:      { nombre: 'Tabla',      plural: 'Tablas',      rgb: [190, 184, 172] },
+  audio:     { nombre: 'Audio',      plural: 'Audios',      rgb: [100, 180, 230] },
+  documento: { nombre: 'Documento',  plural: 'Documentos',  rgb: [220,  80,  90] },
+  dibujo:    { nombre: 'Dibujo',     plural: 'Dibujos',     rgb: [229, 181,  59] }
 };
+function categoriaDe(tipo) {
+  if (CATEGORIAS[tipo]) return CATEGORIAS[tipo];
+  var n = String(tipo || 'archivo');
+  n = n.charAt(0).toUpperCase() + n.slice(1);
+  return (CATEGORIAS[tipo] = { nombre: n, plural: n, rgb: [168, 163, 165] });
+}
 
-// Color base por subproyecto (grupo) — prevalece sobre TIPO_RGB en el rizoma
+// Color base por subproyecto (grupo) — color por defecto de los nodos del rizoma
 // I·Dramaturgias=pumpkin · II·Danzario=emerald · III·Aulide=watermelon · IV·Creación=willow · VI·Campo=azul suave
 var SUB_RGB = {
   'SUB-01': [168, 163, 165],   // gestión — neutro
@@ -206,17 +214,17 @@ function mostrarVista(nombre) {
     document.getElementById('nav-toggle').classList.remove('nav--pagina');
     if (typeof sketch !== 'undefined' && sketch.loop) sketch.loop();
     vistaActual = 'mapa';
+    if (window.EXP) EXP.alCambiarVista('mapa');
     return;
   }
 
   // Fuera del mapa: pausar p5 completamente y bloquear su canvas
   document.getElementById('canvas-wrapper').style.pointerEvents = 'none';
-  document.querySelector('nav').classList.add('nav--pagina');
-  document.getElementById('nav-toggle').classList.add('nav--pagina');
+  // El archivo es parte del explorador: conserva el menú oscuro, igual que el rizoma
+  document.querySelector('nav').classList.toggle('nav--pagina', nombre !== 'archivo');
+  document.getElementById('nav-toggle').classList.toggle('nav--pagina', nombre !== 'archivo');
   if (typeof sketch !== 'undefined' && sketch.noLoop) sketch.noLoop();
   document.getElementById('sello-institucional').style.display = 'none';
-
-  if (nombre === 'archivo') poblarArchivoPorRama();
 
   document.getElementById('vista-mapa').style.display = 'none';
   var el = document.getElementById('vista-' + nombre);
@@ -228,6 +236,10 @@ function mostrarVista(nombre) {
       el.classList.add('visible');
       el.focus({ preventScroll: true }); // foco para recibir scroll de teclado
     });
+  }
+  if (window.EXP) {
+    EXP.alCambiarVista(nombre);
+    if (nombre === 'archivo') EXP.pintarArchivo();
   }
 }
 
@@ -297,7 +309,8 @@ document.querySelectorAll('.nav-link').forEach(function(a) {
 });
 document.getElementById('nav-home').addEventListener('click', function() { mostrarVista('mapa'); });
 document.querySelectorAll('[data-back]').forEach(function(btn) {
-  btn.addEventListener('click', function() { mostrarVista('mapa'); });
+  // vuelve a la última vista del explorador (rizoma o archivo)
+  btn.addEventListener('click', function() { mostrarVista(window.EXP ? EXP.st.ultima : 'mapa'); });
 });
 
 /* ── Toggle nav ── */
@@ -318,151 +331,13 @@ document.getElementById('nav-toggle').addEventListener('click', function() {
   }, 460); // después de que termine la transición del nav (0.45s)
 });
 
-/* ══════════════════════════════════════════
-   ARCHIVO: GRID POR RAMA + FILTROS
-══════════════════════════════════════════ */
-var filtroRamaActivo = 'todos';
-var filtroTemaActivo = 'todos';
-var filtroPracticaActivo = 'todos';
-
-function poblarArchivoPorRama() {
-  var cont = document.getElementById('archivo-por-rama');
-  cont.innerHTML = '';
-  var ordenRamas = ['SUB-02','SUB-03','SUB-04','SUB-05','SUB-06'];
-  ordenRamas.forEach(function(subId) {
-    var sub = SUBPROYECTOS[subId];
-    var items = CONTENIDOS.filter(function(c) { return c.sub === subId; });
-    if (items.length === 0) return;
-
-    var bloque = document.createElement('div');
-    bloque.className = 'rama-bloque';
-    bloque.dataset.rama = subId;
-
-    bloque.innerHTML = '' +
-      '<div class="rama-header">' +
-        '<span class="rama-id">' + subId + '</span>' +
-        '<span class="rama-tipo-tag tipo-' + sub.tipo + '">' + sub.rotulo + '</span>' +
-        '<h2 class="rama-titulo">' + sub.titulo + '</h2>' +
-        '<div class="rama-meta">' +
-          '<span><strong>Grupo:</strong> ' + sub.grupo + '</span>' +
-          '<span><strong>Archivos catalogados:</strong> ' + items.length + '</span>' +
-        '</div>' +
-      '</div>' +
-      '<div class="rama-desc">' + sub.desc + '</div>' +
-      '<div class="archivos-grid" data-grid-rama="' + subId + '"></div>';
-
-    cont.appendChild(bloque);
-
-    var grid = bloque.querySelector('.archivos-grid');
-    items.forEach(function(c) {
-      var tagsHTML = (c.tags || []).slice(0,4).map(function(t) {
-        return '<span class="card-tag">#' + t + '</span>';
-      }).join('');
-      var temasHTML = (c.temas || []).map(function(t) {
-        return '<span class="card-tag tema">·' + t + '</span>';
-      }).join('');
-      var estadoCls = c.estado === 'apto' ? 'estado-apto' : 'estado-sinrevisar';
-
-      var card = document.createElement('div');
-      card.className = 'archivo-card' + (c.esSerie ? ' is-serie' : '');
-      card.dataset.id = c.id;
-      card.dataset.tipo = c.tipo;
-      card.dataset.temas = (c.temas || []).join(',');
-      card.dataset.practicas = (c.practicas || []).join(',');
-
-      card.innerHTML = '' +
-        '<div class="card-header">' +
-          '<span class="card-id">' + c.id + '</span>' +
-          '<span class="card-tipo tipo-' + c.tipo + '">' + c.tipo + '</span>' +
-        '</div>' +
-        '<div style="margin-bottom:10px;">' +
-          '<div style="font-family:var(--font-italic);font-size:17px;color:var(--crema);line-height:1.35;margin-bottom:8px;">' + c.titulo + '</div>' +
-          (c.esSerie ? '<div class="card-serie-meta">serie · ' + c.conteo + (c.tam && c.tam !== '—' ? ' · ' + c.tam : '') + '</div>' : '') +
-          '<div class="card-archivo">' + c.archivo + '</div>' +
-        '</div>' +
-        '<div class="card-desc">' + c.desc + '</div>' +
-        '<div class="card-tags">' + tagsHTML + temasHTML + '<span class="estado-badge ' + estadoCls + '">' + (c.estado || '') + '</span></div>';
-
-      card.addEventListener('click', function() { mostrarNodo(c); });
-      grid.appendChild(card);
-    });
-  });
-  aplicarFiltros();
-}
-
-function aplicarFiltros() {
-  var totalVisible = 0;
-  document.querySelectorAll('.rama-bloque').forEach(function(b) {
-    var rama = b.dataset.rama;
-    var ramaOk = filtroRamaActivo === 'todos' || filtroRamaActivo === rama;
-    var visiblesEnBloque = 0;
-    b.querySelectorAll('.archivo-card').forEach(function(card) {
-      var temas = (card.dataset.temas || '').split(',').filter(Boolean);
-      var practicas = (card.dataset.practicas || '').split(',').filter(Boolean);
-      var temaOk = filtroTemaActivo === 'todos' || temas.indexOf(filtroTemaActivo) !== -1;
-      var practicaOk = filtroPracticaActivo === 'todos' || practicas.indexOf(filtroPracticaActivo) !== -1;
-      var visible = ramaOk && temaOk && practicaOk;
-      card.classList.toggle('hidden', !visible);
-      if (visible) visiblesEnBloque++;
-    });
-    b.classList.toggle('hidden', !ramaOk || visiblesEnBloque === 0);
-    if (ramaOk) totalVisible += visiblesEnBloque;
-  });
-  document.getElementById('conteo-num').textContent = totalVisible;
-}
-
-document.getElementById('filtros-rama').addEventListener('click', function(e) {
-  if (!e.target.classList.contains('filtro-btn')) return;
-  document.querySelectorAll('#filtros-rama .filtro-btn').forEach(function(b) { b.classList.remove('active'); });
-  e.target.classList.add('active');
-  filtroRamaActivo = e.target.dataset.filtroRama;
-  aplicarFiltros();
-});
-document.getElementById('filtros-tema').addEventListener('click', function(e) {
-  if (!e.target.classList.contains('filtro-btn')) return;
-  document.querySelectorAll('#filtros-tema .filtro-btn').forEach(function(b) { b.classList.remove('active'); });
-  e.target.classList.add('active');
-  filtroTemaActivo = e.target.dataset.filtroTema;
-  aplicarFiltros();
-});
-document.getElementById('archivo-por-rama').addEventListener('click', function(e) {
-  var btn = e.target.closest('.card-mapa-btn');
-  if (btn) {
-    e.stopPropagation();
-    irAlMapaDesdeArchivo(btn.dataset.nodeId);
-  }
-});
-
-document.getElementById('filtros-practica').addEventListener('click', function(e) {
-  if (!e.target.classList.contains('filtro-btn')) return;
-  document.querySelectorAll('#filtros-practica .filtro-btn').forEach(function(b) { b.classList.remove('active'); });
-  e.target.classList.add('active');
-  filtroPracticaActivo = e.target.dataset.filtroPractica;
-  aplicarFiltros();
-});
+/* El archivo (cuadrícula, lista y filtros) vive ahora en js/explorar.js */
 
 // ── Navegación cruzada: mapa ↔ archivo ────────────────────────────
 // Desde el panel del mapa → ir a la tarjeta en el archivo
 function irAlArchivoDesdeMapa() {
   var nodeId = document.getElementById('panel-btn-archivo').dataset.nodeId;
-  // Asegurar que el archivo se pueble antes de buscar la tarjeta
-  mostrarVista('archivo');
-  // Esperar a que poblarArchivoPorRama termine y el DOM esté listo
-  var intentos = 0;
-  function buscarTarjeta() {
-    var card = document.querySelector('.archivo-card[data-id="' + nodeId + '"]');
-    if (card) {
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      card.style.outline = '2px solid rgba(242,204,107,0.8)';
-      setTimeout(function() {
-        card.style.outline = '';
-        card.style.transition = 'outline 0.6s';
-      }, 2000);
-    } else if (intentos++ < 10) {
-      setTimeout(buscarTarjeta, 150);
-    }
-  }
-  setTimeout(buscarTarjeta, 200);
+  if (window.EXP) EXP.revelarTarjeta(nodeId);
 }
 
 // Desde una tarjeta del archivo → volver al mapa y abrir el panel del nodo
@@ -639,14 +514,40 @@ var sketch = new p5(function(p) {
     return DEPTH_FLOOR + (1 - DEPTH_FLOOR) * smooth;
   }
 
+  // Área del rizoma: todo lo que deja libre el panel izquierdo y el menú inferior
+  function areaRizoma() {
+    var oculto = document.body.classList.contains('nav-hidden');
+    navH = oculto ? 0 : (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 0);
+    var r = document.getElementById('vista-mapa').getBoundingClientRect();
+    var w = Math.round(r.width);
+    if (!w) {  // la app aún está oculta: estimar
+      var panelW = window.matchMedia('(max-width: 860px)').matches ? 0 : 300;
+      w = window.innerWidth - panelW;
+    }
+    return { w: Math.max(200, w), h: Math.max(200, window.innerHeight - navH) };
+  }
+  // Ajusta el lienzo y reubica los nodos en proporción
+  function ajustarCanvas() {
+    var a = areaRizoma();
+    if (a.w === p.width && a.h === p.height) return;
+    var sx = a.w / (p.width || a.w), sy = a.h / (p.height || a.h);
+    p.resizeCanvas(a.w, a.h);
+    nCont.concat(nAmb).forEach(function(n) {
+      n.x *= sx; n.y *= sy;
+      if (n.ax !== undefined) { n.ax *= sx; n.ay *= sy; }
+    });
+  }
+  var canvasEl = null;
+
   p.setup = function() {
-    var c = p.createCanvas(window.innerWidth, window.innerHeight - navH);
+    var a0 = areaRizoma();
+    var c = p.createCanvas(a0.w, a0.h);
     c.parent('canvas-wrapper');
     p.colorMode(p.RGB);
 
     // p5.js registra su propio listener 'wheel' en el canvas con preventDefault.
     // Lo reemplazamos con uno pasivo que solo bloquea el scroll cuando estamos en el mapa.
-    var canvasEl = c.elt;
+    canvasEl = c.elt;
     canvasEl.addEventListener('wheel', function(e) {
       if (vistaActual !== 'mapa') {
         // Fuera del mapa: propagar el scroll a la vista de página visible
@@ -666,7 +567,7 @@ var sketch = new p5(function(p) {
 
     CONTENIDOS.forEach(function(c) {
       // Color por grupo (SUB) — con fallback a tipo si no hay mapeo de grupo
-      var rgb = SUB_RGB[c.sub] || TIPO_RGB[c.tipo] || [120,120,120];
+      var rgb = (SUB_RGB[c.sub] || categoriaDe(c.tipo).rgb).slice();
       var col = idx % cols;
       var row = Math.floor(idx / cols);
       // Centro de la celda + jitter aleatorio dentro de ella
@@ -1298,9 +1199,10 @@ var sketch = new p5(function(p) {
     }
   }
 
-  p.mousePressed = function() {
+  p.mousePressed = function(e) {
     if (vistaActual !== 'mapa') return;
-    if (mouseAbsX > window.innerWidth - 460 && panel.classList.contains('open')) return;
+    // solo cuentan los clics sobre el lienzo (no sobre los paneles ni el menú)
+    if (e && e.target && e.target !== canvasEl) return;
     var best = null, bestD = 65;  // +30% sobre v14 (50→65) para click confortable con nodos más grandes
     for (var i = 0; i < nCont.length; i++) {
       var n = nCont[i];
@@ -1330,51 +1232,11 @@ var sketch = new p5(function(p) {
     return false;  // bloquea scroll del navegador
   };
 
-  p.windowResized = function() {
-    var newH = window.innerHeight - navH;
-    var prevW = p.width, prevH = p.height;
-    p.resizeCanvas(window.innerWidth, newH);
-    // Remapar nodos proporcionalmente al nuevo canvas
-    var scaleX = p.width  / (prevW || p.width);
-    var scaleY = p.height / (prevH || p.height);
-    nCont.forEach(function(n) { n.x *= scaleX; n.y *= scaleY; });
-    nAmb.forEach(function(n)  { n.x *= scaleX; n.y *= scaleY; });
-  };
-
-  // Redistribución animada al toggle del nav
-  window.addEventListener('nav-toggled', function(e) {
-    navH = e.detail.navH;
-    var newH = window.innerHeight - navH;
-    var prevW = p.width, prevH = p.height;
-    p.resizeCanvas(window.innerWidth, newH);
-    var scaleX = p.width  / (prevW || p.width);
-    var scaleY = p.height / (prevH || p.height);
-
-    // Mover nodos hacia sus posiciones remapeadas con impulso suave
-    nCont.forEach(function(n) {
-      var tx = n.x * scaleX;
-      var ty = n.y * scaleY;
-      // Velocidad proporcional a la distancia de destino — arriba/abajo según expansión
-      n.vx += (tx - n.x) * 0.04;
-      n.vy += (ty - n.y) * 0.04;
-      n.x = tx;
-      n.y = ty;
-    });
-    nAmb.forEach(function(n) {
-      var tx = n.x * scaleX;
-      var ty = n.y * scaleY;
-      n.x = tx;
-      n.y = ty;
-    });
-  });
-
-  // Cuando el landing revela la app, el canvas pudo haberse creado con
-  // dimensiones incorrectas (la app estaba en display:none). Recalcular.
-  window.addEventListener('app-revealed', function() {
-    setTimeout(function() {
-      p.resizeCanvas(window.innerWidth, window.innerHeight - navH);
-    }, 50);
-  });
+  p.windowResized = function() { ajustarCanvas(); };
+  // Menú ocultado/mostrado, panel plegado/abierto, cambio de vista o entrada desde la portada
+  window.addEventListener('nav-toggled', function() { ajustarCanvas(); setTimeout(ajustarCanvas, 480); });
+  window.addEventListener('exp-layout', function() { setTimeout(ajustarCanvas, 30); });
+  window.addEventListener('app-revealed', function() { setTimeout(ajustarCanvas, 50); });
 
 }, document.getElementById('canvas-wrapper'));
 
