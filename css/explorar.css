@@ -448,3 +448,92 @@ body.exp-rizoma #exp-extra { display: block; }
 .exp-color button + button { border-left: 1px solid var(--line-strong); }
 .exp-color button.on { color: #17150c; background: var(--crema); }
 .exp-color button:hover:not(.on) { color: var(--blanco); }
+
+/* ══════════════════════════════════════════
+   Bloque D · MINIATURAS
+══════════════════════════════════════════ */
+/* Imagen de la tarjeta: va encima de la portada diseñada (que queda de respaldo) */
+.arc-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+/* Las carátulas de YouTube traen franjas negras arriba y abajo: se recortan */
+.arc-img.es-yt, .rz-img.es-yt { height: 134%; top: -17%; }
+.rz-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.arc-play {
+  position: absolute; right: 10px; bottom: 10px;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(19,19,15,0.7);
+  border: 1px solid rgba(240,237,228,0.55);
+}
+.arc-play::after {
+  content: ''; position: absolute; left: 12px; top: 9px;
+  border-left: 9px solid var(--crema);
+  border-top: 5.5px solid transparent; border-bottom: 5.5px solid transparent;
+}
+
+/* Categorías grandes arriba del archivo */
+#arc-categorias {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px; margin-bottom: 30px;
+}
+.cat-card {
+  position: relative; overflow: hidden;
+  height: 104px; padding: 0; text-align: left;
+  background: var(--bg-2);
+  border: 1px solid var(--line-strong);
+  border-bottom: 3px solid var(--cat);
+  cursor: none;
+  transition: opacity 0.25s, border-color 0.2s;
+}
+.cat-img {
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--cat) 34%, transparent), transparent 75%) center/cover no-repeat;
+  background-size: cover; background-position: center;
+  transition: transform 0.6s cubic-bezier(0.16,1,0.3,1), filter 0.25s;
+}
+.cat-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(19,19,15,0.92) 8%, rgba(19,19,15,0.35) 60%, rgba(19,19,15,0.2));
+}
+.cat-txt {
+  position: absolute; left: 14px; right: 12px; bottom: 10px; z-index: 1;
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+}
+.cat-nom {
+  font-family: var(--font-italic); font-style: italic;
+  font-size: 26px; line-height: 1; color: var(--blanco);
+}
+.cat-n {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  color: var(--cat); white-space: nowrap;
+}
+.cat-card:hover .cat-img { transform: scale(1.05); }
+.cat-card.off { opacity: 0.4; }
+.cat-card.off .cat-img { filter: grayscale(1); }
+.cat-card.sola { border-color: var(--cat); }
+
+/* Galería de la ficha: cuadrícula de miniaturas que abre el visor */
+.galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 4px;
+}
+.galeria-item {
+  aspect-ratio: 3 / 2; overflow: hidden; position: relative;
+  background: rgba(255,255,255,0.04);
+  cursor: none;
+}
+.galeria-item img { transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.2s; }
+.galeria-item:hover img { transform: scale(1.05); }
+
+@media (max-width: 860px) {
+  #arc-categorias { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .cat-card { height: 84px; }
+  .cat-nom { font-size: 20px; }
+  .cat-txt { flex-direction: column; align-items: flex-start; gap: 3px; left: 10px; bottom: 8px; }
+  .galeria-grid { grid-template-columns: repeat(3, 1fr); }
+  .arc-play { width: 24px; height: 24px; right: 7px; bottom: 7px; }
+  .arc-play::after { left: 9px; top: 6px; }
+}

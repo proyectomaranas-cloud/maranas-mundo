@@ -79,8 +79,9 @@ function esVideo(fname) {
 function renderGaleria(files, contenedor) {
   window._lbFolder = '';
   window._lbFiles  = files;
-  var baseImg   = 'https://res.cloudinary.com/dt6cvonyy/image/upload/w_400,h_300,c_fill,q_auto/';
-  var baseVideo = 'https://res.cloudinary.com/dt6cvonyy/video/upload/w_400,h_300,c_fill,q_auto/';
+  // Miniaturas livianas 3:2 (480×320, calidad y formato automáticos)
+  var baseImg   = 'https://res.cloudinary.com/dt6cvonyy/image/upload/c_fill,w_480,h_320,q_auto,f_auto/';
+  var baseVideo = 'https://res.cloudinary.com/dt6cvonyy/video/upload/c_fill,w_480,h_320,q_auto,f_auto/';
   var baseVideoFull = 'https://res.cloudinary.com/dt6cvonyy/video/upload/';
 
   var fotos  = files.filter(function(f) { return !esVideo(f); });
@@ -91,14 +92,14 @@ function renderGaleria(files, contenedor) {
   html += '<div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:var(--musgo);text-transform:uppercase;margin-bottom:10px;">' +
     total + ' archivos · ' + fotos.length + ' fotos · ' + videos.length + ' videos · click para ampliar</div>';
 
-  html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">';
+  html += '<div class="galeria-grid">';
 
   files.forEach(function(fname, i) {
     // Quitar extensión del public_id para que Cloudinary maneje el formato
     var pid = fname.replace(/\.(webp|jpg|jpeg|png|mp4|mov|avi)$/i, '');
     if (esVideo(fname)) {
       var thumb = baseVideo + pid + '.jpg';
-      html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:#000;position:relative;" ' +
+      html += '<div class="galeria-item" style="background:#000;" ' +
         'onclick="LB.open(\'\', window._lbFiles, ' + i + ')">' +
         '<img src="' + thumb + '" style="width:100%;height:100%;object-fit:cover;opacity:0.8;" loading="lazy" ' +
         'onerror="this.style.display=\'none\'">' +
@@ -110,7 +111,7 @@ function renderGaleria(files, contenedor) {
       // Si el public_id ya tiene extensión (.webp, .jpg) usarla; si no, pedir jpg
       var ext = fname.match(/\.(webp|jpg|jpeg|png)$/i);
       var imgUrl = ext ? baseImg + pid : baseImg + pid + '.jpg';
-      html += '<div style="aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:rgba(255,255,255,0.04);" ' +
+      html += '<div class="galeria-item" ' +
         'onclick="LB.open(\'\', window._lbFiles, ' + i + ')">' +
         '<img src="' + imgUrl + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy" ' +
         'onerror="this.parentElement.style.display=\'none\'">' +

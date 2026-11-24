@@ -320,12 +320,57 @@ var EXP = (function () {
     return '';
   }
 
+  /* ── Miniaturas ──────────────────────────────────────────────────
+     Orden de preferencia:
+       1. c.thumb  → miniatura elegida a mano en el catálogo
+       2. video de YouTube → su carátula
+       3. primera imagen de la galería en Cloudinary (recortada a 480×320, liviana)
+       4. sin imagen → portada diseñada (color de la categoría + título)
+     Si una imagen falla al cargar, queda a la vista la portada diseñada.
+  ──────────────────────────────────────────────────────────────── */
+  var NUBE = 'https://res.cloudinary.com/dt6cvonyy/';
+  var RECORTE = 'c_fill,w_480,h_320,q_auto,f_auto/';
+  function ytDe(c) {
+    if (c.youtubeId) return c.youtubeId;
+    var m = /^youtube:([\w-]{6,})$/.exec(c.archivo || '');
+    return (m && m[1] !== 'pendiente') ? m[1] : '';
+  }
+  function urlNube(archivo, recorte) {
+    var pid = archivo.replace(/\.(webp|jpg|jpeg|png|mp4|mov|avi)$/i, '');
+    if (esVideo(archivo)) return encodeURI(NUBE + 'video/upload/' + recorte + pid + '.jpg');
+    var conExt = /\.(webp|jpg|jpeg|png)$/i.test(archivo);
+    return encodeURI(NUBE + 'image/upload/' + recorte + (conExt ? pid : pid + '.jpg'));
+  }
+  function miniaturaUrl(c, recorte) {
+    recorte = recorte || RECORTE;
+    if (c.thumb) return /^https?:/.test(c.thumb) ? c.thumb : urlNube(c.thumb, recorte);
+    var yt = ytDe(c);
+    if (yt) return 'https://img.youtube.com/vi/' + yt + '/hqdefault.jpg';
+    var fs = c.cloudinaryFiles || [];
+    if (fs.length) {
+      for (var i = 0; i < fs.length; i++) if (!esVideo(fs[i])) return urlNube(fs[i], recorte);
+      return urlNube(fs[0], recorte);
+    }
+    return '';
+  }
+  function imgHTML(c, cls) {
+    var url = miniaturaUrl(c);
+    if (!url) return '';
+    return '<img class="' + cls + (ytDe(c) && !c.thumb ? ' es-yt' : '') + '" src="' + esc(url) +
+      '" alt="" loading="lazy" decoding="async" onerror="this.remove()">';
+  }
+  // Para el rótulo del rizoma
+  function miniaturaHTML(c) { return imgHTML(c, 'rz-img'); }
+
   function portadaHTML(c) {
     // Portada diseñada: color de la categoría + título en itálica
     return '<div class="arc-portada"><span class="arc-portada-tipo">' + esc(categoriaDe(c.tipo).nombre) + '</span>' +
       '<span class="arc-portada-tit">' + esc(c.titulo) + '</span></div>';
   }
-  function thumbHTML(c) { return portadaHTML(c); }
+  function thumbHTML(c) {
+    var esVid = c.tipo === 'video';
+    return portadaHTML(c) + imgHTML(c, 'arc-img') + (esVid ? '<span class="arc-play" aria-hidden="true"></span>' : '');
+  }
 
   function tarjetaHTML(c) {
     var cat = categoriaDe(c.tipo), n = etiquetaConteo(c);
@@ -396,7 +441,41 @@ var EXP = (function () {
     st._orden = ordenados();
     pintarLote();
   }
-  function pintarCategorias() { /* tarjetas grandes de categoría: Bloque D */ }
+  // Imagen representativa de cada categoría: la del primer archivo que tenga miniatura
+  var imgCategoria = {};
+  function imagenDeCategoria(t) {
+    if (t in imgCategoria) return imgCategoria[t];
+    // entre los archivos de la categoría que tienen imagen, el de mayor peso en el catálogo
+    var url = '', mejor = -1;
+    CONTENIDOS.forEach(function (c) {
+      if (c.tipo !== t) return;
+      var u = miniaturaUrl(c);
+      if (u && (c.peso || 0) > mejor) { mejor = c.peso || 0; url = u; }
+    });
+    return (imgCategoria[t] = url);
+  }
+  // Tarjetas grandes de categoría (arriba del archivo): miniatura, nombre y cantidad
+  function pintarCategorias() {
+    var cont = $('arc-categorias');
+    if (!cont) return;
+    var apagadas = Object.keys(st.tiposOff).length;
+    cont.innerHTML = tipos.map(function (t) {
+      var cat = categoriaDe(t), url = imagenDeCategoria(t), n = contarTipo(t);
+      var off = !!st.tiposOff[t], sola = !off && apagadas === tipos.length - 1;
+      return '<button class="cat-card' + (off ? ' off' : '') + (sola ? ' sola' : '') + '" data-solo-tipo="' + esc(t) +
+        '" style="--cat:' + rgbCss(cat.rgb) + '" title="' + (sola ? 'Mostrar todas las categorías' : 'Ver solo ' + esc(cat.plural.toLowerCase())) + '">' +
+        '<span class="cat-img"' + (url ? ' style="background-image:url(&quot;' + esc(url) + '&quot;)"' : '') + '></span>' +
+        '<span class="cat-txt"><span class="cat-nom">' + esc(cat.plural) + '</span>' +
+        '<span class="cat-n">' + n + (n === 1 ? ' archivo' : ' archivos') + '</span></span>' +
+      '</button>';
+    }).join('');
+  }
+  function pintarMinisPanel() {
+    document.querySelectorAll('#exp-cats [data-mini]').forEach(function (el) {
+      var url = imagenDeCategoria(el.dataset.mini);
+      if (url) el.style.backgroundImage = 'url("' + url + '")';
+    });
+  }
 
   function pintarLote() {
     var arr = st._orden || [], hasta = Math.min(arr.length, st.pintados + LOTE);
@@ -494,13 +573,14 @@ var EXP = (function () {
   preparar();
   construirPanel();
   construirArchivo();
+  pintarMinisPanel();
   aplicar();
 
   return {
     st: st, pasa: pasa, aplicar: aplicar, limpiar: limpiar, irA: irA,
     soloObra: soloObra, soloTipo: soloTipo, alternarTipo: alternarTipo,
     pintarArchivo: pintarArchivo, alCambiarVista: alCambiarVista, revelarTarjeta: revelarTarjeta,
-    obraCorta: obraCorta, nombreDe: nombreDe, esc: esc, rgbCss: rgbCss, esMovil: esMovil,
+    obraCorta: obraCorta, nombreDe: nombreDe, esc: esc, miniaturaUrl: miniaturaUrl, miniaturaHTML: miniaturaHTML, rgbCss: rgbCss, esMovil: esMovil,
     visibles: function () { return visibles; }, tipos: function () { return tipos; }
   };
 })();
