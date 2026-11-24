@@ -386,7 +386,7 @@ body.exp-plegado .arc-inner { padding-top: 76px; }
     background: rgba(0,0,0,0.55);
   }
   #exp-tirador { top: 12px; left: 12px; font-size: 10px; padding: 9px 12px; }
-  body.exp-on #hint, body.exp-on.exp-plegado #hint { left: 12px; right: 12px; top: 56px; line-height: 1.6; }
+  #hint { display: none; }   /* habla de cursor y rueda del mouse: no aplica en pantallas táctiles */
   body.exp-on #depth-indicator { left: 14px; }
 
   .arc-inner, body.exp-plegado .arc-inner { padding: 66px 16px 90px; }
@@ -402,3 +402,49 @@ body.exp-plegado .arc-inner { padding-top: 76px; }
   .col-obra, .col-fecha, .col-nichos, .col-estado { display: none; }
   .lst-tit { font-size: 15px; }
 }
+
+/* ══════════════════════════════════════════
+   Bloque C · RIZOMA: rótulo del nodo señalado
+══════════════════════════════════════════ */
+#rz-tip {
+  position: absolute; top: 0; left: 0; z-index: 5;
+  width: 250px;
+  pointer-events: none;
+  opacity: 0; transition: opacity 0.18s ease;
+  background: rgba(19,19,15,0.94);
+  border: 1px solid var(--line-strong);
+  padding: 10px 12px 11px;
+}
+#rz-tip.on { opacity: 1; }
+.rz-tip-img { margin: -10px -12px 10px; aspect-ratio: 3 / 2; overflow: hidden; background: var(--bg-2); position: relative; }
+.rz-tip-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rz-tip-pie { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
+.rz-tip-cod {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em;
+  color: #17150c; background: var(--cat);
+  padding: 4px 6px; white-space: nowrap; margin-top: 2px;
+}
+.rz-tip-tit {
+  font-family: var(--font-italic); font-style: italic;
+  font-size: 19px; line-height: 1.12; color: var(--blanco);
+  overflow-wrap: anywhere;
+}
+.rz-tip-meta {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; line-height: 1.6;
+  color: var(--text-mid); margin-top: 8px;
+}
+@media (max-width: 860px) { #rz-tip { width: 200px; } .rz-tip-tit { font-size: 16px; } }
+
+/* Color de los nodos: por obra o por categoría (solo en la vista de rizoma) */
+#exp-extra { display: none; }
+#exp-extra .exp-rotulo { margin-top: 26px; }
+body.exp-rizoma #exp-extra { display: block; }
+.exp-color { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line-strong); }
+.exp-color button {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+  color: var(--text-mid); background: transparent; border: none;
+  padding: 9px 0;
+}
+.exp-color button + button { border-left: 1px solid var(--line-strong); }
+.exp-color button.on { color: #17150c; background: var(--crema); }
+.exp-color button:hover:not(.on) { color: var(--blanco); }

@@ -165,6 +165,15 @@ var EXP = (function () {
         }).join('') + '</div></details>';
     }).join('');
 
+    // Color de los nodos del rizoma: por obra (identidad actual) o por categoría
+    $('exp-extra').innerHTML = '<div class="exp-rotulo">Color de los nodos</div>' +
+      '<div class="exp-color" id="exp-color"><button data-color="obra">por obra</button>' +
+      '<button data-color="tipo">por categoría</button></div>';
+    $('exp-color').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-color]');
+      if (b) { st.color = b.dataset.color; refrescarPanel(); }
+    });
+
     // Eventos
     $('exp-vistas').addEventListener('click', function (e) {
       var b = e.target.closest('[data-exp-vista]');
@@ -225,7 +234,7 @@ var EXP = (function () {
     });
     $('exp-conteo').textContent = visibles.length;
     $('exp-conteo-rotulo').innerHTML = (visibles.length === 1 ? 'archivo visible' : 'archivos visibles') +
-      '<br>de ' + CONTENIDOS.length + ' en el catálogo';
+      '<br>de ' + CONTENIDOS.length;
     $('exp-limpiar').style.visibility = hayFiltros() ? 'visible' : 'hidden';
     $('exp-q-x').style.visibility = st.q ? 'visible' : 'hidden';
     var modoVista = (typeof vistaActual !== 'undefined' && vistaActual === 'archivo')
@@ -233,6 +242,10 @@ var EXP = (function () {
     document.querySelectorAll('#exp-vistas [data-exp-vista]').forEach(function (b) {
       b.classList.toggle('on', b.dataset.expVista === modoVista);
     });
+    document.querySelectorAll('#exp-color [data-color]').forEach(function (b) {
+      b.classList.toggle('on', b.dataset.color === st.color);
+    });
+    document.body.classList.toggle('exp-rizoma', modoVista === 'rizoma');
     rotuloTirador();
   }
 

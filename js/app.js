@@ -483,6 +483,85 @@ function abrirPanel(n) {
 ══════════════════════════════════════════ */
 var nCont = [];
 var nAmb  = [];
+
+/* ── RED DE RELACIONES ───────────────────────────────────────────
+   Dos archivos se relacionan por lo que comparten: cada etiqueta, nicho o
+   práctica en común suma 1 punto; pertenecer a la misma obra suma 1; una
+   conexión curada a mano (CONEXIONES_VISUALES) suma 3.
+   · Hay conexión cuando suman 2 puntos o más (o es curada).
+   · grado[i]  = cuántas conexiones tiene el archivo → tamaño del nodo.
+   · v (0–1)   = qué tan fuerte es la conexión → grosor, opacidad y velocidad.
+   Se calcula una sola vez al cargar. Para que siga legible y fluido con
+   cientos de archivos, se dibujan las 5 conexiones más fuertes de cada nodo
+   (3 o 4 cuando el catálogo crece) y hasta 12 del nodo que se señala.
+──────────────────────────────────────────────────────────────── */
+function calcularRed(items) {
+  var N = items.length, UMBRAL = 2, K_HOVER = 12;
+  var K_BASE = N <= 80 ? 5 : (N <= 200 ? 4 : 3);   // menos trazos por nodo cuando hay muchos
+  var pos = {}, grupos = {}, pares = {}, curadas = {};
+  items.forEach(function(c, i) { pos[c.id] = i; });
+  function anotar(clave, i) { (grupos[clave] || (grupos[clave] = [])).push(i); }
+  items.forEach(function(c, i) {
+    (c.tags || []).forEach(function(t) { anotar('e:' + t, i); });
+    (c.temas || []).forEach(function(t) { anotar('n:' + t, i); });
+    (c.practicas || []).forEach(function(t) { anotar('p:' + t, i); });
+    anotar('o:' + c.sub, i);
+  });
+  function sumar(i, j, w) {
+    if (i === j) return;
+    var k = Math.min(i, j) * N + Math.max(i, j);
+    pares[k] = (pares[k] || 0) + w;
+    return k;
+  }
+  Object.keys(grupos).forEach(function(clave) {
+    var m = grupos[clave];
+    for (var a = 0; a < m.length; a++) for (var b = a + 1; b < m.length; b++) sumar(m[a], m[b], 1);
+  });
+  (typeof CONEXIONES_VISUALES !== 'undefined' ? CONEXIONES_VISUALES : []).forEach(function(par) {
+    if (pos[par[0]] === undefined || pos[par[1]] === undefined) return;
+    curadas[sumar(pos[par[0]], pos[par[1]], 3)] = true;
+  });
+
+  var grado = [], porNodo = [], i;
+  for (i = 0; i < N; i++) { grado.push(0); porNodo.push([]); }
+  Object.keys(pares).forEach(function(k) {
+    var w = pares[k];
+    if (w < UMBRAL && !curadas[k]) return;
+    var a = Math.floor(k / N), b = k % N;
+    var e = { a: a, b: b, w: w, cur: !!curadas[k], base: false, v: 0,
+              seed: a * 31 + b * 17, off: 0, dir: ((a + b) % 3 === 0) ? -1 : 1 };
+    grado[a]++; grado[b]++;
+    porNodo[a].push(e); porNodo[b].push(e);
+  });
+  var wMin = Infinity, wMax = 0, aristas = [], vistas = {};
+  porNodo.forEach(function(lista) {
+    lista.sort(function(x, y) { return y.w - x.w; });
+    for (var q = 0; q < lista.length && q < K_BASE; q++) lista[q].base = true;
+    if (lista.length > K_HOVER) lista.length = K_HOVER;
+  });
+  porNodo.forEach(function(lista) {
+    lista.forEach(function(e) {
+      var k = e.a * N + e.b;
+      if (vistas[k]) return;
+      vistas[k] = true;
+      if (e.base) aristas.push(e);
+      if (e.w < wMin) wMin = e.w;
+      if (e.w > wMax) wMax = e.w;
+    });
+  });
+  porNodo.forEach(function(lista) {
+    lista.forEach(function(e) { e.v = wMax > wMin ? (e.w - wMin) / (wMax - wMin) : 0.5; });
+  });
+  var vecinos = porNodo.map(function(lista, idx) {
+    var m = {};
+    lista.forEach(function(e) { m[e.a === idx ? e.b : e.a] = true; });
+    return m;
+  });
+  var gMin = Math.min.apply(null, grado.length ? grado : [0]);
+  var gMax = Math.max.apply(null, grado.length ? grado : [0]);
+  return { aristas: aristas, porNodo: porNodo, vecinos: vecinos, grado: grado, gMin: gMin, gMax: gMax };
+}
+var RED = calcularRed(CONTENIDOS);
 var navH  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'));
 
 var sketch = new p5(function(p) {
@@ -536,6 +615,7 @@ var sketch = new p5(function(p) {
       n.x *= sx; n.y *= sy;
       if (n.ax !== undefined) { n.ax *= sx; n.ay *= sy; }
     });
+    ajustarDensidad();
   }
   var canvasEl = null;
 
@@ -556,8 +636,7 @@ var sketch = new p5(function(p) {
       }
     }, { passive: true });
 
-    // Distribución inicial en grilla con jitter: garantiza que los nodos
-    // nazcan dispersos por todo el canvas, no agrupados por azar.
+    // Distribución inicial en grilla con jitter (semilla de la distribución por afinidad)
     var nTotal = CONTENIDOS.length;
     var cols = Math.ceil(Math.sqrt(nTotal * p.width / p.height));
     var rows = Math.ceil(nTotal / cols);
@@ -566,28 +645,34 @@ var sketch = new p5(function(p) {
     var idx = 0;
 
     CONTENIDOS.forEach(function(c) {
-      // Color por grupo (SUB) — con fallback a tipo si no hay mapeo de grupo
-      var rgb = (SUB_RGB[c.sub] || categoriaDe(c.tipo).rgb).slice();
       var col = idx % cols;
       var row = Math.floor(idx / cols);
-      // Centro de la celda + jitter aleatorio dentro de ella
       var cx = 80 + cellW * (col + 0.5) + p.random(-cellW * 0.35, cellW * 0.35);
       var cy = 80 + cellH * (row + 0.5) + p.random(-cellH * 0.35, cellH * 0.35);
-      idx++;
+
+      // Tamaño según el número de relaciones (grado): de SIZE_MIN a SIZE_MAX
+      var g = RED.grado[idx];
+      var tG = RED.gMax > RED.gMin ? (g - RED.gMin) / (RED.gMax - RED.gMin) : 0.5;
+      var rgbObra = SUB_RGB[c.sub] || categoriaDe(c.tipo).rgb;
 
       nCont.push({
         cont: c,
-        x: cx,
-        y: cy,
-        vx: p.random(-0.3, 0.3),  // velocidad inicial leve para que se asienten orgánicamente
-        vy: p.random(-0.3, 0.3),
-        // +30% sobre v14: bases 8→10.4 (serie) y 6→7.8 (archivo), multiplicador peso 1.5→1.95
-        size: c.esSerie ? 10.4 + (c.peso || 1) * 1.95 : 7.8 + (c.peso || 1) * 1.95,
+        gi: idx,                 // índice en RED
+        grado: g,
+        x: cx, y: cy,
+        size0: SIZE_MIN + (SIZE_MAX - SIZE_MIN) * Math.pow(tG, 0.85),
+        size: SIZE_MIN,
         ph: p.random(p.TWO_PI),
         z: p.random(-1, 1),
-        rgb: rgb,
+        rgbObra: rgbObra,                       // color por obra/grupo
+        rgbTipo: categoriaDe(c.tipo).rgb,       // color por categoría
+        rgb: rgbObra.slice(),                   // color en pantalla (transita entre ambos)
+        fv: 1,                                  // 1 = pasa los filtros · 0 = apagado
+        hk: 0,                                  // 1 = es el nodo señalado
+        depth: 1, foco: 0, hb: 0, dM: 9999, sz: SIZE_MIN,
         wisps: []
       });
+      idx++;
     });
 
     // Nodos ambientales — distribución totalmente aleatoria, son fondo
@@ -595,8 +680,6 @@ var sketch = new p5(function(p) {
       var rgb = AMBIENT_RGB[Math.floor(p.random(AMBIENT_RGB.length))];
       nAmb.push({
         x: p.random(p.width), y: p.random(p.height),
-        vx: p.random(-0.3, 0.3), vy: p.random(-0.3, 0.3),
-        // +30% sobre v14: rango 3-6 → 3.9-7.8
         size: p.random(3.9, 7.8),
         ph: p.random(p.TWO_PI),
         z: p.random(-1, 1),
@@ -604,8 +687,102 @@ var sketch = new p5(function(p) {
         wisps: []
       });
     }
+    ajustarDensidad();
+    distribuir();
     nodeCountEl.textContent = nCont.length;
+
+    canvasEl.addEventListener('mouseleave', function() { cursorEnLienzo = false; });
+    canvasEl.addEventListener('mousemove',  function() { cursorEnLienzo = true; });
   };
+
+  // ── Tamaños ─────────────────────────────────────────────────────
+  var SIZE_MIN = 12, SIZE_MAX = 28;   // el cuerpo del nodo mide ≈ 1,6 × size
+  var DENS = 1;                       // con muchos archivos, todo se reduce en proporción
+  function ajustarDensidad() {
+    var N = Math.max(1, nCont.length);
+    DENS = p.constrain(Math.sqrt((p.width * p.height) / (N * 24000)), 0.5, 1);
+    nCont.forEach(function(n) { n.size = n.size0 * DENS; });
+  }
+
+  // ── Distribución por afinidad ───────────────────────────────────
+  // Los archivos relacionados quedan cerca (más cerca cuanto más comparten) y
+  // todos se repelen para no encimarse. Se calcula una vez; después cada nodo
+  // flota alrededor del lugar que le tocó.
+  function distribuir() {
+    var N = nCont.length;
+    if (N < 2) return;
+    var W = p.width, H = p.height;
+    var mx = Math.min(90, W * 0.12), my = Math.min(80, H * 0.12);
+    var L = Math.sqrt(((W - 2 * mx) * (H - 2 * my)) / N);   // separación ideal
+    var iter = N > 250 ? 150 : 260;
+    var fx = new Float32Array(N), fy = new Float32Array(N);
+    var cx = W / 2, cy = H / 2;
+    // cuántos resortes tira de cada nodo (para que los muy conectados no colapsen al centro)
+    var tiros = new Float32Array(N);
+    RED.aristas.forEach(function(e) { tiros[e.a]++; tiros[e.b]++; });
+    for (var it = 0; it < iter; it++) {
+      var temp = 1 - it / iter;
+      for (var q = 0; q < N; q++) { fx[q] = 0; fy[q] = 0; }
+      // repulsión
+      for (var i = 0; i < N; i++) {
+        var a = nCont[i];
+        for (var j = i + 1; j < N; j++) {
+          var b = nCont[j];
+          var dx = a.x - b.x, dy = a.y - b.y;
+          var d2 = dx * dx + dy * dy;
+          if (d2 < 0.01) { dx = Math.random() - 0.5; dy = Math.random() - 0.5; d2 = dx * dx + dy * dy + 0.01; }
+          var r = L * 1.1 + (a.size + b.size) * 0.8;
+          if (d2 > r * r * 6.25) continue;
+          var d = Math.sqrt(d2);
+          var f = Math.min(L * 0.5, (r * r) / d2 * 2.2);
+          fx[i] += dx / d * f; fy[i] += dy / d * f;
+          fx[j] -= dx / d * f; fy[j] -= dy / d * f;
+        }
+      }
+      // resortes: las conexiones fuertes acercan más
+      for (var k = 0; k < RED.aristas.length; k++) {
+        var e = RED.aristas[k], na = nCont[e.a], nb = nCont[e.b];
+        var ex = nb.x - na.x, ey = nb.y - na.y;
+        var ed = Math.sqrt(ex * ex + ey * ey) || 0.01;
+        var objetivo = L * (1.9 - 0.9 * e.v) + (na.size + nb.size);
+        var ef = (ed - objetivo) * (0.02 + 0.05 * e.v) / Math.sqrt(Math.max(1, Math.max(tiros[e.a], tiros[e.b]) - 2));
+        fx[e.a] += ex / ed * ef; fy[e.a] += ey / ed * ef;
+        fx[e.b] -= ex / ed * ef; fy[e.b] -= ey / ed * ef;
+      }
+      // gravedad suave + paso limitado (se enfría) + marco
+      var paso = L * 0.45 * temp + 0.4;
+      for (var m = 0; m < N; m++) {
+        var n = nCont[m];
+        fx[m] += (cx - n.x) * 0.0015; fy[m] += (cy - n.y) * 0.0015;
+        var mag = Math.sqrt(fx[m] * fx[m] + fy[m] * fy[m]);
+        if (mag > paso) { fx[m] *= paso / mag; fy[m] *= paso / mag; }
+        n.x = Math.min(W - mx, Math.max(mx, n.x + fx[m]));
+        n.y = Math.min(H - my, Math.max(my, n.y + fy[m]));
+      }
+    }
+    // repaso final: separar los que quedaron encimados
+    for (var pas = 0; pas < 24; pas++) {
+      for (var i2 = 0; i2 < N; i2++) {
+        var u = nCont[i2];
+        for (var j2 = i2 + 1; j2 < N; j2++) {
+          var w = nCont[j2];
+          var ox = u.x - w.x, oy = u.y - w.y;
+          var sep = (u.size + w.size) * 1.15 + 8;
+          var od2 = ox * ox + oy * oy;
+          if (od2 >= sep * sep) continue;
+          var od = Math.sqrt(od2) || 0.01, emp = (sep - od) * 0.5;
+          u.x += ox / od * emp; u.y += oy / od * emp;
+          w.x -= ox / od * emp; w.y -= oy / od * emp;
+        }
+      }
+      for (var c2 = 0; c2 < N; c2++) {
+        var nn = nCont[c2];
+        nn.x = Math.min(W - mx, Math.max(mx, nn.x));
+        nn.y = Math.min(H - my, Math.max(my, nn.y));
+      }
+    }
+    nCont.forEach(function(n) { n.ax = undefined; });   // reanclar el flotar en el nuevo lugar
+  }
 
   // Easing tipo v10: la gota sale con impulso y frena cerca del destino
   function easeOutQuint(x) { return 1 - Math.pow(1 - x, 5); }
@@ -717,7 +894,7 @@ var sketch = new p5(function(p) {
     //
     // El anclaje también deriva imperceptiblemente, así que la nube entera
     // respira y se reorganiza con lentitud a lo largo de minutos.
-    var marginX = 90, marginY = 90;
+    var marginX = Math.min(90, p.width * 0.12), marginY = Math.min(90, p.height * 0.12);
     var maxX = p.width - marginX, maxY = p.height - marginY;
     var all = nCont.concat(nAmb);
     var tFloat = p.frameCount * 0.0016;   // reloj lento para el flotar
@@ -767,80 +944,82 @@ var sketch = new p5(function(p) {
       n.y = p.constrain(n.y, 20, p.height - 20);
     }
 
-    // CONEXIONES inkstroke (triple capa: nube difusa + nube principal + partículas viajeras)
-    // v16: optimización para escalar al doble de nodos — se descarta el nodo `a`
-    // temprano si está demasiado lejos del cursor, evitando el bucle interno entero.
-    // El radio de corte contempla MAX_CON para no perder conexiones válidas.
-    p.noStroke();
-    var cutoff = RADIO * 1.8 + MAX_CON;  // margen para que ningún par válido se pierda
+    // ── PRE-PASE: estado de cada nodo y nodo bajo el cursor ─────────
+    var mX = p.mouseX, mY = p.mouseY;
+    var colorTipo = !!(window.EXP && EXP.st.color === 'tipo');
+    var cand = null, candD = 1e9;
     for (var i = 0; i < nCont.length; i++) {
-      var a = nCont[i];
-      // Descarte temprano: si `a` está más lejos que cutoff del cursor, ninguna
-      // de sus conexiones tendrá su punto medio dentro del radio de la lupa.
-      if (p.dist(a.x, a.y, p.mouseX, p.mouseY) > cutoff) continue;
-      for (var j = i + 1; j < nCont.length; j++) {
-        var b = nCont[j];
-        var d = p.dist(a.x, a.y, b.x, b.y);
-        if (d > MAX_CON) continue;
-
-        var midX = (a.x + b.x) / 2, midY = (a.y + b.y) / 2;
-        var dMouse = p.dist(midX, midY, p.mouseX, p.mouseY);
-        if (dMouse > RADIO * 1.8) continue;
-
-        // Boost individual de cada nodo por cercanía al cursor
-        var hoverA = smoothstep(RADIO, RADIO * 0.2, p.dist(a.x, a.y, p.mouseX, p.mouseY));
-        var hoverB = smoothstep(RADIO, RADIO * 0.2, p.dist(b.x, b.y, p.mouseX, p.mouseY));
-        var depthA = depthFactor(a.z, hoverA);
-        var depthB = depthFactor(b.z, hoverB);
-        var depthMin = Math.min(depthA, depthB);
-        if (depthMin < 0.2) continue;
-
-        // Conexión "reforzada" si está en CONEXIONES_VISUALES
-        var esPreferente = false;
-        for (var k = 0; k < CONEXIONES_VISUALES.length; k++) {
-          var par = CONEXIONES_VISUALES[k];
-          if ((par[0] === a.cont.id && par[1] === b.cont.id) ||
-              (par[0] === b.cont.id && par[1] === a.cont.id)) {
-            esPreferente = true; break;
-          }
-        }
-
-        var avgR = (a.rgb[0] + b.rgb[0]) / 2;
-        var avgG = (a.rgb[1] + b.rgb[1]) / 2;
-        var avgB = (a.rgb[2] + b.rgb[2]) / 2;
-        // Atenuación por distancia entre los nodos (más cerca = más densa, como v10)
-        var distAlp = p.map(d, 0, MAX_CON, 1.0, 0.0);
-        // v15: alpha base subida (130→185 / 180→235) para conexiones más visibles
-        var alph = (esPreferente ? 235 : 185) * depthMin * distAlp;
-        var seed = i * 31 + j * 17;
-
-        // CAPA 1: nube difusa de partículas pequeñas (fondo) — opacidad subida (0.35→0.45)
-        p.fill(avgR, avgG, avgB, alph * 0.45);
-        inkStroke(a.x, a.y, b.x, b.y, seed, false);
-
-        // CAPA 2: nube principal — partículas más grandes y sólidas (0.95→1.0)
-        p.fill(avgR, avgG, avgB, alph * 1.0);
-        inkStroke(a.x, a.y, b.x, b.y, seed, true);
-
-        // CAPA 3 (v15): partículas viajeras direccionales
-        // Pequeñas luces que recorren el eje de la conexión — como savia,
-        // esporas o luciérnagas siguiendo el cauce. Cada conexión tiene
-        // un puñado con velocidades, tamaños y opacidades distintas.
-        // Más visibles si es preferente o si el cursor está cerca.
-        var stirMid = smoothstep(RADIO * 1.8, 0, dMouse);
-        travelers(a.x, a.y, b.x, b.y, seed, avgR, avgG, avgB,
-                  alph, esPreferente, stirMid);
+      var n = nCont[i];
+      var pasa = n.cont._visible !== false;
+      n.fv += ((pasa ? 1 : 0) - n.fv) * 0.12;
+      var obj = colorTipo ? n.rgbTipo : n.rgbObra;
+      n.rgb[0] += (obj[0] - n.rgb[0]) * 0.1;
+      n.rgb[1] += (obj[1] - n.rgb[1]) * 0.1;
+      n.rgb[2] += (obj[2] - n.rgb[2]) * 0.1;
+      n.dM = p.dist(n.x, n.y, mX, mY);
+      n.foco = smoothstep(RADIO * 2.4, 0, n.dM);          // el hover empieza a actuar antes
+      n.hb = smoothstep(RADIO, RADIO * 0.2, n.dM);        // atracción hacia el plano focal
+      n.depth = depthFactor(n.z, n.hb);
+      n.hk += ((n === hov ? 1 : 0) - n.hk) * 0.2;
+      var pls = p.sin(p.frameCount * 0.05 + n.ph);
+      n.sz = (n.size + p.map(pls, -1, 1, -0.8, 2) * DENS) * (0.8 + n.depth * 0.55) * (1 + n.hb * 0.18 + n.hk * 0.2);
+      if (cursorEnLienzo && pasa && n.depth >= 0.35) {
+        var alcance = Math.max(18, n.sz * 0.8 + 8);
+        if (n.dM < alcance && n.dM < candD) { candD = n.dM; cand = n; }
       }
+    }
+    if (vistaActual !== 'mapa') cand = null;
+    if (cand !== hov) {
+      hov = cand;
+      if (hov) { hovRef = hov; mostrarTip(hov); }
+      cursorRing.classList.toggle('hover', !!hov);
+    }
+    hovK += ((hov ? 1 : 0) - hovK) * 0.16;
+    if (!hov && hovK < 0.02) { hovK = 0; hovRef = null; }
+    ubicarTip();
+
+    // ── CONEXIONES ──────────────────────────────────────────────────
+    // Trazo punteado que fluye. Cuanto más comparten dos archivos (e.v):
+    // más grueso, más opaco y más rápido. Las débiles quedan tenues y lentas.
+    var ctx = p.drawingContext;
+    var tinta = [];   // conexiones cerca del cursor: reciben además la nube de tinta
+    ctx.save();
+    ctx.lineCap = 'round';
+    for (var k = 0; k < RED.aristas.length; k++) {
+      var e = RED.aristas[k];
+      var vivo = !!hovRef && (e.a === hovRef.gi || e.b === hovRef.gi);
+      trazo(ctx, e, vivo, tinta);
+    }
+    // conexiones propias del nodo señalado que no están en el trazado base
+    if (hovRef) {
+      var extra = RED.porNodo[hovRef.gi];
+      for (var x = 0; x < extra.length; x++) if (!extra[x].base) trazo(ctx, extra[x], true, tinta);
+    }
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Nube de tinta + viajeras (la textura dibujada del rizoma) en las conexiones
+    // que toca la lupa. Se limita a las más cercanas para mantener la fluidez.
+    p.noStroke();
+    tinta.sort(function(u, w) { return (w.vivo - u.vivo) || (u.d - w.d); });
+    var maxTinta = nCont.length <= 80 ? 6 : 3;
+    for (var t = 0; t < tinta.length && t < maxTinta; t++) {
+      var T = tinta[t];
+      p.fill(T.r, T.g, T.bl, T.alfa * 0.45);
+      inkStroke(T.a.x, T.a.y, T.b.x, T.b.y, T.e.seed, false);
+      p.fill(T.r, T.g, T.bl, T.alfa);
+      inkStroke(T.a.x, T.a.y, T.b.x, T.b.y, T.e.seed, true);
+      travelers(T.a.x, T.a.y, T.b.x, T.b.y, T.e.seed, T.r, T.g, T.bl, T.alfa, T.e.cur, T.stir);
     }
 
     // NODOS AMBIENTALES (siempre visibles, suavemente moduladas por profundidad)
+    var apagarAmb = 1 - hovK * 0.5;
     for (var i = 0; i < nAmb.length; i++) {
       var n = nAmb[i];
-      var dMouse = p.dist(n.x, n.y, p.mouseX, p.mouseY);
+      var dMouse = p.dist(n.x, n.y, mX, mY);
       var foco = smoothstep(RADIO * 2, RADIO * 0.5, dMouse);
-      // los ambientales reciben un boost suave con el cursor cerca
       var depth = depthFactor(n.z, foco * 0.5);
-      var vis = depth * (0.4 + foco * 0.6);
+      var vis = depth * (0.4 + foco * 0.6) * apagarAmb;
       var pls = p.sin(p.frameCount * 0.04 + n.ph);
       var sz  = (n.size + p.map(pls, -1, 1, -0.6, 1.4)) * (0.7 + depth * 0.5);
       p.noStroke();
@@ -851,84 +1030,38 @@ var sketch = new p5(function(p) {
       if (foco > 0.1) updateAndDrawWisps(n, sz, n.rgb[0], n.rgb[1], n.rgb[2], vis, false);
     }
 
-    // NODOS DE CONTENIDO (siempre visibles · hover atrae profundidad + agranda)
+    // NODOS DE CONTENIDO
+    var pocos = nCont.length <= 80;
     for (var i = 0; i < nCont.length; i++) {
       var n = nCont[i];
-      var dMouse = p.dist(n.x, n.y, p.mouseX, p.mouseY);
-      // foco extendido para que el hover empiece a actuar antes
-      var foco = smoothstep(RADIO * 2.4, 0, dMouse);
-      // hoverBoost: cuán fuertemente el cursor "atrae" este nodo al plano focal.
-      // Solo se activa cuando el cursor está bien cerca (< RADIO).
-      var hoverBoost = smoothstep(RADIO, RADIO * 0.2, dMouse);
-      // n.z efectivo: si el cursor está encima, el nodo "se acerca" virtualmente
-      var depth = depthFactor(n.z, hoverBoost);
+      if (n === hov) continue;       // el señalado se dibuja al final, encima
+      dibujarNodo(n, pocos);
+    }
+    if (hov) dibujarNodo(hov, pocos);
 
-      var pls = p.sin(p.frameCount * 0.05 + n.ph);
-      // tamaño escala con profundidad (80%→130%) y con hover (extra +25% si está encima)
-      var depthScale = 0.8 + depth * 0.55;
-      var hoverScale = 1 + hoverBoost * 0.35;  // hasta 35% más grande con hover
-      var sz  = (n.size + p.map(pls, -1, 1, -0.8, 2)) * depthScale * hoverScale;
-
-      // visibilidad: piso 40% por profundidad, hasta 100% con cursor encima
-      var vis = depth * (0.55 + foco * 0.45);
-
-      p.noStroke();
-
-      // Glow: shadowBlur escalado por visibilidad y hover
-      var glowIntensity = (8 + hoverBoost * 18) * vis;
-      p.drawingContext.shadowBlur = glowIntensity;
-      p.drawingContext.shadowColor = 'rgba(' + n.rgb[0] + ',' + n.rgb[1] + ',' + n.rgb[2] + ',' + (0.7 * vis) + ')';
-
-      // Halo (alpha subido: 38→65 para más presencia)
-      p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 65 * vis);
-      p.circle(n.x, n.y, sz * 3.5);
-      // Cuerpo (alpha subido: 210→240)
-      p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 240 * vis);
-      p.circle(n.x, n.y, sz * 1.6);
-
-      // Apagar glow antes del núcleo para que no se contamine
-      p.drawingContext.shadowBlur = 0;
-
-      // Núcleo (siempre presente — es lo que permite localizar el nodo)
-      p.fill(236, 230, 220, 240 * depth * (0.45 + foco * 0.55));
-      p.circle(n.x, n.y, sz * 0.55);
-
-      updateAndDrawWisps(n, sz, n.rgb[0], n.rgb[1], n.rgb[2], vis, foco > 0.5);
-      p.drawingContext.shadowBlur = 0;  // reset definitivo después de wisps
-
-      // Etiqueta cerca del cursor
-      if (dMouse < RADIO * 0.9) {
-        var labelAlp = smoothstep(RADIO * 0.9, RADIO * 0.3, dMouse);
-        // Doble glifo para series, simple para archivos
-        p.fill(19, 19, 15, 225 * labelAlp);
-        p.rectMode(p.CENTER);
-        var glyph = n.cont.icono;
-        var labelW = 20 + (glyph.length - 1) * 7;
-        p.rect(n.x + 22, n.y - 14, labelW, 18, 3);
-        p.noFill();
-        p.stroke(n.rgb[0], n.rgb[1], n.rgb[2], 140 * labelAlp);
-        p.strokeWeight(0.7);
-        p.rect(n.x + 22, n.y - 14, labelW, 18, 3);
+    // Rótulos de los archivos conectados con el nodo señalado
+    if (hovRef && hovK > 0.05) {
+      var vec = RED.vecinos[hovRef.gi];
+      p.textAlign(p.LEFT, p.CENTER);
+      for (var i = 0; i < nCont.length; i++) {
+        var n = nCont[i];
+        if (!vec[n.gi] || n.fv < 0.5) continue;
+        var lx = n.x + n.sz * 0.8 + 9, ly = n.y;
+        var tit = n.cont.titulo.length > 30 ? n.cont.titulo.slice(0, 28) + '…' : n.cont.titulo;
         p.noStroke();
-        p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 230 * labelAlp);
-        p.textFont('JetBrains Mono');
-        p.textSize(10);
-        p.textAlign(p.CENTER, p.CENTER);
-        p.text(glyph, n.x + 22, n.y - 13);
-
-        // ID + título compacto
-        if (labelAlp > 0.5) {
-          p.fill(236, 230, 220, 200 * (labelAlp - 0.5) * 2);
-          p.textSize(9);
-          p.textAlign(p.LEFT, p.CENTER);
-          p.text(n.cont.id, n.x + 36, n.y - 14);
-
-          p.fill(232, 227, 213, 180 * (labelAlp - 0.5) * 2);
-          p.textFont('Instrument Serif');
-          p.textSize(12);
-          var maxT = n.cont.titulo.length > 32 ? n.cont.titulo.slice(0,30) + '…' : n.cont.titulo;
-          p.text(maxT, n.x + 36, n.y);
-        }
+        p.textFont('JetBrains Mono'); p.textSize(9);
+        var wId = p.textWidth(n.cont.id);
+        p.textFont('Instrument Serif'); p.textSize(14);
+        var wTit = p.textWidth(tit);
+        p.fill(19, 19, 15, 205 * hovK);
+        p.rectMode(p.CORNER);
+        p.rect(lx - 5, ly - 11, wId + wTit + 20, 22, 2);
+        p.fill(n.rgb[0], n.rgb[1], n.rgb[2], 240 * hovK);
+        p.textFont('JetBrains Mono'); p.textSize(9);
+        p.text(n.cont.id, lx, ly);
+        p.fill(236, 230, 220, 235 * hovK);
+        p.textFont('Instrument Serif'); p.textSize(14);
+        p.text(tit, lx + wId + 9, ly - 1);
       }
     }
 
@@ -936,17 +1069,130 @@ var sketch = new p5(function(p) {
     if (selectedNode) {
       var sn = selectedNode;
       var sp3 = p.sin(p.frameCount * 0.07);
-      var sr  = sn.size * 1.7 + p.map(sp3, -1, 1, 4, 10);
-      var zFs = p.map(sn.z, -1, 1, 0.45, 1.3);
+      var sr  = sn.sz * 1.1 + p.map(sp3, -1, 1, 4, 10);
       p.noFill();
-      p.stroke(sn.rgb[0], sn.rgb[1], sn.rgb[2], 90); p.strokeWeight(0.8);
-      p.circle(sn.x, sn.y, sr * 2 * zFs);
-      p.stroke(sn.rgb[0], sn.rgb[1], sn.rgb[2], 40); p.strokeWeight(0.4);
-      p.circle(sn.x, sn.y, sr * 3.2 * zFs);
+      p.stroke(sn.rgb[0], sn.rgb[1], sn.rgb[2], 110); p.strokeWeight(0.8);
+      p.circle(sn.x, sn.y, sr * 2);
+      p.stroke(sn.rgb[0], sn.rgb[1], sn.rgb[2], 45); p.strokeWeight(0.4);
+      p.circle(sn.x, sn.y, sr * 3.2);
     }
 
     drawLupa();
   };
+
+  // ── Nodo señalado con el mouse ──────────────────────────────────
+  var hov = null;        // nodo bajo el cursor
+  var hovRef = null;     // el último señalado (para desvanecer con suavidad)
+  var hovK = 0;          // 0 → 1: cuánto está activo el resalte
+  var cursorEnLienzo = false;
+
+  // Una conexión: curva punteada cuyo trazo avanza
+  function trazo(ctx, e, vivo, tinta) {
+    var a = nCont[e.a], b = nCont[e.b];
+    var fa = Math.min(a.fv, b.fv);
+    if (fa < 0.03) return;
+    var v = e.v;
+    var dx = b.x - a.x, dy = b.y - a.y;
+    var d = Math.sqrt(dx * dx + dy * dy) || 0.01;
+    var midX = (a.x + b.x) / 2, midY = (a.y + b.y) / 2;
+    var dMid = p.dist(midX, midY, p.mouseX, p.mouseY);
+    var stir = cursorEnLienzo ? smoothstep(RADIO * 1.8, 0, dMid) : 0;
+    var dm = Math.min(a.depth, b.depth);
+
+    var alfa = (0.10 + 0.55 * v) * (0.4 + 0.6 * dm) * (1 + 0.5 * stir);
+    if (vivo) alfa = alfa + (Math.max(alfa, 0.62 + 0.38 * v) - alfa) * hovK;
+    else      alfa = alfa * (1 - 0.84 * hovK);
+    alfa = Math.min(1, alfa) * fa;
+    if (alfa < 0.012) return;
+
+    // velocidad del flujo: las fuertes corren, las débiles apenas se mueven
+    var vel = (0.10 + v * v * 1.7) * (vivo ? 1 + 0.7 * hovK : 1);
+    e.off -= vel * e.dir;
+
+    var r = (a.rgb[0] + b.rgb[0]) / 2, g = (a.rgb[1] + b.rgb[1]) / 2, bl = (a.rgb[2] + b.rgb[2]) / 2;
+    if (fa < 0.99) { r += (120 - r) * (1 - fa); g += (118 - g) * (1 - fa); bl += (112 - bl) * (1 - fa); }
+
+    // curva leve que respira
+    var comba = (p.noise(e.seed * 0.37, p.frameCount * 0.0022) - 0.5) * d * 0.24;
+    var cxp = midX + (-dy / d) * comba, cyp = midY + (dx / d) * comba;
+
+    ctx.strokeStyle = 'rgba(' + (r | 0) + ',' + (g | 0) + ',' + (bl | 0) + ',' + alfa.toFixed(3) + ')';
+    ctx.lineWidth = (0.7 + v * 2.4) * (0.6 + 0.4 * DENS) * (vivo ? 1 + 0.35 * hovK : 1);
+    ctx.setLineDash([2.5 + v * 6.5, 5.5 + (1 - v) * 4]);
+    ctx.lineDashOffset = e.off;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.quadraticCurveTo(cxp, cyp, b.x, b.y);
+    ctx.stroke();
+
+    if ((stir > 0.06 || (vivo && hovK > 0.3)) && fa > 0.5) {
+      var cerca = p.map(d, 0, MAX_CON * 1.6, 1, 0.3, true);
+      tinta.push({ e: e, a: a, b: b, d: dMid, vivo: vivo ? 1 : 0, stir: stir, r: r, g: g, bl: bl,
+                   alfa: (e.cur ? 235 : 185) * dm * (0.35 + 0.65 * v) * cerca * Math.max(stir, vivo ? hovK * 0.7 : 0) });
+    }
+  }
+
+  function dibujarNodo(n, pocos) {
+    var esVecino = !!hovRef && (n === hovRef || RED.vecinos[hovRef.gi][n.gi]);
+    var atenuar = (hovRef && !esVecino) ? 1 - 0.72 * hovK : 1;
+    var vis = n.depth * (0.55 + n.foco * 0.45) * atenuar * (0.10 + 0.90 * n.fv);
+    var r = n.rgb[0], g = n.rgb[1], b = n.rgb[2];
+    if (n.fv < 0.99) { r += (120 - r) * (1 - n.fv); g += (118 - g) * (1 - n.fv); b += (112 - b) * (1 - n.fv); }
+    var sz = n.sz;
+    var ctx = p.drawingContext;
+
+    p.noStroke();
+    // Glow solo cerca del cursor (es lo más costoso de dibujar)
+    var conGlow = (n.hk > 0.05 || n.hb > (pocos ? 0.05 : 0.5)) && n.fv > 0.5;
+    if (conGlow) {
+      ctx.shadowBlur = (8 + n.hb * 18 + n.hk * 10) * vis;
+      ctx.shadowColor = 'rgba(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ',' + (0.7 * vis) + ')';
+    }
+    // Halo
+    p.fill(r, g, b, 65 * vis);
+    p.circle(n.x, n.y, sz * 3.5);
+    // Cuerpo
+    p.fill(r, g, b, 240 * vis);
+    p.circle(n.x, n.y, sz * 1.6);
+    ctx.shadowBlur = 0;
+    // Núcleo (siempre presente — es lo que permite localizar el nodo)
+    p.fill(236, 230, 220, 240 * n.depth * (0.45 + n.foco * 0.55) * atenuar * n.fv);
+    p.circle(n.x, n.y, sz * 0.55);
+
+    if (n.fv > 0.5 && (pocos || n.hb > 0.05)) {
+      updateAndDrawWisps(n, sz, r, g, b, vis, n.foco > 0.5);
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  // ── Rótulo del nodo señalado (código + título; la miniatura llega en el Bloque D) ──
+  var tipEl = document.getElementById('rz-tip');
+  function mostrarTip(n) {
+    if (!tipEl) return;
+    var c = n.cont, cat = categoriaDe(c.tipo), sub = SUBPROYECTOS[c.sub];
+    var esc = window.EXP ? EXP.esc : function(s) { return s; };
+    var obra = window.EXP ? EXP.obraCorta(c.sub) : (sub ? sub.titulo : c.sub);
+    var mini = (window.EXP && EXP.miniaturaHTML) ? EXP.miniaturaHTML(c) : '';
+    tipEl.style.setProperty('--cat', 'rgb(' + cat.rgb.join(',') + ')');
+    tipEl.innerHTML = (mini ? '<div class="rz-tip-img">' + mini + '</div>' : '') +
+      '<div class="rz-tip-pie"><span class="rz-tip-cod">' + esc(c.id) + '</span>' +
+      '<span class="rz-tip-tit">' + esc(c.titulo) + '</span></div>' +
+      '<div class="rz-tip-meta">' + esc(cat.nombre) + ' · ' + esc(obra) + '<br>' +
+      n.grado + (n.grado === 1 ? ' relación' : ' relaciones') + ' · clic para abrir</div>';
+  }
+  function ubicarTip() {
+    if (!tipEl) return;
+    var activo = !!hov && vistaActual === 'mapa';
+    tipEl.classList.toggle('on', activo);
+    if (!activo) return;
+    var w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+    var sep = hov.sz * 0.8 + 20;
+    var x = hov.x + sep;
+    if (x + w > p.width - 12) x = hov.x - sep - w;
+    if (x < 8) x = 8;
+    var y = p.constrain(hov.y - h * 0.35, 10, Math.max(10, p.height - h - 10));
+    tipEl.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px)';
+  }
 
   function updateAndDrawWisps(n, motherSize, r, g, b, zAlp, inFocus) {
     var maxWisps = inFocus ? 3 : 2;
@@ -1203,14 +1449,19 @@ var sketch = new p5(function(p) {
     if (vistaActual !== 'mapa') return;
     // solo cuentan los clics sobre el lienzo (no sobre los paneles ni el menú)
     if (e && e.target && e.target !== canvasEl) return;
-    var best = null, bestD = 65;  // +30% sobre v14 (50→65) para click confortable con nodos más grandes
-    for (var i = 0; i < nCont.length; i++) {
-      var n = nCont[i];
-      var d = p.dist(p.mouseX, p.mouseY, n.x, n.y);
-      // Hover boost: nodos atraídos por el cursor son clickeables aunque estén lejos
-      var hoverBoost = smoothstep(RADIO, RADIO * 0.2, d);
-      if (depthFactor(n.z, hoverBoost) < 0.35) continue;
-      if (d < RADIO && d < bestD) { bestD = d; best = n; }
+    // Primero el nodo señalado; si no hay (pantallas táctiles), el más cercano al toque
+    var best = null;
+    if (hov && p.dist(p.mouseX, p.mouseY, hov.x, hov.y) < Math.max(18, hov.sz * 0.8 + 8)) best = hov;
+    if (!best) {
+      var bestD = 1e9;
+      for (var i = 0; i < nCont.length; i++) {
+        var n = nCont[i];
+        if (n.cont._visible === false) continue;
+        var d = p.dist(p.mouseX, p.mouseY, n.x, n.y);
+        var hoverBoost = smoothstep(RADIO, RADIO * 0.2, d);
+        if (depthFactor(n.z, hoverBoost) < 0.35) continue;
+        if (d < Math.max(40, n.sz * 0.8 + 10) && d < bestD) { bestD = d; best = n; }
+      }
     }
     if (best) abrirPanel(best);
     else { panel.classList.remove('open'); selectedNode = null; }
