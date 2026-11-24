@@ -1,0 +1,19 @@
+/* ══════════════════════════════════════════
+   FASE 2 · INTERFAZ
+   Portada con dos entradas · explorador (panel + vistas) ·
+   tarjetas con miniatura · lista · ajustes de móvil.
+   Usa las variables de identidad definidas en maranas.css.
+══════════════════════════════════════════ */
+
+/* ── Bloque A · Portada: dos entradas del mismo peso ── */
+.landing-hero-right { gap: 14px; align-items: stretch; }
+.landing-hero-right .entrar-directo {
+  min-width: 250px;
+  justify-content: flex-start;
+}
+.quees-item .quees-link + .quees-link { margin-left: 18px; }
+@media (max-width: 860px) {
+  .landing-hero { flex-direction: column; gap: 8px; padding-bottom: 48px; }
+  .landing-hero-right { padding-top: 24px; align-self: stretch; }
+  .landing-hero-right .entrar-directo { min-width: 0; width: 100%; }
+}

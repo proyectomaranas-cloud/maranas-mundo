@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,300..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,300..500;1,300..500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="css/maranas.css" />
+<link rel="stylesheet" href="css/explorar.css" />
 </head>
 <body>
 
@@ -56,7 +57,10 @@
         </p>
       </div>
       <div class="landing-hero-right">
-        <button class="entrar-directo" id="entrar-directo">
+        <button class="entrar-directo" id="entrar-archivo">
+          <span class="dot"></span> Entrar al archivo
+        </button>
+        <button class="entrar-directo" id="entrar-rizoma">
           <span class="dot"></span> Entrar al rizoma
         </button>
       </div>
@@ -80,34 +84,35 @@
         <div class="quees-num">03 · para qué</div>
         <div class="quees-titulo">Un archivo abierto</div>
         <div class="quees-desc">para recorrer y citar: cada nodo es un registro catalogado del proceso.</div>
+        <button class="quees-link" data-quees="archivo">→ entrar al archivo</button>
         <button class="quees-link" data-quees="datos">→ cómo citar</button>
       </div>
     </div>
 
     <div class="portales-label">Cuatro grupos de investigación</div>
     <div class="portales">
-      <div class="portal" data-portal="tronco" style="--portal-color: var(--willow);">
+      <div class="portal" data-portal="SUB-02" style="--portal-color: var(--willow);">
         <div class="portal-flyer" style="background-image:url('https://res.cloudinary.com/dt6cvonyy/image/upload/w_600,c_fill,q_auto/flyers_obras/flyer_obra_DRAMATURGIAS_1')"></div>
         <div class="portal-num">I · Obra</div>
         <div class="portal-nombre">De los mundos de plantación<br>a las marañas mundo</div>
         <div class="portal-desc">Grupo Dramaturgias del Cuerpo y Escrituras del Espacio<br>Dirección: Álvaro Iván Hernández Rodríguez · Co-dirección: Regina María Gutiérrez Bermúdez</div>
         <div class="portal-cta"><span class="arrow">→</span> explorar la obra</div>
       </div>
-      <div class="portal" data-portal="temas" style="--portal-color: var(--ocre);">
+      <div class="portal" data-portal="SUB-03" style="--portal-color: var(--ocre);">
         <div class="portal-flyer" style="background-image:url('https://res.cloudinary.com/dt6cvonyy/image/upload/w_600,c_fill,q_auto/flyers_obras/Flyer_obra_ARTE_DANZARIO_1')"></div>
         <div class="portal-num">II · Obra</div>
         <div class="portal-nombre">Enmarañar-Ser</div>
         <div class="portal-desc">Grupo Arte Danzario (PCAD)<br>Ana Cecilia Vargas Núñez · Diana Lucía León Bohórquez · Yina Erazo Coral · Jhonnatan Luna "Tatán"</div>
         <div class="portal-cta"><span class="arrow">→</span> explorar la obra</div>
       </div>
-      <div class="portal" data-portal="archivo" style="--portal-color: var(--vino);">
+      <div class="portal" data-portal="SUB-04" style="--portal-color: var(--vino);">
         <div class="portal-flyer" style="background-image:url('https://res.cloudinary.com/dt6cvonyy/image/upload/w_600,c_fill,q_auto/flyers_obras/Flyer_obra_AULIDE_1')"></div>
         <div class="portal-num">III · Obra</div>
         <div class="portal-nombre">Per(r)o mundo</div>
         <div class="portal-desc">Grupo Aulide<br>Alexánder Llerena · Daniela Botero · Dubián Gallego · Javier Mican · Isabel García · Marcela Ayala · Vicente Bernal</div>
         <div class="portal-cta"><span class="arrow">→</span> explorar la obra</div>
       </div>
-      <div class="portal" data-portal="libre" style="--portal-color: var(--musgo);">
+      <div class="portal" data-portal="SUB-05" style="--portal-color: var(--musgo);">
         <div class="portal-flyer" style="background-image:url('https://res.cloudinary.com/dt6cvonyy/image/upload/w_600,c_fill,q_auto/flyers_obras/Flyer_obra_CREACI%C3%93N_ARTISTICA_1')"></div>
         <div class="portal-num">IV · Obra</div>
         <div class="portal-nombre">Carne de mis<br>bosques corporados</div>

@@ -30,12 +30,16 @@
 
       // Navegar al destino. mostrarVista puede no existir aún si p5 falló;
       // se protege con typeof.
+      // destino: 'archivo' → vista de archivo · 'SUB-xx' → archivo de esa obra · otro → rizoma
       if (typeof mostrarVista === 'function') {
-        if (destino === 'temas' || destino === 'archivo' || destino === 'tronco') {
-        mostrarVista('archivo');
-      } else {
-        mostrarVista('mapa');
-      }
+        if (/^SUB-/.test(destino || '') && window.EXP && EXP.soloObra) {
+          EXP.soloObra(destino);
+          mostrarVista('archivo');
+        } else if (destino === 'archivo' || /^SUB-/.test(destino || '')) {
+          mostrarVista('archivo');
+        } else {
+          mostrarVista('mapa');
+        }
       }
     }, 900);  // coincide con el fundido CSS
   };
@@ -55,8 +59,10 @@
       window.entrarAlRizoma(this.dataset.portal);
     });
   });
-  var btnDirecto = document.getElementById('entrar-directo');
-  if (btnDirecto) btnDirecto.addEventListener('click', function() { window.entrarAlRizoma('libre'); });
+  var btnArchivo = document.getElementById('entrar-archivo');
+  if (btnArchivo) btnArchivo.addEventListener('click', function() { window.entrarAlRizoma('archivo'); });
+  var btnRizoma = document.getElementById('entrar-rizoma');
+  if (btnRizoma) btnRizoma.addEventListener('click', function() { window.entrarAlRizoma('libre'); });
   var btnInicio = document.getElementById('btn-inicio');
   if (btnInicio) btnInicio.addEventListener('click', function() { window.volverAlInicio(); });
 

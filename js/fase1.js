@@ -178,6 +178,7 @@
     b.addEventListener('click', function () {
       var destino = this.dataset.quees;
       if (typeof window.entrarAlRizoma !== 'function') return;
+      if (destino === 'archivo') { window.entrarAlRizoma('archivo'); return; }
       window.entrarAlRizoma('libre');
       if (destino === 'mapa') return;
       setTimeout(function () {
