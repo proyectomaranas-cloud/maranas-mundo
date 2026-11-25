@@ -60,7 +60,7 @@ Sin build. p5.js 1.9.4 por CDN. La página abre con doble clic (`file://`) y en 
 - **Descarga de datos CSV/JSON: DESACTIVADA a propósito** hasta que el investigador principal la apruebe.
   El código está en el script FASE 1; no volver a poner los botones sin que Nathalie lo pida.
 - Corrección del `<script>` mal cerrado del lightbox (antes rompía `LB`, el scroll en páginas y el video).
-- **Fase 2 (rama `fase-2-interfaz`, pendiente de aprobación de Nathalie; no publicada):** portada con dos entradas,
+- **Fase 2 (publicada el 24 nov 2026, aprobada por Nathalie):** portada con dos entradas,
   explorador con panel izquierdo, rizoma por relaciones, archivo con miniaturas, lista y catálogo en `data/catalogo.js`.
   La vista **Mapa** geográfico está prevista en el selector, deshabilitada.
 
